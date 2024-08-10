@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "272425722153",
+    "project_id": "cstain",
+    "storage_bucket": "cstain.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:272425722153:android:6c28eb9bad6e197ca41738",
+        "android_client_info": {
+          "package_name": "com.example.cstain"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2vJhXJP16__gYp6jjJhnZf2WJOs51fjw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
