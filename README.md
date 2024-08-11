@@ -1,4 +1,4 @@
-# cstain
+# C-Stain - Track, Reduce, Sustain
 
 A new Flutter project.
 
