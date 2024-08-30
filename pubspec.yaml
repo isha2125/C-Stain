@@ -43,6 +43,8 @@ dependencies:
   flutter_riverpod: ^2.5.1
   cloud_firestore: ^5.2.1
   fpdart: ^1.1.0
+  numberpicker: ^2.1.2
+  duration_picker: ^1.2.0
 
 dev_dependencies:
   flutter_test:

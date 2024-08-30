@@ -1,43 +1,27 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
+//import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CategoriesAndActionModel {
   final String action;
   final String category;
   final double co2_saved;
-  final Timestamp created_at;
-  final int duration;
-  final String userid;
-  final String visibility;
   CategoriesAndActionModel({
     required this.action,
     required this.category,
     required this.co2_saved,
-    required this.created_at,
-    required this.duration,
-    required this.userid,
-    required this.visibility,
   });
 
   CategoriesAndActionModel copyWith({
     String? action,
     String? category,
     double? co2_saved,
-    Timestamp? created_at,
-    int? duration,
-    String? userid,
-    String? visibility,
   }) {
     return CategoriesAndActionModel(
       action: action ?? this.action,
       category: category ?? this.category,
       co2_saved: co2_saved ?? this.co2_saved,
-      created_at: created_at ?? this.created_at,
-      duration: duration ?? this.duration,
-      userid: userid ?? this.userid,
-      visibility: visibility ?? this.visibility,
     );
   }
 
@@ -46,10 +30,6 @@ class CategoriesAndActionModel {
       'action': action,
       'category': category,
       'co2_saved': co2_saved,
-      'created_at': created_at,
-      'duration': duration,
-      'userid': userid,
-      'visibility': visibility,
     };
   }
 
@@ -58,10 +38,6 @@ class CategoriesAndActionModel {
       action: map['action'] as String,
       category: map['category'] as String,
       co2_saved: map['co2_saved'] as double,
-      created_at: map['created_at'] as Timestamp,
-      duration: map['duration'] as int,
-      userid: map['userid'] as String,
-      visibility: map['visibility'] as String,
     );
   }
 
@@ -72,9 +48,8 @@ class CategoriesAndActionModel {
           json.decode(source) as Map<String, dynamic>);
 
   @override
-  String toString() {
-    return 'CategoriesAndActionModel(action: $action, category: $category, co2_saved: $co2_saved, created_at: $created_at, duration: $duration, userid: $userid, visibility: $visibility)';
-  }
+  String toString() =>
+      'CategoriesAndActionModel(action: $action, category: $category, co2_saved: $co2_saved)';
 
   @override
   bool operator ==(covariant CategoriesAndActionModel other) {
@@ -82,21 +57,9 @@ class CategoriesAndActionModel {
 
     return other.action == action &&
         other.category == category &&
-        other.co2_saved == co2_saved &&
-        other.created_at == created_at &&
-        other.duration == duration &&
-        other.userid == userid &&
-        other.visibility == visibility;
+        other.co2_saved == co2_saved;
   }
 
   @override
-  int get hashCode {
-    return action.hashCode ^
-        category.hashCode ^
-        co2_saved.hashCode ^
-        created_at.hashCode ^
-        duration.hashCode ^
-        userid.hashCode ^
-        visibility.hashCode;
-  }
+  int get hashCode => action.hashCode ^ category.hashCode ^ co2_saved.hashCode;
 }
