@@ -4,40 +4,40 @@ import 'dart:convert';
 //import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CategoriesAndActionModel {
-  final String action;
-  final String category;
-  final double co2_saved;
+  final String action_name;
+  final String category_name;
+  final double co2_saving_factor;
   CategoriesAndActionModel({
-    required this.action,
-    required this.category,
-    required this.co2_saved,
+    required this.action_name,
+    required this.category_name,
+    required this.co2_saving_factor,
   });
 
   CategoriesAndActionModel copyWith({
-    String? action,
-    String? category,
-    double? co2_saved,
+    String? action_name,
+    String? category_name,
+    double? co2_saving_factor,
   }) {
     return CategoriesAndActionModel(
-      action: action ?? this.action,
-      category: category ?? this.category,
-      co2_saved: co2_saved ?? this.co2_saved,
+      action_name: action_name ?? this.action_name,
+      category_name: category_name ?? this.category_name,
+      co2_saving_factor: co2_saving_factor ?? this.co2_saving_factor,
     );
   }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'action': action,
-      'category': category,
-      'co2_saved': co2_saved,
+      'action_name': action_name,
+      'category_name': category_name,
+      'co2_saving_factor': co2_saving_factor,
     };
   }
 
   factory CategoriesAndActionModel.fromMap(Map<String, dynamic> map) {
     return CategoriesAndActionModel(
-      action: map['action'] as String,
-      category: map['category'] as String,
-      co2_saved: map['co2_saved'] as double,
+      action_name: map['action_name'] as String,
+      category_name: map['category_name'] as String,
+      co2_saving_factor: map['co2_saving_factor'] as double,
     );
   }
 
@@ -49,17 +49,20 @@ class CategoriesAndActionModel {
 
   @override
   String toString() =>
-      'CategoriesAndActionModel(action: $action, category: $category, co2_saved: $co2_saved)';
+      'CategoriesAndActionModel(action_name: $action_name, category_name: $category_name, co2_saving_factor: $co2_saving_factor)';
 
   @override
   bool operator ==(covariant CategoriesAndActionModel other) {
     if (identical(this, other)) return true;
 
-    return other.action == action &&
-        other.category == category &&
-        other.co2_saved == co2_saved;
+    return other.action_name == action_name &&
+        other.category_name == category_name &&
+        other.co2_saving_factor == co2_saving_factor;
   }
 
   @override
-  int get hashCode => action.hashCode ^ category.hashCode ^ co2_saved.hashCode;
+  int get hashCode =>
+      action_name.hashCode ^
+      category_name.hashCode ^
+      co2_saving_factor.hashCode;
 }

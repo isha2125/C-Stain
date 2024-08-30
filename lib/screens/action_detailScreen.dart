@@ -32,7 +32,7 @@ class ActionDetailScreen extends ConsumerWidget {
                 child: Row(
                   children: categories.map((category) {
                     return ChoiceChip(
-                      label: Text(category.category),
+                      label: Text(category.category_name),
                       selected:
                           false, // You might want to manage selected state
                       onSelected: (selected) {
