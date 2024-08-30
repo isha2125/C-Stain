@@ -9,6 +9,8 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final myUser = ref.watch(userProvider);
+    //print('User data: ${myUser?.toString() ?? "null"}');
+    //print('Auth state: $authState');
     return Scaffold(
       appBar: AppBar(
         leading: Image.asset(
@@ -47,7 +49,19 @@ class HomeScreen extends ConsumerWidget {
         ],
         automaticallyImplyLeading: false,
       ),
-      body: Text(myUser!.full_name),
+      body: Center(
+        child: myUser != null
+            ? Text('Welcome, ${myUser.full_name}')
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 20),
+                  Text(
+                      'User data is null. Provider state: ${ref.read(userProvider)}'),
+                ],
+              ),
+      ),
     );
   }
 }
