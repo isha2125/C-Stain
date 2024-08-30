@@ -1,11 +1,14 @@
+import 'package:cstain/backend/auth_gate.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final myUser = ref.watch(userProvider);
     return Scaffold(
       appBar: AppBar(
         leading: Image.asset(
@@ -44,6 +47,7 @@ class HomeScreen extends StatelessWidget {
         ],
         automaticallyImplyLeading: false,
       ),
+      body: Text(myUser!.full_name),
     );
   }
 }

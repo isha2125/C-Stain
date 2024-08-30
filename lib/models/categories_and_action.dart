@@ -3,8 +3,7 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class UserContributionModel {
-  final String contribution_id;
+class CategoriesAndActionModel {
   final String action;
   final String category;
   final double co2_saved;
@@ -12,8 +11,7 @@ class UserContributionModel {
   final int duration;
   final String userid;
   final String visibility;
-  UserContributionModel({
-    required this.contribution_id,
+  CategoriesAndActionModel({
     required this.action,
     required this.category,
     required this.co2_saved,
@@ -23,8 +21,7 @@ class UserContributionModel {
     required this.visibility,
   });
 
-  UserContributionModel copyWith({
-    String? contribution_id,
+  CategoriesAndActionModel copyWith({
     String? action,
     String? category,
     double? co2_saved,
@@ -33,8 +30,7 @@ class UserContributionModel {
     String? userid,
     String? visibility,
   }) {
-    return UserContributionModel(
-      contribution_id: contribution_id ?? this.contribution_id,
+    return CategoriesAndActionModel(
       action: action ?? this.action,
       category: category ?? this.category,
       co2_saved: co2_saved ?? this.co2_saved,
@@ -47,7 +43,6 @@ class UserContributionModel {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'contribution_id': contribution_id,
       'action': action,
       'category': category,
       'co2_saved': co2_saved,
@@ -58,9 +53,8 @@ class UserContributionModel {
     };
   }
 
-  factory UserContributionModel.fromMap(Map<String, dynamic> map) {
-    return UserContributionModel(
-      contribution_id: map['contribution_id'] as String,
+  factory CategoriesAndActionModel.fromMap(Map<String, dynamic> map) {
+    return CategoriesAndActionModel(
       action: map['action'] as String,
       category: map['category'] as String,
       co2_saved: map['co2_saved'] as double,
@@ -73,21 +67,20 @@ class UserContributionModel {
 
   String toJson() => json.encode(toMap());
 
-  factory UserContributionModel.fromJson(String source) =>
-      UserContributionModel.fromMap(
+  factory CategoriesAndActionModel.fromJson(String source) =>
+      CategoriesAndActionModel.fromMap(
           json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() {
-    return 'UserContributionModel(contribution_id: $contribution_id, action: $action, category: $category, co2_saved: $co2_saved, created_at: $created_at, duration: $duration, userid: $userid, visibility: $visibility)';
+    return 'CategoriesAndActionModel(action: $action, category: $category, co2_saved: $co2_saved, created_at: $created_at, duration: $duration, userid: $userid, visibility: $visibility)';
   }
 
   @override
-  bool operator ==(covariant UserContributionModel other) {
+  bool operator ==(covariant CategoriesAndActionModel other) {
     if (identical(this, other)) return true;
 
-    return other.contribution_id == contribution_id &&
-        other.action == action &&
+    return other.action == action &&
         other.category == category &&
         other.co2_saved == co2_saved &&
         other.created_at == created_at &&
@@ -98,8 +91,7 @@ class UserContributionModel {
 
   @override
   int get hashCode {
-    return contribution_id.hashCode ^
-        action.hashCode ^
+    return action.hashCode ^
         category.hashCode ^
         co2_saved.hashCode ^
         created_at.hashCode ^

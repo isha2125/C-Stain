@@ -11,35 +11,41 @@ import '../screens/main_navigation.dart';
 final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
 CollectionReference get _usersCollection => _firestore.collection('user');
+final userProvider = StateProvider<UserModel?>((ref) => null);
 
 class AuthGate extends ConsumerWidget {
   const AuthGate({super.key});
 
   // Separate async function to handle Firestore write
-  Future<void> _handleUserModel(User user) async {
+  Future<void> _handleUserModel(User user, WidgetRef ref) async {
     // Check if the user already exists in Firestore
     final userDoc = await _usersCollection.doc(user.uid).get();
 
+    UserModel userModel;
+
     if (!userDoc.exists) {
       // The user is new, create a new instance of your user model
-      UserModel userModel = UserModel(
+      userModel = UserModel(
         uid: user.uid, // Include the uid from the authenticated user
         bio:
             '', // You might need to fetch this from Firestore or another source
         created_at:
             Timestamp.now(), // Set this to a proper Timestamp if available
         email: user.email ?? 'No Email',
-        full_name: user.displayName ??
-            'Climate Action Enthusiast', // Handle passwords securely; this field might not be used
+        full_name: user.displayName ?? 'Climate Action Enthusiast',
         profile_picture_url: user.photoURL ?? 'Default Profile Picture URL',
         total_CO2_saved: 0.0,
-        username: user.displayName ??
-            'No Username', // Or fetch from a different source if available
+        username: user.displayName ?? 'No Username',
       );
 
       // Perform the Firestore write operation
       await _usersCollection.doc(userModel.uid).set(userModel.toMap());
+    } else {
+      userModel = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
     }
+
+    // Update the userProvider with the fetched or newly created user model
+    ref.read(userProvider.notifier).state = userModel;
   }
 
   @override
@@ -95,7 +101,7 @@ class AuthGate extends ConsumerWidget {
         }
 
         // Call the async function to handle user data and Firestore write
-        _handleUserModel(user);
+        _handleUserModel(user, ref);
 
         return const BottomNavigation();
       },
