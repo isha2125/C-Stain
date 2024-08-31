@@ -4,6 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final categoriesProvider =
     FutureProvider<List<CategoriesAndActionModel>>((ref) async {
-  final repository = CategoriesRepository();
-  return repository.fetchCategoriesAndActions();
+  try {
+    final repository = CategoriesRepository();
+    final categories = await repository.fetchCategoriesAndActions();
+    print('Fetched categories: $categories');
+    return categories;
+  } catch (e) {
+    print('Error in categoriesProvider: $e');
+    rethrow;
+  }
 });

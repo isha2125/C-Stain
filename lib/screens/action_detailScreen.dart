@@ -20,50 +20,61 @@ class ActionDetailScreen extends ConsumerWidget {
         title: Text('Action Details'),
       ),
       body: categoriesAsyncValue.when(
-        data: (categories) {
-          return Column(
-            children: [
-              SizedBox(height: 20),
-              Text('Which Action do you want to log?',
-                  style: TextStyle(fontSize: 18)),
-              SizedBox(height: 10),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: categories.map((category) {
-                    return ChoiceChip(
-                      label: Text(category.category_name),
-                      selected:
-                          false, // You might want to manage selected state
-                      onSelected: (selected) {
-                        // Handle category selection
-                      },
-                    );
-                  }).toList(),
+          data: (categories) {
+            print("All categories: $categories");
+            final uniqueCategories = categories
+                .where((category) =>
+                    category.category_name != null &&
+                    category.category_name!.isNotEmpty &&
+                    category.category_name!.toLowerCase() != 'unknown')
+                .map((category) => category.category_name!)
+                .toSet()
+                .toList();
+
+            print("Unique categories count: ${uniqueCategories.length}");
+            print("Unique categories: $uniqueCategories");
+            return Column(
+              children: [
+                const SizedBox(height: 20),
+                const Text('Which Action do you want to log?',
+                    style: TextStyle(fontSize: 18)),
+                const SizedBox(height: 10),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: uniqueCategories.map((categoryName) {
+                      return ChoiceChip(
+                        label: Text(categoryName),
+                        selected:
+                            false, // You might want to manage selected state
+                        onSelected: (selected) {
+                          // Handle category selection
+                        },
+                      );
+                    }).toList(),
+                  ),
                 ),
-              ),
-              SizedBox(height: 20),
-              Text('How did you reduce emissions?',
-                  style: TextStyle(fontSize: 18)),
-              SizedBox(height: 10),
-              Expanded(
-                child: ListView(
-                  children: ['Carpool', 'Bike', 'Train'].map((method) {
-                    return ListTile(
-                      title: Text(method),
-                      onTap: () {
-                        _showBottomSheet(context, method);
-                      },
-                    );
-                  }).toList(),
+                SizedBox(height: 20),
+                Text('How did you reduce emissions?',
+                    style: TextStyle(fontSize: 18)),
+                SizedBox(height: 10),
+                Expanded(
+                  child: ListView(
+                    children: ['Carpool', 'Bike', 'Train'].map((method) {
+                      return ListTile(
+                        title: Text(method),
+                        onTap: () {
+                          _showBottomSheet(context, method);
+                        },
+                      );
+                    }).toList(),
+                  ),
                 ),
-              ),
-            ],
-          );
-        },
-        loading: () => Loader(),
-        error: (error, stack) => Center(child: Text('Error: $error')),
-      ),
+              ],
+            );
+          },
+          loading: () => Loader(),
+          error: (error, stack) => Center(child: Text('Error: $error'))),
     );
   }
 

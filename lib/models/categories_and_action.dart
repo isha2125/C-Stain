@@ -4,13 +4,13 @@ import 'dart:convert';
 //import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CategoriesAndActionModel {
-  final String action_name;
-  final String category_name;
-  final double co2_saving_factor;
+  final String? action_name;
+  final String? category_name;
+  final double? co2_saving_factor;
   CategoriesAndActionModel({
-    required this.action_name,
-    required this.category_name,
-    required this.co2_saving_factor,
+    this.action_name,
+    this.category_name,
+    this.co2_saving_factor,
   });
 
   CategoriesAndActionModel copyWith({
@@ -35,9 +35,13 @@ class CategoriesAndActionModel {
 
   factory CategoriesAndActionModel.fromMap(Map<String, dynamic> map) {
     return CategoriesAndActionModel(
-      action_name: map['action_name'] as String,
-      category_name: map['category_name'] as String,
-      co2_saving_factor: map['co2_saving_factor'] as double,
+      action_name:
+          map['action_name'] != null ? map['action_name'] as String : null,
+      category_name:
+          map['category_name'] != null ? map['category_name'] as String : null,
+      co2_saving_factor: map['co2_saving_factor'] is int
+          ? (map['co2_saving_factor'] as int).toDouble()
+          : map['co2_saving_factor'],
     );
   }
 
