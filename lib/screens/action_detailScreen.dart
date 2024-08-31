@@ -1,18 +1,25 @@
+import 'package:cstain/components/duration_picker.dart';
 import 'package:cstain/components/loader.dart';
 import 'package:cstain/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../components/duration_picker.dart';
-
-class ActionDetailScreen extends ConsumerWidget {
+class ActionDetailScreen extends ConsumerStatefulWidget {
   final Function(String) onAddLog;
   final String userId;
 
   ActionDetailScreen({required this.onAddLog, required this.userId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  _ActionDetailScreenState createState() => _ActionDetailScreenState();
+}
+
+class _ActionDetailScreenState extends ConsumerState<ActionDetailScreen> {
+  String? selectedCategory;
+  String? selectedAction;
+
+  @override
+  Widget build(BuildContext context) {
     final categoriesAsyncValue = ref.watch(categoriesProvider);
 
     return Scaffold(
@@ -20,65 +27,82 @@ class ActionDetailScreen extends ConsumerWidget {
         title: Text('Action Details'),
       ),
       body: categoriesAsyncValue.when(
-          data: (categories) {
-            print("All categories: $categories");
-            final uniqueCategories = categories
-                .where((category) =>
-                    category.category_name != null &&
-                    category.category_name!.isNotEmpty &&
-                    category.category_name!.toLowerCase() != 'unknown')
-                .map((category) => category.category_name!)
-                .toSet()
-                .toList();
+        data: (categories) {
+          final uniqueCategories = categories
+              .where((category) =>
+                  category.category_name != null &&
+                  category.category_name!.isNotEmpty &&
+                  category.category_name!.toLowerCase() != 'unknown')
+              .map((category) => category.category_name!)
+              .toSet()
+              .toList();
 
-            print("Unique categories count: ${uniqueCategories.length}");
-            print("Unique categories: $uniqueCategories");
-            return Column(
-              children: [
-                const SizedBox(height: 20),
-                const Text('Which Action do you want to log?',
-                    style: TextStyle(fontSize: 18)),
-                const SizedBox(height: 10),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: uniqueCategories.map((categoryName) {
-                      return ChoiceChip(
+          final actionsForSelectedCategory = categories
+              .where((category) => category.category_name == selectedCategory)
+              .map((category) => category.action_name)
+              .where((action) => action != null)
+              .cast<String>()
+              .toList();
+
+          return Column(
+            children: [
+              const SizedBox(height: 20),
+              const Text('Which Action do you want to log?',
+                  style: TextStyle(fontSize: 18)),
+              const SizedBox(height: 10),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: uniqueCategories.map((categoryName) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: ChoiceChip(
                         label: Text(categoryName),
-                        selected:
-                            false, // You might want to manage selected state
+                        selected: selectedCategory == categoryName,
                         onSelected: (selected) {
-                          // Handle category selection
+                          setState(() {
+                            selectedCategory = selected ? categoryName : null;
+                            selectedAction = null;
+                          });
                         },
-                      );
-                    }).toList(),
-                  ),
+                      ),
+                    );
+                  }).toList(),
                 ),
+              ),
+              if (selectedCategory != null) ...[
                 SizedBox(height: 20),
-                Text('How did you reduce emissions?',
+                Text('Actions for ${selectedCategory}:',
                     style: TextStyle(fontSize: 18)),
                 SizedBox(height: 10),
                 Expanded(
-                  child: ListView(
-                    children: ['Carpool', 'Bike', 'Train'].map((method) {
+                  child: ListView.builder(
+                    itemCount: actionsForSelectedCategory.length,
+                    itemBuilder: (context, index) {
+                      final action = actionsForSelectedCategory[index];
                       return ListTile(
-                        title: Text(method),
+                        title: Text(action),
                         onTap: () {
-                          _showBottomSheet(context, method);
+                          setState(() {
+                            selectedAction = action;
+                          });
+                          _showBottomSheet(context, action);
                         },
                       );
-                    }).toList(),
+                    },
                   ),
                 ),
               ],
-            );
-          },
-          loading: () => Loader(),
-          error: (error, stack) => Center(child: Text('Error: $error'))),
+            ],
+          );
+        },
+        loading: () => Loader(),
+        error: (error, stack) => Center(child: Text('Error: $error')),
+      ),
     );
   }
 
-  void _showBottomSheet(BuildContext context, String method) {
+  void _showBottomSheet(BuildContext context, String action) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -91,7 +115,7 @@ class ActionDetailScreen extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('Enter the duration for $method'),
+                  Text('Enter the duration for $action'),
                   SizedBox(height: 10),
                   CustomDurationPicker(
                     initialDuration: selectedDuration,
@@ -108,7 +132,10 @@ class ActionDetailScreen extends ConsumerWidget {
                       final minutes = selectedDuration.inMinutes % 60;
                       final formattedDuration = '${hours}h ${minutes}m';
 
-                      onAddLog('$method for $formattedDuration');
+                      print(
+                          'Debug: Adding log - Action: $action, Duration: $formattedDuration');
+
+                      widget.onAddLog('$action for $formattedDuration');
                       Navigator.pop(context);
                     },
                     child: Text('Add Log'),

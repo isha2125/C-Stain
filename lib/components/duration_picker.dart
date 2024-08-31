@@ -84,6 +84,7 @@ class _CustomDurationPickerState extends State<CustomDurationPicker> {
 
   void _updateDuration() {
     final newDuration = Duration(hours: hours, minutes: minutes);
+    print('Debug: Updated duration - Hours: $hours, Minutes: $minutes');
     widget.onDurationChanged(newDuration);
   }
 }
