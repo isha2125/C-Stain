@@ -46,6 +46,9 @@ class _ActionScreenState extends ConsumerState<ActionScreen> {
               builder: (context) => ActionDetailScreen(
                 onAddLog: _addLog,
                 userId: myUser!.uid,
+                onNavigateBack: () {
+                  Navigator.pop(context); // Navigate back to Action Screen
+                },
               ),
             ),
           );

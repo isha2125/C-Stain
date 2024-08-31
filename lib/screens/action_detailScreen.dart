@@ -7,8 +7,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class ActionDetailScreen extends ConsumerStatefulWidget {
   final Function(String) onAddLog;
   final String userId;
+  final VoidCallback onNavigateBack;
 
-  ActionDetailScreen({required this.onAddLog, required this.userId});
+  ActionDetailScreen({
+    required this.onAddLog,
+    required this.userId,
+    required this.onNavigateBack,
+  });
 
   @override
   _ActionDetailScreenState createState() => _ActionDetailScreenState();
@@ -103,13 +108,13 @@ class _ActionDetailScreenState extends ConsumerState<ActionDetailScreen> {
   }
 
   void _showBottomSheet(BuildContext context, String action) {
+    Duration selectedDuration = Duration();
+
     showModalBottomSheet(
       context: context,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            Duration selectedDuration = Duration();
-
             return Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
@@ -120,9 +125,9 @@ class _ActionDetailScreenState extends ConsumerState<ActionDetailScreen> {
                   CustomDurationPicker(
                     initialDuration: selectedDuration,
                     onDurationChanged: (newDuration) {
-                      setState(() {
-                        selectedDuration = newDuration;
-                      });
+                      selectedDuration = newDuration;
+                      setState(
+                          () {}); // Trigger a rebuild of the StatefulBuilder
                     },
                   ),
                   SizedBox(height: 20),
@@ -132,11 +137,10 @@ class _ActionDetailScreenState extends ConsumerState<ActionDetailScreen> {
                       final minutes = selectedDuration.inMinutes % 60;
                       final formattedDuration = '${hours}h ${minutes}m';
 
-                      print(
-                          'Debug: Adding log - Action: $action, Duration: $formattedDuration');
-
                       widget.onAddLog('$action for $formattedDuration');
                       Navigator.pop(context);
+
+                      widget.onNavigateBack();
                     },
                     child: Text('Add Log'),
                   ),
