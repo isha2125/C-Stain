@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/models/categories_and_action.dart';
+import 'package:cstain/models/user_contribution.dart';
 
-class CategoriesRepository {
+class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   Future<List<CategoriesAndActionModel>> fetchCategoriesAndActions() async {
     try {
@@ -21,6 +22,20 @@ class CategoriesRepository {
     } catch (e) {
       print('Error fetching categories and actions: $e');
       return [];
+    }
+  }
+
+  Future<void> addUserContribution(UserContributionModel contribution) async {
+    try {
+      final durationInHours = contribution.duration / 60;
+
+      final contributionData = contribution.toMap();
+      contributionData['duration'] = durationInHours;
+
+      await _firestore.collection('user_contributions').add(contributionData);
+      print('User contribution added successfully');
+    } catch (e) {
+      print('Error adding user contribution: $e');
     }
   }
 }

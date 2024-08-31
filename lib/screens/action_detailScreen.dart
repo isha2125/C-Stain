@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/components/duration_picker.dart';
 import 'package:cstain/components/loader.dart';
+import 'package:cstain/models/user_contribution.dart';
 import 'package:cstain/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 class ActionDetailScreen extends ConsumerStatefulWidget {
   final Function(String) onAddLog;
@@ -132,10 +135,33 @@ class _ActionDetailScreenState extends ConsumerState<ActionDetailScreen> {
                   ),
                   SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       final hours = selectedDuration.inHours;
                       final minutes = selectedDuration.inMinutes % 60;
                       final formattedDuration = '${hours}h ${minutes}m';
+                      final contribution = UserContributionModel(
+                        contribution_id: Uuid().v4(),
+                        action: action,
+                        category: selectedCategory!,
+                        co2_saved:
+                            0, // You'll need to calculate this based on the action
+                        created_at: Timestamp.now(),
+                        duration: selectedDuration.inMinutes,
+                        user_id: widget.userId,
+                        // Or set as needed
+                      );
+
+                      // Use the provider to get FirestoreService instance and add the user contribution
+                      try {
+                        final firestoreService =
+                            ref.read(firestoreServiceProvider);
+                        await firestoreService
+                            .addUserContribution(contribution);
+                        print('User contribution added successfully');
+                      } catch (e) {
+                        print('Error adding user contribution: $e');
+                        // Handle the error (e.g., show an error message to the user)
+                      }
 
                       widget.onAddLog('$action for $formattedDuration');
                       Navigator.pop(context);

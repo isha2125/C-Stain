@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final categoriesProvider =
     FutureProvider<List<CategoriesAndActionModel>>((ref) async {
   try {
-    final repository = CategoriesRepository();
+    final repository = FirestoreService();
     final categories = await repository.fetchCategoriesAndActions();
     print('Fetched categories: $categories');
     return categories;
@@ -13,4 +13,8 @@ final categoriesProvider =
     print('Error in categoriesProvider: $e');
     rethrow;
   }
+});
+
+final firestoreServiceProvider = Provider<FirestoreService>((ref) {
+  return FirestoreService();
 });

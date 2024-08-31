@@ -10,8 +10,7 @@ class UserContributionModel {
   final double co2_saved;
   final Timestamp created_at;
   final int duration;
-  final String userid;
-  final String visibility;
+  final String user_id;
   UserContributionModel({
     required this.contribution_id,
     required this.action,
@@ -19,8 +18,7 @@ class UserContributionModel {
     required this.co2_saved,
     required this.created_at,
     required this.duration,
-    required this.userid,
-    required this.visibility,
+    required this.user_id,
   });
 
   UserContributionModel copyWith({
@@ -30,8 +28,7 @@ class UserContributionModel {
     double? co2_saved,
     Timestamp? created_at,
     int? duration,
-    String? userid,
-    String? visibility,
+    String? user_id,
   }) {
     return UserContributionModel(
       contribution_id: contribution_id ?? this.contribution_id,
@@ -40,8 +37,7 @@ class UserContributionModel {
       co2_saved: co2_saved ?? this.co2_saved,
       created_at: created_at ?? this.created_at,
       duration: duration ?? this.duration,
-      userid: userid ?? this.userid,
-      visibility: visibility ?? this.visibility,
+      user_id: user_id ?? this.user_id,
     );
   }
 
@@ -53,8 +49,7 @@ class UserContributionModel {
       'co2_saved': co2_saved,
       'created_at': created_at,
       'duration': duration,
-      'userid': userid,
-      'visibility': visibility,
+      'user_id': user_id,
     };
   }
 
@@ -64,10 +59,9 @@ class UserContributionModel {
       action: map['action'] as String,
       category: map['category'] as String,
       co2_saved: map['co2_saved'] as double,
-      created_at: map['created_at'] as Timestamp,
+      created_at: (map['created_at'] as Timestamp),
       duration: map['duration'] as int,
-      userid: map['userid'] as String,
-      visibility: map['visibility'] as String,
+      user_id: map['user_id'] as String,
     );
   }
 
@@ -79,7 +73,7 @@ class UserContributionModel {
 
   @override
   String toString() {
-    return 'UserContributionModel(contribution_id: $contribution_id, action: $action, category: $category, co2_saved: $co2_saved, created_at: $created_at, duration: $duration, userid: $userid, visibility: $visibility)';
+    return 'UserContributionModel(contribution_id: $contribution_id, action: $action, category: $category, co2_saved: $co2_saved, created_at: $created_at, duration: $duration, user_id: $user_id)';
   }
 
   @override
@@ -92,8 +86,7 @@ class UserContributionModel {
         other.co2_saved == co2_saved &&
         other.created_at == created_at &&
         other.duration == duration &&
-        other.userid == userid &&
-        other.visibility == visibility;
+        other.user_id == user_id;
   }
 
   @override
@@ -104,7 +97,6 @@ class UserContributionModel {
         co2_saved.hashCode ^
         created_at.hashCode ^
         duration.hashCode ^
-        userid.hashCode ^
-        visibility.hashCode;
+        user_id.hashCode;
   }
 }
