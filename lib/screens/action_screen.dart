@@ -21,6 +21,7 @@ class _ActionScreenState extends ConsumerState<ActionScreen> {
 
   Future<void> _fetchTodayActions() async {
     final myUser = ref.read(userProvider);
+
     if (myUser != null) {
       final firestoreService = ref.read(firestoreServiceProvider);
       final actions =
@@ -38,12 +39,38 @@ class _ActionScreenState extends ConsumerState<ActionScreen> {
   @override
   Widget build(BuildContext context) {
     final myUser = ref.watch(userProvider);
+    final totalCarbonSaved = _calculateTotalCarbonSaved();
     return Scaffold(
       appBar: AppBar(
         title: Text('Today\'s Actions'),
       ),
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Text(
+                      'Total Carbon Saved Today',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      '${totalCarbonSaved.toStringAsFixed(2)} kg',
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
+                              ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: todayActions.length,
@@ -82,5 +109,9 @@ class _ActionScreenState extends ConsumerState<ActionScreen> {
         child: Icon(Icons.add),
       ),
     );
+  }
+
+  double _calculateTotalCarbonSaved() {
+    return todayActions.fold(0.0, (sum, action) => sum + action.co2_saved);
   }
 }
