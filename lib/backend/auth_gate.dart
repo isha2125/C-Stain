@@ -77,8 +77,8 @@ class AuthGate extends ConsumerWidget {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: action == AuthAction.signIn
-                    ? const Text('Welcome to FlutterFire, please sign in!')
-                    : const Text('Welcome to FlutterFire, please sign up!'),
+                    ? const Text('Welcome to C:Stain, please sign in!')
+                    : const Text('Welcome to C:stain, please sign up!'),
               );
             },
             footerBuilder: (context, action) {
