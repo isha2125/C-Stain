@@ -1,4 +1,5 @@
 import 'package:cstain/models/categories_and_action.dart';
+import 'package:cstain/models/user_contribution.dart';
 import 'package:cstain/providers/firestore_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,4 +18,10 @@ final categoriesProvider =
 
 final firestoreServiceProvider = Provider<FirestoreService>((ref) {
   return FirestoreService();
+});
+final userContributionsProvider =
+    FutureProvider.family<List<UserContributionModel>, String>(
+        (ref, userId) async {
+  final firestoreService = ref.read(firestoreServiceProvider);
+  return firestoreService.fetchTodayUserContributions(userId);
 });

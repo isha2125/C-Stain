@@ -1,7 +1,9 @@
-import 'package:cstain/screens/action_detailScreen.dart';
+import 'package:cstain/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../backend/auth_gate.dart';
+import '../models/user_contribution.dart';
+import 'action_detailScreen.dart';
 
 class ActionScreen extends ConsumerStatefulWidget {
   @override
@@ -9,12 +11,24 @@ class ActionScreen extends ConsumerStatefulWidget {
 }
 
 class _ActionScreenState extends ConsumerState<ActionScreen> {
-  List<String> loggedActions = [];
+  List<UserContributionModel> todayActions = [];
 
-  void _addLog(String log) {
-    setState(() {
-      loggedActions.add(log);
-    });
+  @override
+  void initState() {
+    super.initState();
+    _fetchTodayActions();
+  }
+
+  Future<void> _fetchTodayActions() async {
+    final myUser = ref.read(userProvider);
+    if (myUser != null) {
+      final firestoreService = ref.read(firestoreServiceProvider);
+      final actions =
+          await firestoreService.fetchTodayUserContributions(myUser.uid);
+      setState(() {
+        todayActions = actions;
+      });
+    }
   }
 
   @override
@@ -22,16 +36,21 @@ class _ActionScreenState extends ConsumerState<ActionScreen> {
     final myUser = ref.watch(userProvider);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Actions'),
+        title: Text('Today\'s Actions'),
       ),
       body: Column(
         children: [
           Expanded(
             child: ListView.builder(
-              itemCount: loggedActions.length,
+              itemCount: todayActions.length,
               itemBuilder: (context, index) {
+                final action = todayActions[index];
                 return ListTile(
-                  title: Text(loggedActions[index]),
+                  title: Text(action.action),
+                  subtitle:
+                      Text('${action.duration} minutes - ${action.category}'),
+                  trailing: Text(
+                      'CO2 saved: ${action.co2_saved.toStringAsFixed(2)} kg'),
                 );
               },
             ),
@@ -44,10 +63,13 @@ class _ActionScreenState extends ConsumerState<ActionScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => ActionDetailScreen(
-                onAddLog: _addLog,
+                onAddLog: (String log) {
+                  // This function is not used anymore, but kept for compatibility
+                },
                 userId: myUser!.uid,
                 onNavigateBack: () {
-                  Navigator.pop(context); // Navigate back to Action Screen
+                  _fetchTodayActions(); // Refresh the list when returning from ActionDetailScreen
+                  Navigator.pop(context);
                 },
               ),
             ),

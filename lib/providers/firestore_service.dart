@@ -28,14 +28,38 @@ class FirestoreService {
   Future<void> addUserContribution(UserContributionModel contribution) async {
     try {
       final durationInHours = contribution.duration / 60;
-
       final contributionData = contribution.toMap();
-      contributionData['duration'] = durationInHours;
+      contributionData['created_at'] = FieldValue.serverTimestamp();
 
       await _firestore.collection('user_contributions').add(contributionData);
       print('User contribution added successfully');
     } catch (e) {
       print('Error adding user contribution: $e');
+    }
+  }
+
+  Future<List<UserContributionModel>> fetchTodayUserContributions(
+      String userId) async {
+    try {
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay = startOfDay.add(Duration(days: 1));
+
+      final querySnapshot = await _firestore
+          .collection('user_contributions')
+          .where('user_id', isEqualTo: userId)
+          .where('created_at',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+          .where('created_at', isLessThan: Timestamp.fromDate(endOfDay))
+          .orderBy('created_at', descending: true)
+          .get();
+
+      return querySnapshot.docs
+          .map((doc) => UserContributionModel.fromMap(doc.data()))
+          .toList();
+    } catch (e) {
+      print('Error fetching today\'s user contributions: $e');
+      return [];
     }
   }
 }

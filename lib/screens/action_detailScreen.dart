@@ -146,7 +146,7 @@ class _ActionDetailScreenState extends ConsumerState<ActionDetailScreen> {
                         co2_saved:
                             0, // You'll need to calculate this based on the action
                         created_at: Timestamp.now(),
-                        duration: selectedDuration.inMinutes,
+                        duration: selectedDuration.inMinutes.toDouble(),
                         user_id: widget.userId,
                         // Or set as needed
                       );
@@ -158,15 +158,15 @@ class _ActionDetailScreenState extends ConsumerState<ActionDetailScreen> {
                         await firestoreService
                             .addUserContribution(contribution);
                         print('User contribution added successfully');
+
+                        widget.onAddLog(
+                            '$action for $formattedDuration'); // This line is now just for backwards compatibility
+                        Navigator.pop(context);
+                        widget.onNavigateBack();
                       } catch (e) {
                         print('Error adding user contribution: $e');
                         // Handle the error (e.g., show an error message to the user)
                       }
-
-                      widget.onAddLog('$action for $formattedDuration');
-                      Navigator.pop(context);
-
-                      widget.onNavigateBack();
                     },
                     child: Text('Add Log'),
                   ),

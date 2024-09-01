@@ -9,7 +9,7 @@ class UserContributionModel {
   final String category;
   final double co2_saved;
   final Timestamp created_at;
-  final int duration;
+  final double duration;
   final String user_id;
   UserContributionModel({
     required this.contribution_id,
@@ -27,7 +27,7 @@ class UserContributionModel {
     String? category,
     double? co2_saved,
     Timestamp? created_at,
-    int? duration,
+    double? duration,
     String? user_id,
   }) {
     return UserContributionModel(
@@ -60,10 +60,11 @@ class UserContributionModel {
       category: map['category'] as String,
       co2_saved: map['co2_saved'] as double,
       created_at: (map['created_at'] as Timestamp),
-      duration: map['duration'] as int,
+      duration: (map['duration'] as num).toDouble(),
       user_id: map['user_id'] as String,
     );
   }
+  DateTime get createdAtDateTime => created_at.toDate();
 
   String toJson() => json.encode(toMap());
 
