@@ -27,12 +27,34 @@ class FirestoreService {
 
   Future<void> addUserContribution(UserContributionModel contribution) async {
     try {
-      final durationInHours = contribution.duration / 60;
-      final contributionData = contribution.toMap();
-      contributionData['created_at'] = FieldValue.serverTimestamp();
+      // Fetch the CO2 saving factor for this action
+      final actionDoc = await _firestore
+          .collection('categories_and_actions')
+          .where('action_name', isEqualTo: contribution.action)
+          .limit(1)
+          .get();
 
-      await _firestore.collection('user_contributions').add(contributionData);
-      print('User contribution added successfully');
+      if (actionDoc.docs.isNotEmpty) {
+        final durationInHours = contribution.duration / 60;
+        final contributionData = contribution.toMap();
+        contributionData['duration'] = durationInHours;
+        contributionData['created_at'] = FieldValue.serverTimestamp();
+        final actionData = actionDoc.docs.first.data();
+        final co2SavingFactor = actionData['co2_saving_factor'] as double;
+
+        // Calculate CO2 saved
+        final co2Saved = contribution.duration * co2SavingFactor;
+
+        // Update the contribution data with calculated CO2 saved
+
+        contributionData['co2_saved'] = co2Saved;
+        contributionData['created_at'] = FieldValue.serverTimestamp();
+
+        await _firestore.collection('user_contributions').add(contributionData);
+        print('User contribution added successfully with CO2 saved: $co2Saved');
+      } else {
+        print('Error: Action not found in categories_and_actions');
+      }
     } catch (e) {
       print('Error adding user contribution: $e');
     }
@@ -63,3 +85,16 @@ class FirestoreService {
     }
   }
 }
+// Future<void> addUserContribution(UserContributionModel contribution) async {
+//     try {
+//       final durationInHours = contribution.duration / 60;
+//       final contributionData = contribution.toMap();
+//       contributionData['duration'] = durationInHours;
+//       contributionData['created_at'] = FieldValue.serverTimestamp();
+
+//       await _firestore.collection('user_contributions').add(contributionData);
+//       print('User contribution added successfully');
+//     } catch (e) {
+//       print('Error adding user contribution: $e');
+//     }
+//   }

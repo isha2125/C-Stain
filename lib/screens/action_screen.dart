@@ -31,6 +31,10 @@ class _ActionScreenState extends ConsumerState<ActionScreen> {
     }
   }
 
+  String _formatDuration(double hours) {
+    return '${hours.toStringAsFixed(2)} hours';
+  }
+
   @override
   Widget build(BuildContext context) {
     final myUser = ref.watch(userProvider);
@@ -47,8 +51,8 @@ class _ActionScreenState extends ConsumerState<ActionScreen> {
                 final action = todayActions[index];
                 return ListTile(
                   title: Text(action.action),
-                  subtitle:
-                      Text('${action.duration} minutes - ${action.category}'),
+                  subtitle: Text(
+                      '${_formatDuration(action.duration)} - ${action.category}'),
                   trailing: Text(
                       'CO2 saved: ${action.co2_saved.toStringAsFixed(2)} kg'),
                 );
