@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFABD5C5)),
         useMaterial3: true,
       ),
+      debugShowCheckedModeBanner: false,
       home: const AuthGate(),
     );
   }

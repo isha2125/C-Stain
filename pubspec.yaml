@@ -46,6 +46,7 @@ dependencies:
   numberpicker: ^2.1.2
   duration_picker: ^1.2.0
   uuid: ^4.5.0
+  percent_indicator: ^4.2.3
 
 dev_dependencies:
   flutter_test:

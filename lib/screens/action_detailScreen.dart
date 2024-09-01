@@ -30,9 +30,22 @@ class _ActionDetailScreenState extends ConsumerState<ActionDetailScreen> {
   Widget build(BuildContext context) {
     final categoriesAsyncValue = ref.watch(categoriesProvider);
 
+    final textStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Color(0xFF5F5F5F),
+          fontSize: 14,
+        );
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Action Details'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: widget.onNavigateBack,
+        ),
+        title: Text(
+          'Action Details',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
       body: categoriesAsyncValue.when(
         data: (categories) {
@@ -52,56 +65,84 @@ class _ActionDetailScreenState extends ConsumerState<ActionDetailScreen> {
               .cast<String>()
               .toList();
 
-          return Column(
-            children: [
-              const SizedBox(height: 20),
-              const Text('Which Action do you want to log?',
-                  style: TextStyle(fontSize: 18)),
-              const SizedBox(height: 10),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: uniqueCategories.map((categoryName) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: ChoiceChip(
-                        label: Text(categoryName),
-                        selected: selectedCategory == categoryName,
-                        onSelected: (selected) {
-                          setState(() {
-                            selectedCategory = selected ? categoryName : null;
-                            selectedAction = null;
-                          });
-                        },
-                      ),
-                    );
-                  }).toList(),
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 10),
+                Text(
+                  'Which Action do you want to log?',
+                  style: textStyle,
                 ),
-              ),
-              if (selectedCategory != null) ...[
-                SizedBox(height: 20),
-                Text('Actions for ${selectedCategory}:',
-                    style: TextStyle(fontSize: 18)),
-                SizedBox(height: 10),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: actionsForSelectedCategory.length,
-                    itemBuilder: (context, index) {
-                      final action = actionsForSelectedCategory[index];
-                      return ListTile(
-                        title: Text(action),
-                        onTap: () {
-                          setState(() {
-                            selectedAction = action;
-                          });
-                          _showBottomSheet(context, action);
-                        },
+                const SizedBox(height: 16),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: uniqueCategories.map((categoryName) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: ChoiceChip(
+                          label: Text(
+                            categoryName,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          selected: selectedCategory == categoryName,
+                          onSelected: (selected) {
+                            setState(() {
+                              selectedCategory = selected ? categoryName : null;
+                              selectedAction = null;
+                            });
+                          },
+                          selectedColor: const Color.fromARGB(50, 0, 225, 165),
+                          backgroundColor: Colors.transparent,
+                          labelStyle: TextStyle(
+                              color: const Color.fromARGB(255, 0, 0, 0)),
+                        ),
                       );
-                    },
+                    }).toList(),
                   ),
                 ),
+                if (selectedCategory != null) ...[
+                  const SizedBox(height: 20),
+                  Text(
+                    'Actions for $selectedCategory:',
+                    style: textStyle?.copyWith(
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: actionsForSelectedCategory.length,
+                      itemBuilder: (context, index) {
+                        final action = actionsForSelectedCategory[index];
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
+                            leading:
+                                Icon(Icons.add, color: const Color(0xFF237155)),
+                            title: Text(
+                              action,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            horizontalTitleGap: 8.0,
+                            onTap: () {
+                              setState(() {
+                                selectedAction = action;
+                              });
+                              _showBottomSheet(context, action);
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           );
         },
         loading: () => Loader(),
@@ -116,64 +157,78 @@ class _ActionDetailScreenState extends ConsumerState<ActionDetailScreen> {
     showModalBottomSheet(
       context: context,
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Enter the duration for $action'),
-                  SizedBox(height: 10),
-                  CustomDurationPicker(
-                    initialDuration: selectedDuration,
-                    onDurationChanged: (newDuration) {
-                      selectedDuration = newDuration;
-                      setState(
-                          () {}); // Trigger a rebuild of the StatefulBuilder
-                    },
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final hours = selectedDuration.inHours;
-                      final minutes = selectedDuration.inMinutes % 60;
-                      final formattedDuration = '${hours}h ${minutes}m';
-                      final contribution = UserContributionModel(
-                        contribution_id: Uuid().v4(),
-                        action: action,
-                        category: selectedCategory!,
-                        co2_saved:
-                            0, // You'll need to calculate this based on the action
-                        created_at: Timestamp.now(),
-                        duration: selectedDuration.inMinutes.toDouble(),
-                        user_id: widget.userId,
-                        // Or set as needed
-                      );
-
-                      // Use the provider to get FirestoreService instance and add the user contribution
-                      try {
-                        final firestoreService =
-                            ref.read(firestoreServiceProvider);
-                        await firestoreService
-                            .addUserContribution(contribution);
-                        print('User contribution added successfully');
-
-                        widget.onAddLog(
-                            '$action for $formattedDuration'); // This line is now just for backwards compatibility
-                        Navigator.pop(context);
-                        widget.onNavigateBack();
-                      } catch (e) {
-                        print('Error adding user contribution: $e');
-                        // Handle the error (e.g., show an error message to the user)
-                      }
-                    },
-                    child: Text('Add Log'),
-                  ),
-                ],
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Enter the duration for $action',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Color(0xFF5F5F5F),
+                      fontSize: 14,
+                    ),
               ),
-            );
-          },
+              const SizedBox(height: 16),
+              CustomDurationPicker(
+                initialDuration: selectedDuration,
+                onDurationChanged: (newDuration) {
+                  setState(() {
+                    selectedDuration = newDuration;
+                  });
+                },
+              ),
+              const SizedBox(height: 20),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final hours = selectedDuration.inHours;
+                    final minutes = selectedDuration.inMinutes % 60;
+                    final formattedDuration = '${hours}h ${minutes}m';
+                    final contribution = UserContributionModel(
+                      contribution_id: Uuid().v4(),
+                      action: action,
+                      category: selectedCategory!,
+                      co2_saved:
+                          0, // You'll need to calculate this based on the action
+                      created_at: Timestamp.now(),
+                      duration: selectedDuration.inMinutes.toDouble(),
+                      user_id: widget.userId,
+                      // Or set as needed
+                    );
+
+                    try {
+                      final firestoreService =
+                          ref.read(firestoreServiceProvider);
+                      await firestoreService.addUserContribution(contribution);
+                      print('User contribution added successfully');
+
+                      widget.onAddLog(
+                          '$action for $formattedDuration'); // This line is now just for backwards compatibility
+                      Navigator.pop(context);
+                      widget.onNavigateBack();
+                    } catch (e) {
+                      print('Error adding user contribution: $e');
+                      // Handle the error (e.g., show an error message to the user)
+                    }
+                  },
+                  child: Text('Add Log'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF237155),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                          30), // Adjust the radius for more or less ellipse effect
+                    ),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 12), // Adjust padding for the button size
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
