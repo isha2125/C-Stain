@@ -33,8 +33,12 @@ class _ActionScreenState extends ConsumerState<ActionScreen> {
     }
   }
 
-  String _formatDuration(double hours) {
-    return '${hours.toStringAsFixed(2)} hours';
+  String _formatDuration(double value, String category) {
+    if (category.toLowerCase() == 'food') {
+      return '${value.toInt()} meals';
+    } else {
+      return '${value.toStringAsFixed(2)} hrs';
+    }
   }
 
   // Map categories to specific icons and colors
@@ -222,7 +226,7 @@ class _ActionScreenState extends ConsumerState<ActionScreen> {
                 ),
           ),
           subtitle: Text(
-            '${_formatDuration(action.duration)} - ${action.category}',
+            '${_formatDuration(action.duration, action.category)} - ${action.category}',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.grey[600],
                 ),

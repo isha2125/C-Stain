@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/components/duration_picker.dart';
 import 'package:cstain/components/loader.dart';
+import 'package:cstain/models/categories_and_action.dart';
 import 'package:cstain/models/user_contribution.dart';
 import 'package:cstain/providers/providers.dart';
 import 'package:flutter/material.dart';
@@ -210,11 +211,21 @@ class _ActionDetailScreenState extends ConsumerState<ActionDetailScreen> {
                   Center(
                     child: ElevatedButton(
                       onPressed: () async {
+                        // Get the CO2 saving factor for this action
+                        final categories = ref.read(categoriesProvider).value;
+                        final actionModel = categories?.firstWhere(
+                          (cat) => cat.action_name == action,
+                          orElse: () => CategoriesAndActionModel(
+                              action_name: action, co2_saving_factor: 0),
+                        );
+                        final co2SavingFactor =
+                            actionModel?.co2_saving_factor ?? 0;
+
                         final contribution = UserContributionModel(
                           contribution_id: Uuid().v4(),
                           action: action,
                           category: selectedCategory!,
-                          co2_saved: 0,
+                          co2_saved: numberOfMeals * co2SavingFactor,
                           created_at: Timestamp.now(),
                           duration: numberOfMeals.toDouble(),
                           user_id: widget.userId,
@@ -227,7 +238,8 @@ class _ActionDetailScreenState extends ConsumerState<ActionDetailScreen> {
                               .addUserContribution(contribution);
                           print('User contribution added successfully');
 
-                          widget.onAddLog('$action: $numberOfMeals meals');
+                          widget.onAddLog(
+                              '$action: $numberOfMeals meals, CO2 saved: ${(numberOfMeals * co2SavingFactor).toStringAsFixed(2)}');
                           Navigator.pop(context);
                           widget.onNavigateBack();
                         } catch (e) {

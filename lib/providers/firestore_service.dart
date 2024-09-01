@@ -27,45 +27,33 @@ class FirestoreService {
 
   Future<void> addUserContribution(UserContributionModel contribution) async {
     try {
-      final actionDoc = await _firestore
-          .collection('categories_and_actions')
-          .where('action_name', isEqualTo: contribution.action)
-          .limit(1)
-          .get();
+      final contributionData = contribution.toMap();
 
-      if (actionDoc.docs.isNotEmpty) {
-        final contributionData = contribution.toMap();
-        final actionData = actionDoc.docs.first.data();
+      // For food actions, the co2_saved is already calculated
+      if (contribution.category == 'Food') {
+        contributionData['co2_saved'] = contribution.co2_saved;
+      } else {
+        // For non-food actions, keep the existing calculation
+        final actionDoc = await _firestore
+            .collection('categories_and_actions')
+            .where('action_name', isEqualTo: contribution.action)
+            .limit(1)
+            .get();
 
-        // Check if the action is meal-related
-        bool isMealAction =
-            contribution.action.toLowerCase().contains('meal') ||
-                contribution.action.toLowerCase().contains('food');
-
-        double co2Saved;
-        if (isMealAction) {
-          // For meal actions, use the duration as the number of meals
-          final co2SavingPerMeal =
-              actionData['co2_saving_per_meal'] as double? ?? 0.0;
-          co2Saved = contribution.duration * co2SavingPerMeal;
-          // Keep the duration as is (representing number of meals)
-        } else {
-          // For non-meal actions, convert duration to hours and calculate CO2 saved
+        if (actionDoc.docs.isNotEmpty) {
+          final actionData = actionDoc.docs.first.data();
           final co2SavingFactor = actionData['co2_saving_factor'] as double;
           final durationInHours = contribution.duration / 60;
-          print('this is the final duration in  hours ${durationInHours}');
-          co2Saved = durationInHours * co2SavingFactor;
+          contributionData['co2_saved'] = durationInHours * co2SavingFactor;
           contributionData['duration'] = durationInHours;
         }
-
-        contributionData['co2_saved'] = co2Saved;
-        contributionData['created_at'] = FieldValue.serverTimestamp();
-
-        await _firestore.collection('user_contributions').add(contributionData);
-        print('User contribution added successfully with CO2 saved: $co2Saved');
-      } else {
-        print('Error: Action not found in categories_and_actions');
       }
+
+      contributionData['created_at'] = FieldValue.serverTimestamp();
+
+      await _firestore.collection('user_contributions').add(contributionData);
+      print(
+          'User contribution added successfully with CO2 saved: ${contributionData['co2_saved']}');
     } catch (e) {
       print('Error adding user contribution: $e');
     }
