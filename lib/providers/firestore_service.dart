@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/models/categories_and_action.dart';
+import 'package:cstain/models/user.dart';
 import 'package:cstain/models/user_contribution.dart';
 
 class FirestoreService {
@@ -52,47 +53,18 @@ class FirestoreService {
       contributionData['created_at'] = FieldValue.serverTimestamp();
 
       await _firestore.collection('user_contributions').add(contributionData);
+      final userDoc =
+          await _firestore.collection('user').doc(contribution.user_id).get();
+      final userData =
+          UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+      final newTotal = userData.total_CO2_saved + contributionData['co2_saved'];
+      await updateUserCO2Saved(contribution.user_id, newTotal);
       print(
           'User contribution added successfully with CO2 saved: ${contributionData['co2_saved']}');
     } catch (e) {
       print('Error adding user contribution: $e');
     }
   }
-
-  // Future<void> addUserContribution(UserContributionModel contribution) async {
-  //   try {
-  //     // Fetch the CO2 saving factor for this action
-  //     final actionDoc = await _firestore
-  //         .collection('categories_and_actions')
-  //         .where('action_name', isEqualTo: contribution.action)
-  //         .limit(1)
-  //         .get();
-
-  //     if (actionDoc.docs.isNotEmpty) {
-  //       final durationInHours = contribution.duration / 60;
-  //       final contributionData = contribution.toMap();
-  //       contributionData['duration'] = durationInHours;
-  //       contributionData['created_at'] = FieldValue.serverTimestamp();
-  //       final actionData = actionDoc.docs.first.data();
-  //       final co2SavingFactor = actionData['co2_saving_factor'] as double;
-
-  //       // Calculate CO2 saved
-  //       final co2Saved = contribution.duration * co2SavingFactor;
-
-  //       // Update the contribution data with calculated CO2 saved
-
-  //       contributionData['co2_saved'] = co2Saved;
-  //       contributionData['created_at'] = FieldValue.serverTimestamp();
-
-  //       await _firestore.collection('user_contributions').add(contributionData);
-  //       print('User contribution added successfully with CO2 saved: $co2Saved');
-  //     } else {
-  //       print('Error: Action not found in categories_and_actions');
-  //     }
-  //   } catch (e) {
-  //     print('Error adding user contribution: $e');
-  //   }
-  // }
 
   Future<List<UserContributionModel>> fetchTodayUserContributions(
       String userId) async {
@@ -118,17 +90,31 @@ class FirestoreService {
       return [];
     }
   }
-}
-// Future<void> addUserContribution(UserContributionModel contribution) async {
-//     try {
-//       final durationInHours = contribution.duration / 60;
-//       final contributionData = contribution.toMap();
-//       contributionData['duration'] = durationInHours;
-//       contributionData['created_at'] = FieldValue.serverTimestamp();
 
-//       await _firestore.collection('user_contributions').add(contributionData);
-//       print('User contribution added successfully');
-//     } catch (e) {
-//       print('Error adding user contribution: $e');
-//     }
-  // }
+  Future<UserModel> fetchUserData(String userId) async {
+    try {
+      final userDoc = await _firestore.collection('user').doc(userId).get();
+      return UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+    } catch (e) {
+      print('Error fetching user data: $e');
+      throw e;
+    }
+  }
+
+  Future<void> updateUserCO2Saved(String userId, double newTotal) async {
+    try {
+      await _firestore.collection('user').doc(userId).update({
+        'total_CO2_saved': newTotal,
+      });
+    } catch (e) {
+      print('Error updating user CO2 saved: $e');
+      throw e;
+    }
+  }
+
+  Stream<UserModel> getUserStream(String userId) {
+    return _firestore.collection('user').doc(userId).snapshots().map(
+        (snapshot) =>
+            UserModel.fromMap(snapshot.data() as Map<String, dynamic>));
+  }
+}

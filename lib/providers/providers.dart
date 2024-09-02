@@ -1,6 +1,8 @@
 import 'package:cstain/models/categories_and_action.dart';
+import 'package:cstain/models/user.dart';
 import 'package:cstain/models/user_contribution.dart';
 import 'package:cstain/providers/firestore_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final categoriesProvider =
@@ -24,4 +26,10 @@ final userContributionsProvider =
         (ref, userId) async {
   final firestoreService = ref.read(firestoreServiceProvider);
   return firestoreService.fetchTodayUserContributions(userId);
+});
+final userStreamProvider = StreamProvider.autoDispose<UserModel>((ref) {
+  final firestoreService = ref.watch(firestoreServiceProvider);
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) throw Exception('User not authenticated');
+  return firestoreService.getUserStream(user.uid);
 });
