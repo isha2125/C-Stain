@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cstain/models/achievements.dart';
 import 'package:cstain/models/categories_and_action.dart';
 import 'package:cstain/models/user.dart';
 import 'package:cstain/models/user_contribution.dart';
@@ -116,5 +117,17 @@ class FirestoreService {
     return _firestore.collection('user').doc(userId).snapshots().map(
         (snapshot) =>
             UserModel.fromMap(snapshot.data() as Map<String, dynamic>));
+  }
+
+  Future<List<AchievementsModel>> fetchAchievements() async {
+    try {
+      final snapshot = await _firestore.collection('achievements').get();
+      return snapshot.docs
+          .map((doc) => AchievementsModel.fromMap(doc.data()))
+          .toList();
+    } catch (e) {
+      print('Error fetching achievements: $e');
+      return [];
+    }
   }
 }
