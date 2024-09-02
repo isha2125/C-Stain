@@ -33,7 +33,7 @@ class FirestoreService {
 
       // For food actions, the co2_saved is already calculated
       if (contribution.category == 'Food') {
-        contributionData['co2_saved'] = contribution.co2_saved;
+        contributionData['co2_saved'] = contribution.co2_saved.toDouble();
       } else {
         // For non-food actions, keep the existing calculation
         final actionDoc = await _firestore
@@ -44,10 +44,12 @@ class FirestoreService {
 
         if (actionDoc.docs.isNotEmpty) {
           final actionData = actionDoc.docs.first.data();
-          final co2SavingFactor = actionData['co2_saving_factor'] as double;
+          final co2SavingFactor =
+              (actionData['co2_saving_factor'] as num).toDouble();
           final durationInHours = contribution.duration / 60;
-          contributionData['co2_saved'] = durationInHours * co2SavingFactor;
-          contributionData['duration'] = durationInHours;
+          contributionData['co2_saved'] =
+              (durationInHours * co2SavingFactor).toDouble();
+          contributionData['duration'] = durationInHours.toDouble();
         }
       }
 

@@ -45,10 +45,10 @@ class AchievementsModel {
 
   factory AchievementsModel.fromMap(Map<String, dynamic> map) {
     return AchievementsModel(
-      achievement_id: map['achievement_id'] as String,
-      name: map['name'] as String,
-      description: map['description'] as String,
-      co2_threshold: map['co2_threshold'] as double,
+      achievement_id: map['achievement_id'] as String? ?? "random id",
+      name: map['name'] as String? ?? '',
+      description: map['description'] as String? ?? '',
+      co2_threshold: (map['co2_threshold'] as num?)?.toDouble() ?? 500.0,
       created_at: map['created_at'] as Timestamp,
     );
   }

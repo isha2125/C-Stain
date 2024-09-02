@@ -12,7 +12,9 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 final achievementsProvider =
     FutureProvider<List<AchievementsModel>>((ref) async {
   final firestoreService = ref.watch(firestoreServiceProvider);
-  return firestoreService.fetchAchievements();
+  final achievements = await firestoreService.fetchAchievements();
+  print("Fetched ${achievements.length} achievements");
+  return achievements;
 });
 final userStreamProvider = StreamProvider.autoDispose<UserModel>((ref) {
   final user = ref.watch(authStateProvider).value;
@@ -38,6 +40,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userStream = ref.watch(userStreamProvider);
     final achievements = ref.watch(achievementsProvider);
+    print("Achievements state: ${achievements.toString()}");
     //final myUser = ref.watch(userProvider);
     //final co2Saved = ref.watch(co2SavedProvider);
     //final achievementProgress = ref.watch(achievementProgressProvider);
@@ -222,7 +225,10 @@ class HomeScreen extends ConsumerWidget {
 
   Widget _buildAchievementProgress(
       UserModel user, List<AchievementsModel> achievements) {
+    print("User CO2 saved: ${user.total_CO2_saved}");
+    print("Number of achievements: ${achievements.length}");
     // Find the next achievement
+    achievements.sort((a, b) => a.co2_threshold.compareTo(b.co2_threshold));
     final nextAchievement = achievements.isNotEmpty
         ? achievements.firstWhere(
             (a) => a.co2_threshold > user.total_CO2_saved,
@@ -231,8 +237,10 @@ class HomeScreen extends ConsumerWidget {
         : null;
 
     if (nextAchievement == null) {
+      print("No next achievement found");
       return Center(child: Text('No achievements available.'));
     }
+    print("Next achievement: ${nextAchievement.name}");
 
     final progress = user.total_CO2_saved / nextAchievement.co2_threshold;
     final cappedProgress = progress > 1 ? 1.0 : progress;
@@ -247,6 +255,15 @@ class HomeScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            Text(
+              progress >= 1
+                  ? "Congratulations! You've reached the highest achievement!"
+                  : "Next achievement: ${nextAchievement.name}",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18.0,
+              ),
+            ),
             Text(
               'Achievement Progress',
               style: TextStyle(

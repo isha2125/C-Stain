@@ -58,7 +58,7 @@ class UserContributionModel {
       contribution_id: map['contribution_id'] as String,
       action: map['action'] as String,
       category: map['category'] as String,
-      co2_saved: map['co2_saved'] as double,
+      co2_saved: (map['co2_saved'] as num).toDouble(),
       created_at: (map['created_at'] as Timestamp),
       duration: (map['duration'] as num).toDouble(),
       user_id: map['user_id'] as String,
