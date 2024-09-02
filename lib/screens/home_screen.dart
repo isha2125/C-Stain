@@ -1,4 +1,4 @@
-import 'package:cstain/backend/auth_gate.dart';
+//import 'package:cstain/backend/auth_gate.dart';
 import 'package:cstain/models/user.dart';
 import 'package:cstain/providers/auth_service.dart';
 import 'package:cstain/providers/providers.dart';
@@ -20,10 +20,10 @@ final achievementProgressProvider = StateProvider<double>((ref) => 0.75);
 final tipOfTheDayProvider =
     StateProvider<String>((ref) => 'Save water, save life!');
 
-class User {
-  final String full_name;
-  User({required this.full_name});
-}
+// class User {
+//   final String full_name;
+//   User({required this.full_name});
+// }
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -31,7 +31,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userStream = ref.watch(userStreamProvider);
-    final myUser = ref.watch(userProvider);
+    //final myUser = ref.watch(userProvider);
     //final co2Saved = ref.watch(co2SavedProvider);
     final achievementProgress = ref.watch(achievementProgressProvider);
     final tipOfTheDay = ref.watch(tipOfTheDayProvider);
@@ -109,7 +109,7 @@ class HomeScreen extends ConsumerWidget {
                           ),
                           SizedBox(height: 10),
                           Text(
-                            '${myUser?.total_CO2_saved.toStringAsFixed(2)} kg',
+                            '${myUser.total_CO2_saved.toStringAsFixed(2)} kg',
                             style: TextStyle(
                               fontSize: 36,
                               color: Colors.white,
