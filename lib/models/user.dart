@@ -13,6 +13,8 @@ class UserModel {
   final String profile_picture_url;
   final double total_CO2_saved;
   final String username;
+  final int streak; // New property
+  final Timestamp lastLoginDate; // New property
   UserModel({
     required this.uid,
     required this.bio,
@@ -22,6 +24,8 @@ class UserModel {
     required this.profile_picture_url,
     required this.total_CO2_saved,
     required this.username,
+    required this.streak, // Add this
+    required this.lastLoginDate, // A
   });
 
   UserModel copyWith({
@@ -33,6 +37,8 @@ class UserModel {
     String? profile_picture_url,
     double? total_CO2_saved,
     String? username,
+    int? streak,
+    Timestamp? lastLoginDate,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -43,6 +49,8 @@ class UserModel {
       profile_picture_url: profile_picture_url ?? this.profile_picture_url,
       total_CO2_saved: total_CO2_saved ?? this.total_CO2_saved,
       username: username ?? this.username,
+      streak: streak ?? this.streak,
+      lastLoginDate: lastLoginDate ?? this.lastLoginDate,
     );
   }
 
@@ -56,6 +64,8 @@ class UserModel {
       'profile_picture_url': profile_picture_url,
       'total_CO2_saved': total_CO2_saved,
       'username': username,
+      'streak': streak,
+      'lastLoginDate': lastLoginDate,
     };
   }
 
@@ -69,6 +79,8 @@ class UserModel {
       profile_picture_url: map['profile_picture_url'] as String,
       total_CO2_saved: map['total_CO2_saved'] as double,
       username: map['username'] as String,
+      streak: map['streak'] as int,
+      lastLoginDate: map['lastLoginDate'] as Timestamp,
     );
   }
 
@@ -79,7 +91,7 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(uid: $uid, bio: $bio, created_at: $created_at, email: $email, full_name: $full_name, profile_picture_url: $profile_picture_url, total_CO2_saved: $total_CO2_saved, username: $username)';
+    return 'UserModel(uid: $uid, bio: $bio, created_at: $created_at, email: $email, full_name: $full_name, profile_picture_url: $profile_picture_url, total_CO2_saved: $total_CO2_saved, username: $username,streak: $streak, lastLoginDate: $lastLoginDate)';
   }
 
   @override
@@ -93,7 +105,9 @@ class UserModel {
         other.full_name == full_name &&
         other.profile_picture_url == profile_picture_url &&
         other.total_CO2_saved == total_CO2_saved &&
-        other.username == username;
+        other.username == username &&
+        other.streak == streak &&
+        other.lastLoginDate == lastLoginDate;
   }
 
   @override
@@ -105,6 +119,8 @@ class UserModel {
         full_name.hashCode ^
         profile_picture_url.hashCode ^
         total_CO2_saved.hashCode ^
-        username.hashCode;
+        username.hashCode ^
+        streak.hashCode ^
+        lastLoginDate.hashCode;
   }
 }

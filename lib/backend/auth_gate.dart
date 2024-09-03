@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/components/loader.dart';
+import 'package:cstain/components/streak_service.dart';
 import 'package:cstain/models/user.dart';
 import 'package:cstain/providers/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
@@ -27,6 +28,10 @@ class AuthGate extends ConsumerWidget {
   static Future<void> _handleUserModel(User user, Ref ref) async {
     final userDoc = await _usersCollection.doc(user.uid).get();
 
+    //streak provider
+
+    final streakService = StreakService();
+
     UserModel userModel;
 
     if (!userDoc.exists) {
@@ -39,12 +44,15 @@ class AuthGate extends ConsumerWidget {
         profile_picture_url: user.photoURL ?? 'Default Profile Picture URL',
         total_CO2_saved: 0.0,
         username: user.displayName ?? 'No Username',
+        streak: 0,
+        lastLoginDate: Timestamp.now(),
       );
 
       await _usersCollection.doc(userModel.uid).set(userModel.toMap());
     } else {
       userModel = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
     }
+    await streakService.updateStreak();
 
     ref.read(userProvider.notifier).state = userModel;
   }
