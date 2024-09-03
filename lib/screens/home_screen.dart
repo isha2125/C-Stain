@@ -22,9 +22,9 @@ final userStreamProvider = StreamProvider.autoDispose<UserModel>((ref) {
   if (user == null) throw Exception('User not authenticated');
   return ref.watch(firestoreServiceProvider).getUserStream(user.uid);
 });
-final streakProvider = StreamProvider<int>((ref) {
+final streakProvider = StreamProvider<List<bool>>((ref) {
   final streakService = StreakService();
-  return streakService.getStreakStream();
+  return streakService.getLastSevenDaysStreakStream();
 });
 
 //final userProvider = StateProvider<User?>((ref) => User(full_name: "Aditya"));
@@ -400,7 +400,7 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStreakTracker(AsyncValue<int> streakAsyncValue) {
+  Widget _buildStreakTracker(AsyncValue<List<bool>> streakAsyncValue) {
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16.0),
@@ -412,7 +412,7 @@ class HomeScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Current Streak',
+              'Streak Tracker',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -420,13 +420,35 @@ class HomeScreen extends ConsumerWidget {
             ),
             SizedBox(height: 10),
             streakAsyncValue.when(
-              data: (streak) => Text(
-                '$streak days',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                ),
+              data: (streak) => Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: List.generate(7, (index) {
+                  final dayName =
+                      ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index];
+                  final isActive = streak[index];
+                  return Column(
+                    children: [
+                      Text(
+                        dayName,
+                        style: TextStyle(fontSize: 12),
+                      ),
+                      SizedBox(height: 5),
+                      Container(
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isActive ? Colors.green : Colors.grey[300],
+                        ),
+                        child: Icon(
+                          isActive ? Icons.check : Icons.close,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ],
+                  );
+                }),
               ),
               loading: () => CircularProgressIndicator(),
               error: (error, _) => Text('Error: $error'),
