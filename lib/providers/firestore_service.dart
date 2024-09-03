@@ -132,4 +132,28 @@ class FirestoreService {
       return [];
     }
   }
+
+  Future<void> deleteUserContribution(
+      UserContributionModel contribution) async {
+    try {
+      // Delete the contribution document
+      await _firestore
+          .collection('user_contributions')
+          .doc(contribution.contribution_id)
+          .delete();
+
+      // Update user's total CO2 saved
+      final userDoc =
+          await _firestore.collection('user').doc(contribution.user_id).get();
+      final userData =
+          UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+      final newTotal = userData.total_CO2_saved - contribution.co2_saved;
+      await updateUserCO2Saved(contribution.user_id, newTotal);
+
+      print('User contribution deleted successfully');
+    } catch (e) {
+      print('Error deleting user contribution: $e');
+      throw e;
+    }
+  }
 }

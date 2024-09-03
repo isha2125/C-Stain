@@ -21,7 +21,15 @@ final userStreamProvider = StreamProvider.autoDispose<UserModel>((ref) {
   if (user == null) throw Exception('User not authenticated');
   return ref.watch(firestoreServiceProvider).getUserStream(user.uid);
 });
-
+final streakProvider = StateProvider<List<bool?>>((ref) => [
+      true, // Monday: Log completed
+      false, // Tuesday: Log missed
+      true, // Wednesday: Log completed
+      null, // Thursday: Yet to arrive
+      null, // Friday: Yet to arrive
+      null, // Saturday: Yet to arrive
+      null // Sunday: Yet to arrive
+    ]);
 //final userProvider = StateProvider<User?>((ref) => User(full_name: "Aditya"));
 //final co2SavedProvider = StateProvider<double>((ref) => 100.0);
 final achievementProgressProvider = StateProvider<double>((ref) => 0.75);
@@ -38,6 +46,7 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final streak = ref.watch(streakProvider);
     final userStream = ref.watch(userStreamProvider);
     final achievements = ref.watch(achievementsProvider);
     print("Achievements state: ${achievements.toString()}");
@@ -135,6 +144,75 @@ class HomeScreen extends ConsumerWidget {
                           size: 40,
                         ),
                       ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+
+                  // Streak Tracker for a Week
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                    elevation: 4,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Streak Tracker',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: List.generate(7, (index) {
+                              Color dayColor;
+                              IconData dayIcon;
+
+                              if (streak[index] == true) {
+                                dayColor = Colors.green;
+                                dayIcon = Icons.check;
+                              } else if (streak[index] == false) {
+                                dayColor = Colors.red;
+                                dayIcon = Icons.close;
+                              } else {
+                                dayColor = Colors.lightBlue;
+                                dayIcon = Icons.hourglass_empty;
+                              }
+
+                              return Column(
+                                children: [
+                                  Text(
+                                    [
+                                      'Mon',
+                                      'Tue',
+                                      'Wed',
+                                      'Thu',
+                                      'Fri',
+                                      'Sat',
+                                      'Sun'
+                                    ][index],
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                  SizedBox(height: 5),
+                                  CircleAvatar(
+                                    radius: 20,
+                                    backgroundColor: dayColor,
+                                    child: Icon(
+                                      dayIcon,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   SizedBox(height: 20),
@@ -240,10 +318,17 @@ class HomeScreen extends ConsumerWidget {
       print("No next achievement found");
       return Center(child: Text('No achievements available.'));
     }
+    final previousAchievement = achievements.lastWhere(
+      (a) => a.co2_threshold <= user.total_CO2_saved,
+      orElse: () => achievements.first,
+    );
+
     print("Next achievement: ${nextAchievement.name}");
 
-    final progress = user.total_CO2_saved / nextAchievement.co2_threshold;
-    final cappedProgress = progress > 1 ? 1.0 : progress;
+    final progress =
+        (user.total_CO2_saved - previousAchievement.co2_threshold) /
+            (nextAchievement.co2_threshold - previousAchievement.co2_threshold);
+    final cappedProgress = progress.clamp(0.0, 1.0);
 
     return Card(
       shape: RoundedRectangleBorder(

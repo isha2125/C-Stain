@@ -210,33 +210,46 @@ class _ActionScreenState extends ConsumerState<ActionScreen> {
         final action = todayActions[index];
         final categoryData = _getCategoryIcon(action.category);
 
-        return ListTile(
-          leading: CircleAvatar(
-            backgroundColor: categoryData['color'],
-            child: Icon(
-              categoryData['icon'], // Use category-specific icon
-              color: Colors.white,
+        return Dismissible(
+          key: Key(action.contribution_id),
+          direction: DismissDirection.endToStart,
+          background: Container(
+            color: Colors.red,
+            alignment: Alignment.centerRight,
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Icon(Icons.delete, color: Colors.white),
+          ),
+          onDismissed: (direction) {
+            _deleteAction(action);
+          },
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: categoryData['color'],
+              child: Icon(
+                categoryData['icon'], // Use category-specific icon
+                color: Colors.white,
+              ),
             ),
-          ),
-          title: Text(
-            action.action,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[800],
-                ),
-          ),
-          subtitle: Text(
-            '${_formatDuration(action.duration, action.category)} - ${action.category}',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
-          ),
-          trailing: Text(
-            '${action.co2_saved.toStringAsFixed(2)} kg',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Color(0xFF237155), // CO2 saved text color updated
-                  fontWeight: FontWeight.bold,
-                ),
+            title: Text(
+              action.action,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                  ),
+            ),
+            subtitle: Text(
+              '${_formatDuration(action.duration, action.category)} - ${action.category}',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+            ),
+            trailing: Text(
+              '${action.co2_saved.toStringAsFixed(2)} kg',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Color(0xFF237155), // CO2 saved text color updated
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
           ),
           // Removed the shape property to remove the border
         );
@@ -246,5 +259,27 @@ class _ActionScreenState extends ConsumerState<ActionScreen> {
 
   double _calculateTotalCarbonSaved() {
     return todayActions.fold(0.0, (sum, action) => sum + action.co2_saved);
+  }
+
+  Future<void> _deleteAction(UserContributionModel action) async {
+    try {
+      final firestoreService = ref.read(firestoreServiceProvider);
+      await firestoreService.deleteUserContribution(action);
+
+      setState(() {
+        todayActions.remove(action);
+      });
+
+      // Update the total carbon saved
+      final totalCarbonSaved = _calculateTotalCarbonSaved();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Action deleted successfully')),
+      );
+    } catch (e) {
+      print('Error deleting action: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete action')),
+      );
+    }
   }
 }
