@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/components/loader.dart';
-import 'package:cstain/components/streak_service.dart';
+//import 'package:cstain/components/streak_service.dart';
 import 'package:cstain/models/user.dart';
 import 'package:cstain/providers/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
@@ -30,7 +30,7 @@ class AuthGate extends ConsumerWidget {
 
     //streak provider
 
-    final streakService = StreakService();
+    // final streakService = StreakService();
 
     UserModel userModel;
 
@@ -52,7 +52,7 @@ class AuthGate extends ConsumerWidget {
     } else {
       userModel = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
     }
-    await streakService.updateStreak();
+    //await streakService.updateStreakOnNewLog();
 
     ref.read(userProvider.notifier).state = userModel;
   }

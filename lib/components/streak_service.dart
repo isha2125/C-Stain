@@ -5,19 +5,16 @@ class StreakService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<void> updateStreak() async {
-    final user = _auth.currentUser;
-    if (user == null) return;
-
-    final userDoc = _firestore.collection('user').doc(user.uid);
+  Future<void> updateStreak(String userId) async {
+    final userDoc = _firestore.collection('user').doc(userId);
     final userData = await userDoc.get();
 
-    final lastLoginDate = userData['lastLoginDate']?.toDate();
+    final lastActionDate = userData['lastLoginDate']?.toDate();
     final currentDate = DateTime.now();
 
-    if (lastLoginDate == null || !_isSameDay(lastLoginDate, currentDate)) {
-      if (lastLoginDate != null &&
-          currentDate.difference(lastLoginDate).inDays == 1) {
+    if (lastActionDate == null || !_isSameDay(lastActionDate, currentDate)) {
+      if (lastActionDate != null &&
+          currentDate.difference(lastActionDate).inDays == 1) {
         // Increment streak
         await userDoc.update({
           'streak': FieldValue.increment(1),
@@ -33,21 +30,30 @@ class StreakService {
     }
 
     // Update last 7 days streak
-    List<bool> last7Days = List.filled(7, false);
-    last7Days[0] = true; // Today is always true
-    for (int i = 1; i < 7; i++) {
-      final checkDate = currentDate.subtract(Duration(days: i));
-      final isStreakDay = await _isStreakDay(user.uid, checkDate);
-      last7Days[i] = isStreakDay;
-    }
+    List<bool> last7Days = await _getLast7DaysStreak(userId);
     await userDoc.update({'last7DaysStreak': last7Days});
   }
 
-  Future<bool> _isStreakDay(String userId, DateTime date) async {
+  Future<List<bool>> _getLast7DaysStreak(String userId) async {
     final userDoc = await _firestore.collection('user').doc(userId).get();
-    final lastLoginDate = userDoc['lastLoginDate']?.toDate();
-    if (lastLoginDate == null) return false;
-    return _isSameDay(lastLoginDate, date) || lastLoginDate.isAfter(date);
+    final lastActionDate = userDoc['lastLoginDate']?.toDate();
+    final streak = userDoc['streak'] ?? 0;
+
+    if (lastActionDate == null) return List.filled(7, false);
+
+    List<bool> last7Days = List.filled(7, false);
+    final currentDate = DateTime.now();
+
+    for (int i = 0; i < 7; i++) {
+      final checkDate = currentDate.subtract(Duration(days: i));
+      if (checkDate.difference(lastActionDate).inDays < streak) {
+        last7Days[i] = true;
+      } else {
+        break;
+      }
+    }
+
+    return last7Days;
   }
 
   bool _isSameDay(DateTime date1, DateTime date2) {
@@ -56,33 +62,14 @@ class StreakService {
         date1.day == date2.day;
   }
 
-  Stream<List<bool>> getLastSevenDaysStreakStream() {
-    final user = _auth.currentUser;
-    if (user == null) return Stream.value(List.filled(7, false));
-
+  Stream<List<bool>> getLastSevenDaysStreakStream(String userId) {
     return _firestore
         .collection('user')
-        .doc(user.uid)
+        .doc(userId)
         .snapshots()
         .map((snapshot) {
-      final lastLoginDate = snapshot.data()?['lastLoginDate']?.toDate();
-      final streak = snapshot.data()?['streak'] ?? 0;
-
-      if (lastLoginDate == null) return List.filled(7, false);
-
-      List<bool> lastSevenDays = List.filled(7, false);
-      final currentDate = DateTime.now();
-
-      for (int i = 0; i < 7; i++) {
-        final day = currentDate.subtract(Duration(days: i));
-        if (day.difference(lastLoginDate).inDays < streak) {
-          lastSevenDays[6 - i] = true;
-        } else {
-          break;
-        }
-      }
-
-      return lastSevenDays;
+      final last7DaysStreak = snapshot.data()?['last7DaysStreak'] as List?;
+      return last7DaysStreak?.cast<bool>() ?? List.filled(7, false);
     });
   }
 }

@@ -22,11 +22,12 @@ final userStreamProvider = StreamProvider.autoDispose<UserModel>((ref) {
   if (user == null) throw Exception('User not authenticated');
   return ref.watch(firestoreServiceProvider).getUserStream(user.uid);
 });
-final streakProvider = StreamProvider<List<bool>>((ref) {
+final streakProvider = StreamProvider.autoDispose<List<bool>>((ref) {
+  final user = ref.watch(authStateProvider).value;
+  if (user == null) return Stream.value(List.filled(7, false));
   final streakService = StreakService();
-  return streakService.getLastSevenDaysStreakStream();
+  return streakService.getLastSevenDaysStreakStream(user.uid);
 });
-
 //final userProvider = StateProvider<User?>((ref) => User(full_name: "Aditya"));
 //final co2SavedProvider = StateProvider<double>((ref) => 100.0);
 final achievementProgressProvider = StateProvider<double>((ref) => 0.75);
@@ -146,7 +147,7 @@ class HomeScreen extends ConsumerWidget {
                   SizedBox(height: 20),
 
                   // Streak Tracker for a Week
-                  _buildStreakTracker(streakAsyncValue),
+                  _buildStreakTracker(ref),
                   // Card(
                   //   shape: RoundedRectangleBorder(
                   //     borderRadius: BorderRadius.circular(16.0),
@@ -400,7 +401,9 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStreakTracker(AsyncValue<List<bool>> streakAsyncValue) {
+  Widget _buildStreakTracker(WidgetRef ref) {
+    final streakAsyncValue = ref.watch(streakProvider);
+
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16.0),
@@ -423,14 +426,28 @@ class HomeScreen extends ConsumerWidget {
               data: (streak) => Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: List.generate(7, (index) {
-                  final dayName =
-                      ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index];
+                  final date =
+                      DateTime.now().subtract(Duration(days: 6 - index));
+                  final dayName = [
+                    'Mon',
+                    'Tue',
+                    'Wed',
+                    'Thu',
+                    'Fri',
+                    'Sat',
+                    'Sun'
+                  ][date.weekday - 1];
                   final isActive = streak[index];
                   return Column(
                     children: [
                       Text(
                         dayName,
                         style: TextStyle(fontSize: 12),
+                      ),
+                      Text(
+                        '${date.day}',
+                        style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 5),
                       Container(
@@ -450,7 +467,7 @@ class HomeScreen extends ConsumerWidget {
                   );
                 }),
               ),
-              loading: () => CircularProgressIndicator(),
+              loading: () => Center(child: CircularProgressIndicator()),
               error: (error, _) => Text('Error: $error'),
             ),
           ],

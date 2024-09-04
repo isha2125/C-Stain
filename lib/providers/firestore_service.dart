@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cstain/components/streak_service.dart';
 import 'package:cstain/models/achievements.dart';
 import 'package:cstain/models/categories_and_action.dart';
 import 'package:cstain/models/user.dart';
@@ -6,6 +7,7 @@ import 'package:cstain/models/user_contribution.dart';
 
 class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final StreakService _streakService = StreakService();
   Future<List<CategoriesAndActionModel>> fetchCategoriesAndActions() async {
     try {
       final snapshot =
@@ -62,6 +64,7 @@ class FirestoreService {
           UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
       final newTotal = userData.total_CO2_saved + contributionData['co2_saved'];
       await updateUserCO2Saved(contribution.user_id, newTotal);
+      await _streakService.updateStreak(contribution.user_id);
       print(
           'User contribution added successfully with CO2 saved: ${contributionData['co2_saved']}');
     } catch (e) {
