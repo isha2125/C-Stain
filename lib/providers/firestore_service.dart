@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cstain/components/streak_service.dart';
+
 import 'package:cstain/models/achievements.dart';
 import 'package:cstain/models/categories_and_action.dart';
 import 'package:cstain/models/user.dart';
@@ -7,7 +7,7 @@ import 'package:cstain/models/user_contribution.dart';
 
 class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final StreakService _streakService = StreakService();
+
   Future<List<CategoriesAndActionModel>> fetchCategoriesAndActions() async {
     try {
       final snapshot =
@@ -64,7 +64,9 @@ class FirestoreService {
           UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
       final newTotal = userData.total_CO2_saved + contributionData['co2_saved'];
       await updateUserCO2Saved(contribution.user_id, newTotal);
-      await _streakService.updateStreak(contribution.user_id);
+      await updateStreak(userData.uid);
+      print('i am trying to fix streak');
+
       print(
           'User contribution added successfully with CO2 saved: ${contributionData['co2_saved']}');
     } catch (e) {
@@ -158,5 +160,94 @@ class FirestoreService {
       print('Error deleting user contribution: $e');
       throw e;
     }
+  }
+
+  Future<void> updateStreak(String userId) async {
+    // Get the user's document from Firestore
+    DocumentSnapshot userDoc =
+        await FirebaseFirestore.instance.collection('user').doc(userId).get();
+
+    if (userDoc.exists) {
+      // Fetch current streak and last activity date
+      Timestamp lastActivityTimestamp = userDoc['lastActivityDate'];
+      int currentStreak = userDoc['currentStreak'] ?? 0;
+
+      DateTime lastActivityDate = lastActivityTimestamp.toDate();
+      DateTime today = DateTime.now();
+
+      // Calculate the difference in days between today and the last logged activity
+      int daysDifference = today.difference(lastActivityDate).inDays;
+
+      // Fetch or initialize weekly streak data (default to false for each day)
+      Map<String, bool> weeklyStreak = {
+        'Sunday': userDoc['streak_sunday'] ?? false,
+        'Monday': userDoc['streak_monday'] ?? false,
+        'Tuesday': userDoc['streak_tuesday'] ?? false,
+        'Wednesday': userDoc['streak_wednesday'] ?? false,
+        'Thursday': userDoc['streak_thursday'] ?? false,
+        'Friday': userDoc['streak_friday'] ?? false,
+        'Saturday': userDoc['streak_saturday'] ?? false,
+      };
+
+      // If it's a consecutive day, increment the streak
+      if (daysDifference == 0) {
+        // Same day action, don't change the streak
+        print("Action already logged today");
+      } else if (daysDifference == 1) {
+        // Increment streak for consecutive day
+        currentStreak += 1;
+      } else if (daysDifference > 1) {
+        // Reset streak and optionally the weekly streak
+        currentStreak = 1;
+        weeklyStreak.updateAll((key, value) => false);
+      }
+
+      // Update the streak for today in the weekly streak data
+      String todayDay = _getDayOfWeek(today);
+      weeklyStreak[todayDay] = true;
+
+      // Update Firestore with the new streak and weekly streak values
+      await FirebaseFirestore.instance.collection('user').doc(userId).update({
+        'currentStreak': currentStreak,
+        'lastActivityDate': Timestamp.fromDate(today),
+        'streak_sunday': weeklyStreak['Sunday'],
+        'streak_monday': weeklyStreak['Monday'],
+        'streak_tuesday': weeklyStreak['Tuesday'],
+        'streak_wednesday': weeklyStreak['Wednesday'],
+        'streak_thursday': weeklyStreak['Thursday'],
+        'streak_friday': weeklyStreak['Friday'],
+        'streak_saturday': weeklyStreak['Saturday'],
+      });
+    } else {
+      // If document doesn't exist, initialize the streak for the first action
+      DateTime today = DateTime.now();
+      String todayDay = _getDayOfWeek(today);
+
+      await FirebaseFirestore.instance.collection('user').doc(userId).set({
+        'currentStreak': 1,
+        'lastActivityDate': Timestamp.fromDate(today),
+        'streak_sunday': todayDay == 'Sunday',
+        'streak_monday': todayDay == 'Monday',
+        'streak_tuesday': todayDay == 'Tuesday',
+        'streak_wednesday': todayDay == 'Wednesday',
+        'streak_thursday': todayDay == 'Thursday',
+        'streak_friday': todayDay == 'Friday',
+        'streak_saturday': todayDay == 'Saturday',
+      });
+    }
+  }
+
+// Helper function to get the name of the day
+  String _getDayOfWeek(DateTime date) {
+    List<String> days = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday'
+    ];
+    return days[date.weekday % 7];
   }
 }

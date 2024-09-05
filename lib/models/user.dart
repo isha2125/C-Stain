@@ -13,8 +13,15 @@ class UserModel {
   final String profile_picture_url;
   final double total_CO2_saved;
   final String username;
-  final int streak; // New property
-  final Timestamp lastLoginDate; // New property
+  final int currentStreak; // New property
+  final Timestamp lastActivityDate; // New property
+  final bool streak_sunday;
+  final bool streak_monday;
+  final bool streak_tuesday;
+  final bool streak_wednesday;
+  final bool streak_thursday;
+  final bool streak_friday;
+  final bool streak_saturday;
   UserModel({
     required this.uid,
     required this.bio,
@@ -24,8 +31,15 @@ class UserModel {
     required this.profile_picture_url,
     required this.total_CO2_saved,
     required this.username,
-    required this.streak, // Add this
-    required this.lastLoginDate, // A
+    required this.currentStreak,
+    required this.lastActivityDate,
+    required this.streak_sunday,
+    required this.streak_monday,
+    required this.streak_tuesday,
+    required this.streak_wednesday,
+    required this.streak_thursday,
+    required this.streak_friday,
+    required this.streak_saturday,
   });
 
   UserModel copyWith({
@@ -37,8 +51,15 @@ class UserModel {
     String? profile_picture_url,
     double? total_CO2_saved,
     String? username,
-    int? streak,
-    Timestamp? lastLoginDate,
+    int? currentStreak,
+    Timestamp? lastActivityDate,
+    bool? streak_sunday,
+    bool? streak_monday,
+    bool? streak_tuesday,
+    bool? streak_wednesday,
+    bool? streak_thursday,
+    bool? streak_friday,
+    bool? streak_saturday,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -49,8 +70,15 @@ class UserModel {
       profile_picture_url: profile_picture_url ?? this.profile_picture_url,
       total_CO2_saved: total_CO2_saved ?? this.total_CO2_saved,
       username: username ?? this.username,
-      streak: streak ?? this.streak,
-      lastLoginDate: lastLoginDate ?? this.lastLoginDate,
+      currentStreak: currentStreak ?? this.currentStreak,
+      lastActivityDate: lastActivityDate ?? this.lastActivityDate,
+      streak_sunday: streak_sunday ?? this.streak_sunday,
+      streak_monday: streak_monday ?? this.streak_monday,
+      streak_tuesday: streak_tuesday ?? this.streak_tuesday,
+      streak_wednesday: streak_wednesday ?? this.streak_wednesday,
+      streak_thursday: streak_thursday ?? this.streak_thursday,
+      streak_friday: streak_friday ?? this.streak_friday,
+      streak_saturday: streak_saturday ?? this.streak_saturday,
     );
   }
 
@@ -64,8 +92,15 @@ class UserModel {
       'profile_picture_url': profile_picture_url,
       'total_CO2_saved': total_CO2_saved,
       'username': username,
-      'streak': streak,
-      'lastLoginDate': lastLoginDate,
+      'currentStreak': currentStreak,
+      'lastActivityDate': lastActivityDate,
+      'streak_sunday': streak_sunday,
+      'streak_monday': streak_monday,
+      'streak_tuesday': streak_tuesday,
+      'streak_wednesday': streak_wednesday,
+      'streak_thursday': streak_thursday,
+      'streak_friday': streak_friday,
+      'streak_saturday': streak_saturday,
     };
   }
 
@@ -79,8 +114,15 @@ class UserModel {
       profile_picture_url: map['profile_picture_url'] as String,
       total_CO2_saved: map['total_CO2_saved'] as double,
       username: map['username'] as String,
-      streak: map['streak'] as int,
-      lastLoginDate: map['lastLoginDate'] as Timestamp,
+      currentStreak: map['currentStreak'] as int,
+      lastActivityDate: map['lastActivityDate'] as Timestamp,
+      streak_sunday: map['streak_sunday'] as bool,
+      streak_monday: map['streak_monday'] as bool,
+      streak_tuesday: map['streak_tuesday'] as bool,
+      streak_wednesday: map['streak_wednesday'] as bool,
+      streak_thursday: map['streak_thursday'] as bool,
+      streak_friday: map['streak_friday'] as bool,
+      streak_saturday: map['streak_saturday'] as bool,
     );
   }
 
@@ -91,7 +133,7 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(uid: $uid, bio: $bio, created_at: $created_at, email: $email, full_name: $full_name, profile_picture_url: $profile_picture_url, total_CO2_saved: $total_CO2_saved, username: $username,streak: $streak, lastLoginDate: $lastLoginDate)';
+    return 'UserModel(uid: $uid, bio: $bio, created_at: $created_at, email: $email, full_name: $full_name, profile_picture_url: $profile_picture_url, total_CO2_saved: $total_CO2_saved, username: $username, currentStreak: $currentStreak, lastActivityDate: $lastActivityDate, streak_sunday: $streak_sunday, streak_monday: $streak_monday, streak_tuesday: $streak_tuesday, streak_wednesday: $streak_wednesday, streak_thursday: $streak_thursday, streak_friday: $streak_friday, streak_saturday: $streak_saturday)';
   }
 
   @override
@@ -106,8 +148,15 @@ class UserModel {
         other.profile_picture_url == profile_picture_url &&
         other.total_CO2_saved == total_CO2_saved &&
         other.username == username &&
-        other.streak == streak &&
-        other.lastLoginDate == lastLoginDate;
+        other.currentStreak == currentStreak &&
+        other.lastActivityDate == lastActivityDate &&
+        other.streak_sunday == streak_sunday &&
+        other.streak_monday == streak_monday &&
+        other.streak_tuesday == streak_tuesday &&
+        other.streak_wednesday == streak_wednesday &&
+        other.streak_thursday == streak_thursday &&
+        other.streak_friday == streak_friday &&
+        other.streak_saturday == streak_saturday;
   }
 
   @override
@@ -120,7 +169,14 @@ class UserModel {
         profile_picture_url.hashCode ^
         total_CO2_saved.hashCode ^
         username.hashCode ^
-        streak.hashCode ^
-        lastLoginDate.hashCode;
+        currentStreak.hashCode ^
+        lastActivityDate.hashCode ^
+        streak_sunday.hashCode ^
+        streak_monday.hashCode ^
+        streak_tuesday.hashCode ^
+        streak_wednesday.hashCode ^
+        streak_thursday.hashCode ^
+        streak_friday.hashCode ^
+        streak_saturday.hashCode;
   }
 }

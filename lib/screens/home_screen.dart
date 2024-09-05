@@ -22,12 +22,7 @@ final userStreamProvider = StreamProvider.autoDispose<UserModel>((ref) {
   if (user == null) throw Exception('User not authenticated');
   return ref.watch(firestoreServiceProvider).getUserStream(user.uid);
 });
-final streakProvider = StreamProvider.autoDispose<List<bool>>((ref) {
-  final user = ref.watch(authStateProvider).value;
-  if (user == null) return Stream.value(List.filled(7, false));
-  final streakService = StreakService();
-  return streakService.getLastSevenDaysStreakStream(user.uid);
-});
+
 //final userProvider = StateProvider<User?>((ref) => User(full_name: "Aditya"));
 //final co2SavedProvider = StateProvider<double>((ref) => 100.0);
 final achievementProgressProvider = StateProvider<double>((ref) => 0.75);
@@ -44,7 +39,6 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final streakAsyncValue = ref.watch(streakProvider);
     final userStream = ref.watch(userStreamProvider);
     final achievements = ref.watch(achievementsProvider);
     print("Achievements state: ${achievements.toString()}");
@@ -147,7 +141,8 @@ class HomeScreen extends ConsumerWidget {
                   SizedBox(height: 20),
 
                   // Streak Tracker for a Week
-                  _buildStreakTracker(ref),
+                  StreakWidget(),
+
                   // Card(
                   //   shape: RoundedRectangleBorder(
                   //     borderRadius: BorderRadius.circular(16.0),
@@ -399,90 +394,5 @@ class HomeScreen extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  Widget _buildStreakTracker(WidgetRef ref) {
-    final streakAsyncValue = ref.watch(streakProvider);
-
-    return Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.0),
-        ),
-        elevation: 4,
-        child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(
-                'Streak Tracker',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 10),
-              streakAsyncValue.when(
-                data: (streak) => Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: List.generate(7, (index) {
-                    final date = DateTime.now()
-                        .subtract(Duration(days: DateTime.now().weekday % 7))
-                        .add(Duration(days: index));
-                    final dayName = [
-                      'Sun',
-                      'Mon',
-                      'Tue',
-                      'Wed',
-                      'Thu',
-                      'Fri',
-                      'Sat'
-                    ][index];
-                    final isActive = streak[index];
-                    final isToday = date.day == DateTime.now().day;
-                    final isFuture = date.isAfter(DateTime.now());
-
-                    return Column(
-                      children: [
-                        Text(
-                          dayName,
-                          style: TextStyle(fontSize: 12),
-                        ),
-                        Text(
-                          '${date.day}',
-                          style: TextStyle(
-                              fontSize: 12, fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(height: 5),
-                        Container(
-                          width: 30,
-                          height: 30,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: isActive
-                                ? Colors.green
-                                : (isFuture
-                                    ? Colors.grey[200]
-                                    : Colors.grey[300]),
-                          ),
-                          child: Icon(
-                            isActive
-                                ? Icons.check
-                                : (isFuture
-                                    ? Icons.hourglass_empty
-                                    : Icons.close),
-                            color: isActive
-                                ? Colors.white
-                                : (isFuture ? Colors.grey[400] : Colors.white),
-                            size: 20,
-                          ),
-                        ),
-                      ],
-                    );
-                  }),
-                ),
-                loading: () => Center(child: CircularProgressIndicator()),
-                error: (error, _) => Text('Error: $error'),
-              ),
-            ])));
   }
 }

@@ -44,8 +44,15 @@ class AuthGate extends ConsumerWidget {
         profile_picture_url: user.photoURL ?? 'Default Profile Picture URL',
         total_CO2_saved: 0.0,
         username: user.displayName ?? 'No Username',
-        streak: 0,
-        lastLoginDate: Timestamp.now(),
+        currentStreak: 0,
+        lastActivityDate: Timestamp.now(),
+        streak_sunday: false,
+        streak_monday: false,
+        streak_tuesday: false,
+        streak_wednesday: false,
+        streak_thursday: false,
+        streak_friday: false,
+        streak_saturday: false,
       );
 
       await _usersCollection.doc(userModel.uid).set(userModel.toMap());
