@@ -405,74 +405,84 @@ class HomeScreen extends ConsumerWidget {
     final streakAsyncValue = ref.watch(streakProvider);
 
     return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
-      ),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Streak Tracker',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 10),
-            streakAsyncValue.when(
-              data: (streak) => Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: List.generate(7, (index) {
-                  final date =
-                      DateTime.now().subtract(Duration(days: 6 - index));
-                  final dayName = [
-                    'Mon',
-                    'Tue',
-                    'Wed',
-                    'Thu',
-                    'Fri',
-                    'Sat',
-                    'Sun'
-                  ][date.weekday - 1];
-                  final isActive = streak[index];
-                  return Column(
-                    children: [
-                      Text(
-                        dayName,
-                        style: TextStyle(fontSize: 12),
-                      ),
-                      Text(
-                        '${date.day}',
-                        style: TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 5),
-                      Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: isActive ? Colors.green : Colors.grey[300],
-                        ),
-                        child: Icon(
-                          isActive ? Icons.check : Icons.close,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ],
-                  );
-                }),
-              ),
-              loading: () => Center(child: CircularProgressIndicator()),
-              error: (error, _) => Text('Error: $error'),
-            ),
-          ],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.0),
         ),
-      ),
-    );
+        elevation: 4,
+        child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(
+                'Streak Tracker',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              streakAsyncValue.when(
+                data: (streak) => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: List.generate(7, (index) {
+                    final date = DateTime.now()
+                        .subtract(Duration(days: DateTime.now().weekday % 7))
+                        .add(Duration(days: index));
+                    final dayName = [
+                      'Sun',
+                      'Mon',
+                      'Tue',
+                      'Wed',
+                      'Thu',
+                      'Fri',
+                      'Sat'
+                    ][index];
+                    final isActive = streak[index];
+                    final isToday = date.day == DateTime.now().day;
+                    final isFuture = date.isAfter(DateTime.now());
+
+                    return Column(
+                      children: [
+                        Text(
+                          dayName,
+                          style: TextStyle(fontSize: 12),
+                        ),
+                        Text(
+                          '${date.day}',
+                          style: TextStyle(
+                              fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 5),
+                        Container(
+                          width: 30,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isActive
+                                ? Colors.green
+                                : (isFuture
+                                    ? Colors.grey[200]
+                                    : Colors.grey[300]),
+                          ),
+                          child: Icon(
+                            isActive
+                                ? Icons.check
+                                : (isFuture
+                                    ? Icons.hourglass_empty
+                                    : Icons.close),
+                            color: isActive
+                                ? Colors.white
+                                : (isFuture ? Colors.grey[400] : Colors.white),
+                            size: 20,
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
+                ),
+                loading: () => Center(child: CircularProgressIndicator()),
+                error: (error, _) => Text('Error: $error'),
+              ),
+            ])));
   }
 }

@@ -9,51 +9,37 @@ class StreakService {
     final userDoc = _firestore.collection('user').doc(userId);
     final userData = await userDoc.get();
 
-    final lastActionDate = userData['lastLoginDate']?.toDate();
     final currentDate = DateTime.now();
+    final currentWeekDay =
+        currentDate.weekday % 7; // 0 for Sunday, 6 for Saturday
 
-    if (lastActionDate == null || !_isSameDay(lastActionDate, currentDate)) {
-      if (lastActionDate != null &&
-          currentDate.difference(lastActionDate).inDays == 1) {
-        // Increment streak
-        await userDoc.update({
-          'streak': FieldValue.increment(1),
-          'lastLoginDate': currentDate,
-        });
-      } else {
-        // Reset streak
-        await userDoc.update({
-          'streak': 1,
-          'lastLoginDate': currentDate,
-        });
-      }
+    List<bool> weekStreak =
+        List.from(userData['weekStreak'] ?? List.filled(7, false));
+
+    // Update the current day in the weekStreak
+    weekStreak[currentWeekDay] = true;
+
+    // Reset streak if it's a new week (Sunday)
+    if (currentWeekDay == 0) {
+      weekStreak = List.filled(7, false);
+      weekStreak[0] = true;
     }
 
-    // Update last 7 days streak
-    List<bool> last7Days = await _getLast7DaysStreak(userId);
-    await userDoc.update({'last7DaysStreak': last7Days});
+    await userDoc.update({
+      'weekStreak': weekStreak,
+      'lastLoginDate': currentDate,
+    });
   }
 
-  Future<List<bool>> _getLast7DaysStreak(String userId) async {
-    final userDoc = await _firestore.collection('user').doc(userId).get();
-    final lastActionDate = userDoc['lastLoginDate']?.toDate();
-    final streak = userDoc['streak'] ?? 0;
-
-    if (lastActionDate == null) return List.filled(7, false);
-
-    List<bool> last7Days = List.filled(7, false);
-    final currentDate = DateTime.now();
-
-    for (int i = 0; i < 7; i++) {
-      final checkDate = currentDate.subtract(Duration(days: i));
-      if (checkDate.difference(lastActionDate).inDays < streak) {
-        last7Days[i] = true;
-      } else {
-        break;
-      }
-    }
-
-    return last7Days;
+  Stream<List<bool>> getWeekStreakStream(String userId) {
+    return _firestore
+        .collection('user')
+        .doc(userId)
+        .snapshots()
+        .map((snapshot) {
+      final weekStreak = snapshot.data()?['weekStreak'] as List?;
+      return weekStreak?.cast<bool>() ?? List.filled(7, false);
+    });
   }
 
   bool _isSameDay(DateTime date1, DateTime date2) {
@@ -69,7 +55,19 @@ class StreakService {
         .snapshots()
         .map((snapshot) {
       final last7DaysStreak = snapshot.data()?['last7DaysStreak'] as List?;
-      return last7DaysStreak?.cast<bool>() ?? List.filled(7, false);
+      List<bool> streak =
+          last7DaysStreak?.cast<bool>() ?? List.filled(7, false);
+
+      // Ensure the streak starts from Sunday
+      final today = DateTime.now();
+      final daysUntilSunday = (7 - today.weekday) % 7;
+      final sundayStreak = List<bool>.filled(7, false);
+      for (int i = 0; i < 7; i++) {
+        final index = (i + daysUntilSunday) % 7;
+        sundayStreak[i] = index < streak.length ? streak[index] : false;
+      }
+
+      return sundayStreak;
     });
   }
 }
