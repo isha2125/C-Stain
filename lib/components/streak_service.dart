@@ -14,7 +14,7 @@ class StreakService {
         currentDate.weekday % 7; // 0 for Sunday, 6 for Saturday
 
     List<bool> weekStreak =
-        List.from(userData['weekStreak'] ?? List.filled(7, false));
+        List.from(userData['last7DaysStreak'] ?? List.filled(7, false));
 
     // Update the current day in the weekStreak
     weekStreak[currentWeekDay] = true;
@@ -26,7 +26,7 @@ class StreakService {
     }
 
     await userDoc.update({
-      'weekStreak': weekStreak,
+      'last7DaysStreak': weekStreak,
       'lastLoginDate': currentDate,
     });
   }
@@ -37,7 +37,7 @@ class StreakService {
         .doc(userId)
         .snapshots()
         .map((snapshot) {
-      final weekStreak = snapshot.data()?['weekStreak'] as List?;
+      final weekStreak = snapshot.data()?['last7DaysStreak'] as List?;
       return weekStreak?.cast<bool>() ?? List.filled(7, false);
     });
   }
