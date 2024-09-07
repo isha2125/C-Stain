@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/models/achievements.dart';
 import 'package:cstain/models/categories_and_action.dart';
 import 'package:cstain/models/user.dart';
+import 'package:cstain/models/user_achievement.dart';
 import 'package:cstain/models/user_contribution.dart';
 
 class FirestoreService {
@@ -91,7 +92,8 @@ class FirestoreService {
           .get();
 
       return querySnapshot.docs
-          .map((doc) => UserContributionModel.fromMap(doc.data()))
+          .map((doc) => UserContributionModel.fromMap(
+              {...doc.data(), 'contribution_id': doc.id}))
           .toList();
     } catch (e) {
       print('Error fetching today\'s user contributions: $e');
@@ -249,5 +251,33 @@ class FirestoreService {
       'Saturday'
     ];
     return days[date.weekday % 7];
+  }
+
+  Future<void> storeUserAchievement(String userId, String achievementId) async {
+    try {
+      final userAchievement = UserAchievementsModel(
+        achievement_id: achievementId,
+        earned_at: Timestamp.now(),
+        user_id: userId,
+      );
+
+      await _firestore
+          .collection('user_achievements')
+          .add(userAchievement.toMap());
+      print('Achievement stored successfully');
+    } catch (e) {
+      print('Error storing achievement: $e');
+    }
+  }
+
+  Future<bool> hasUserAchievement(String userId, String achievementId) async {
+    final querySnapshot = await _firestore
+        .collection('user_achievements')
+        .where('user_id', isEqualTo: userId)
+        .where('achievement_id', isEqualTo: achievementId)
+        .limit(1)
+        .get();
+
+    return querySnapshot.docs.isNotEmpty;
   }
 }

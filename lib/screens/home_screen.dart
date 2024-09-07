@@ -212,7 +212,7 @@ class HomeScreen extends ConsumerWidget {
                   SizedBox(height: 20),
 
                   // Achievement Progress
-                  _buildAchievementProgress(myUser, achievementsList),
+                  _buildAchievementProgress(myUser, achievementsList, ref),
 
                   // Card(
                   //   shape: RoundedRectangleBorder(
@@ -296,7 +296,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildAchievementProgress(
-      UserModel user, List<AchievementsModel> achievements) {
+      UserModel user, List<AchievementsModel> achievements, WidgetRef ref) {
     print("User CO2 saved: ${user.total_CO2_saved}");
     print("Number of achievements: ${achievements.length}");
     // Find the next achievement
@@ -316,6 +316,26 @@ class HomeScreen extends ConsumerWidget {
       (a) => a.co2_threshold <= user.total_CO2_saved,
       orElse: () => achievements.first,
     );
+    // Check if the user has just completed an achievement
+    if (previousAchievement != achievements.first &&
+        user.total_CO2_saved >= previousAchievement.co2_threshold) {
+      // Store the completed achievement
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final firestoreService = ref.read(firestoreServiceProvider);
+        final hasAchievement = await firestoreService.hasUserAchievement(
+          user.uid,
+          previousAchievement.achievement_id,
+        );
+        if (!hasAchievement) {
+          await firestoreService.storeUserAchievement(
+            user.uid,
+            previousAchievement.achievement_id,
+          );
+          print(
+              'Achievement ${previousAchievement.name} stored for user ${user.uid}');
+        }
+      });
+    }
 
     print("Next achievement: ${nextAchievement.name}");
 

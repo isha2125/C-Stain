@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/components/duration_picker.dart';
 import 'package:cstain/components/loader.dart';
+import 'package:cstain/components/streak_service.dart';
 import 'package:cstain/models/categories_and_action.dart';
 import 'package:cstain/models/user_contribution.dart';
 import 'package:cstain/providers/providers.dart';
@@ -344,6 +345,7 @@ class _ActionDetailScreenState extends ConsumerState<ActionDetailScreen> {
                           '$action: ${selectedDuration.inMinutes} minutes, CO2 saved: ${(selectedDuration.inMinutes * co2SavingFactor).toStringAsFixed(2)}');
                       Navigator.pop(context);
                       widget.onNavigateBack();
+                      logUserAction();
                     } catch (e) {
                       print('Error adding user contribution: $e');
                     }
