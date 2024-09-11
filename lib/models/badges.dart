@@ -9,14 +9,14 @@ class BadgesModel {
   final String description;
   final double co2_threshold;
   final int time_period;
-  final Timestamp created_at;
+  final Timestamp? created_at;
   BadgesModel({
     required this.badge_id,
     required this.name,
     required this.description,
     required this.co2_threshold,
     required this.time_period,
-    required this.created_at,
+    this.created_at,
   });
 
   BadgesModel copyWith({
@@ -50,12 +50,12 @@ class BadgesModel {
 
   factory BadgesModel.fromMap(Map<String, dynamic> map) {
     return BadgesModel(
-      badge_id: map['badge_id'] as String,
-      name: map['name'] as String,
-      description: map['description'] as String,
-      co2_threshold: map['co2_threshold'] as double,
-      time_period: map['time_period'] as int,
-      created_at: map['created_at'] as Timestamp,
+      badge_id: map['badge_id'] as String? ?? '',
+      name: map['name'] as String? ?? '',
+      description: map['description'] as String? ?? '',
+      co2_threshold: (map['co2_threshold'] as num?)?.toDouble() ?? 0.0,
+      time_period: map['time_period'] as int? ?? 0,
+      created_at: map['created_at'] as Timestamp?,
     );
   }
 

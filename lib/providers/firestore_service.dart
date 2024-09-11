@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:cstain/models/achievements.dart';
+import 'package:cstain/models/badges.dart';
 import 'package:cstain/models/categories_and_action.dart';
 import 'package:cstain/models/user.dart';
 import 'package:cstain/models/user_achievement.dart';
+import 'package:cstain/models/user_badges.dart';
 import 'package:cstain/models/user_contribution.dart';
 
 class FirestoreService {
@@ -220,6 +222,7 @@ class FirestoreService {
         'streak_friday': weeklyStreak['Friday'],
         'streak_saturday': weeklyStreak['Saturday'],
       });
+      await checkAndAwardBadges(userId, currentStreak);
     } else {
       // If document doesn't exist, initialize the streak for the first action
       DateTime today = DateTime.now();
@@ -236,6 +239,7 @@ class FirestoreService {
         'streak_friday': todayDay == 'Friday',
         'streak_saturday': todayDay == 'Saturday',
       });
+      await checkAndAwardBadges(userId, 1);
     }
   }
 
@@ -279,5 +283,73 @@ class FirestoreService {
         .get();
 
     return querySnapshot.docs.isNotEmpty;
+  }
+
+  Future<List<BadgesModel>> fetchBadges() async {
+    try {
+      final snapshot =
+          await FirebaseFirestore.instance.collection('badges').get();
+      return snapshot.docs
+          .map((doc) => BadgesModel.fromMap(doc.data()))
+          .toList();
+    } catch (e) {
+      print('Error fetching badges: $e');
+      return [];
+    }
+  }
+
+  Future<bool> hasUserBadge(String userId, String badgeId) async {
+    final querySnapshot = await _firestore
+        .collection('user_badges')
+        .where('user_id', isEqualTo: userId)
+        .where('badge_id', isEqualTo: badgeId)
+        .limit(1)
+        .get();
+
+    return querySnapshot.docs.isNotEmpty;
+  }
+
+  Future<void> checkAndAwardBadges(String userId, int currentStreak) async {
+    try {
+      final badges = await fetchBadges();
+      final eligibleBadges =
+          badges.where((badge) => currentStreak >= badge.time_period).toList();
+
+      for (var badge in eligibleBadges) {
+        final checkUserHasBadge = await hasUserBadge(userId, badge.badge_id);
+        if (!checkUserHasBadge) {
+          await storeUserBadge(userId, badge.badge_id);
+          print(
+              'Awarded badge ${badge.name} to user $userId for $currentStreak day streak');
+        }
+      }
+    } catch (e) {
+      print('Error checking and awarding badges: $e');
+    }
+  }
+
+  Future<void> storeUserBadge(String userId, String badgeId) async {
+    try {
+      final userBadge = UserBadgesModel(
+        badge_id: badgeId,
+        earned_at: Timestamp.now(),
+        user_id: userId,
+      );
+
+      await _firestore.collection('user_badges').add(userBadge.toMap());
+      print('Badge stored successfully');
+    } catch (e) {
+      print('Error storing badge: $e');
+    }
+  }
+
+  Stream<List<UserBadgesModel>> getUserBadgesStream(String userId) {
+    return _firestore
+        .collection('user_badges')
+        .where('user_id', isEqualTo: userId)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => UserBadgesModel.fromMap(doc.data()))
+            .toList());
   }
 }

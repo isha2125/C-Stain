@@ -1,7 +1,9 @@
 //import 'package:cstain/backend/auth_gate.dart';
 import 'package:cstain/components/streak_service.dart';
 import 'package:cstain/models/achievements.dart';
+import 'package:cstain/models/badges.dart';
 import 'package:cstain/models/user.dart';
+import 'package:cstain/models/user_badges.dart';
 import 'package:cstain/providers/auth_service.dart';
 import 'package:cstain/providers/providers.dart';
 import 'package:flutter/material.dart';
@@ -42,6 +44,7 @@ class HomeScreen extends ConsumerWidget {
     final userStream = ref.watch(userStreamProvider);
     final achievements = ref.watch(achievementsProvider);
     print("Achievements state: ${achievements.toString()}");
+    final userBadges = ref.watch(userBadgesProvider);
     //final myUser = ref.watch(userProvider);
     //final co2Saved = ref.watch(co2SavedProvider);
     //final achievementProgress = ref.watch(achievementProgressProvider);
@@ -143,125 +146,11 @@ class HomeScreen extends ConsumerWidget {
                   // Streak Tracker for a Week
                   StreakWidget(),
 
-                  // Card(
-                  //   shape: RoundedRectangleBorder(
-                  //     borderRadius: BorderRadius.circular(16.0),
-                  //   ),
-                  //   elevation: 4,
-                  //   child: Padding(
-                  //     padding: const EdgeInsets.all(16.0),
-                  //     child: Column(
-                  //       crossAxisAlignment: CrossAxisAlignment.start,
-                  //       children: [
-                  //         Text(
-                  //           'Streak Tracker',
-                  //           style: TextStyle(
-                  //             fontSize: 18,
-                  //             fontWeight: FontWeight.bold,
-                  //           ),
-                  //         ),
-                  //         SizedBox(height: 10),
-                  //         Row(
-                  //           mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  //           children: List.generate(7, (index) {
-                  //             Color dayColor;
-                  //             IconData dayIcon;
-
-                  //             if (streak[index] == true) {
-                  //               dayColor = Colors.green;
-                  //               dayIcon = Icons.check;
-                  //             } else if (streak[index] == false) {
-                  //               dayColor = Colors.red;
-                  //               dayIcon = Icons.close;
-                  //             } else {
-                  //               dayColor = Colors.lightBlue;
-                  //               dayIcon = Icons.hourglass_empty;
-                  //             }
-
-                  //             return Column(
-                  //               children: [
-                  //                 Text(
-                  //                   [
-                  //                     'Mon',
-                  //                     'Tue',
-                  //                     'Wed',
-                  //                     'Thu',
-                  //                     'Fri',
-                  //                     'Sat',
-                  //                     'Sun'
-                  //                   ][index],
-                  //                   style: TextStyle(fontSize: 16),
-                  //                 ),
-                  //                 SizedBox(height: 5),
-                  //                 CircleAvatar(
-                  //                   radius: 20,
-                  //                   backgroundColor: dayColor,
-                  //                   child: Icon(
-                  //                     dayIcon,
-                  //                     color: Colors.white,
-                  //                   ),
-                  //                 ),
-                  //               ],
-                  //             );
-                  //           }),
-                  //         ),
-                  //       ],
-                  //     ),
-                  //   ),
-                  // ),
                   SizedBox(height: 20),
 
                   // Achievement Progress
                   _buildAchievementProgress(myUser, achievementsList, ref),
 
-                  // Card(
-                  //   shape: RoundedRectangleBorder(
-                  //     borderRadius: BorderRadius.circular(16.0),
-                  //   ),
-                  //   elevation: 4,
-                  //   child: Padding(
-                  //     padding: const EdgeInsets.all(16.0),
-                  //     child: Column(
-                  //       crossAxisAlignment: CrossAxisAlignment.center,
-                  //       children: [
-                  //         Text(
-                  //           'Achievement Progress',
-                  //           style: TextStyle(
-                  //             fontSize: 20,
-                  //             fontWeight: FontWeight.bold,
-                  //           ),
-                  //         ),
-                  //         SizedBox(height: 20),
-                  //         CircularPercentIndicator(
-                  //           radius: 100.0,
-                  //           lineWidth: 13.0,
-                  //           animation: true,
-                  //           percent: achievementProgress,
-                  //           center: Icon(
-                  //             Icons
-                  //                 .star, // Replace with the icon of the next achievement
-                  //             size: 50.0,
-                  //             color: Colors.red,
-                  //           ),
-                  //           circularStrokeCap: CircularStrokeCap.round,
-                  //           progressColor: Colors.green,
-                  //           backgroundColor: Colors.grey[300] ??
-                  //               Colors.grey, // Ensuring a non-nullable Color
-                  //           footer: Padding(
-                  //             padding: const EdgeInsets.only(top: 10.0),
-                  //             child: Text(
-                  //               'You are an Achiever!',
-                  //               style: TextStyle(
-                  //                 fontWeight: FontWeight.bold,
-                  //                 fontSize: 17.0,
-                  //               ),
-                  //             ),
-                  //           ),
-                  //         )
-                  //       ],
-                  //     ),
-                  //   ),
-                  // ),
                   SizedBox(height: 20),
 
                   // Tip of the Day
@@ -283,6 +172,12 @@ class HomeScreen extends ConsumerWidget {
                         style: TextStyle(fontSize: 16),
                       ),
                     ),
+                  ), // Badges List
+                  userBadges.when(
+                    data: (badges) => _buildBadgesList(badges),
+                    loading: () => CircularProgressIndicator(),
+                    error: (error, stack) =>
+                        Text('Error loading badges: $error'),
                   ),
                 ],
               ),
@@ -415,4 +310,39 @@ class HomeScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+Widget _buildBadgesList(List<UserBadgesModel> userBadges) {
+  return Card(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16.0),
+    ),
+    elevation: 4,
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Your Badges',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: userBadges
+                .map((badge) => Chip(
+                      label: Text(badge.badge_id),
+                      backgroundColor: Colors.green[100],
+                    ))
+                .toList(),
+          ),
+        ],
+      ),
+    ),
+  );
 }

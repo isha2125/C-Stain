@@ -20,32 +20,6 @@ List<DateTime> getCurrentWeekDates(DateTime today) {
   return weekDates;
 }
 
-// Define the streakProvider to get the current streak count
-// final streakProvider = StreamProvider<int>((ref) {
-//   final user = FirebaseAuth.instance.currentUser;
-
-//   if (user == null) {
-//     // Return a stream with 0 if no user is logged in
-//     return Stream.value(0);
-//   }
-
-//   final userId = user.uid;
-
-//   // Listen for real-time updates in Firestore
-//   return FirebaseFirestore.instance
-//       .collection('user')
-//       .doc(userId)
-//       .snapshots()
-//       .map((userDoc) {
-//     if (userDoc.exists) {
-//       final streak = userDoc.data()?['currentStreak'] ?? 0;
-//       return streak;
-//     } else {
-//       return 0;
-//     }
-//   });
-// });
-
 final weeklyStreakProvider = StreamProvider<Map<String, bool>>(
   (ref) {
     final user = FirebaseAuth.instance.currentUser;
