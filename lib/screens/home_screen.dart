@@ -174,7 +174,7 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ), // Badges List
                   userBadges.when(
-                    data: (badges) => _buildBadgesList(badges),
+                    data: (badges) => _buildBadgesList(badges, ref),
                     loading: () => CircularProgressIndicator(),
                     error: (error, stack) =>
                         Text('Error loading badges: $error'),
@@ -312,7 +312,8 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-Widget _buildBadgesList(List<UserBadgesModel> userBadges) {
+Widget _buildBadgesList(List<UserBadgesModel> userBadges, WidgetRef ref) {
+  final allBadges = ref.watch(badgesProvider);
   return Card(
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(16.0),
@@ -331,16 +332,56 @@ Widget _buildBadgesList(List<UserBadgesModel> userBadges) {
             ),
           ),
           SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: userBadges
-                .map((badge) => Chip(
-                      label: Text(badge.badge_id),
-                      backgroundColor: Colors.green[100],
-                    ))
-                .toList(),
-          ),
+          if (userBadges.isEmpty)
+            Text(
+              'Try to be consistent to earn a badge!',
+              style: TextStyle(
+                fontSize: 16,
+                fontStyle: FontStyle.italic,
+                color: Colors.grey[600],
+              ),
+            )
+          else
+            allBadges.when(
+              data: (badges) {
+                final badgeMap = {
+                  for (var badge in badges) badge.badge_id: badge
+                };
+                return Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: userBadges.map((userBadge) {
+                    final badge = badgeMap[userBadge.badge_id];
+                    return Tooltip(
+                      message: badge?.description ?? 'Unknown badge',
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                image: NetworkImage(badge?.badge_url ??
+                                    'https://placeholder.com/60x60'),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            badge?.name ?? 'Unknown',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                );
+              },
+              loading: () => CircularProgressIndicator(),
+              error: (error, stack) => Text('Error loading badges: $error'),
+            ),
         ],
       ),
     ),

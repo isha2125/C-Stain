@@ -9,6 +9,7 @@ class BadgesModel {
   final String description;
   final double co2_threshold;
   final int time_period;
+  final String badge_url;
   final Timestamp? created_at;
   BadgesModel({
     required this.badge_id,
@@ -16,6 +17,7 @@ class BadgesModel {
     required this.description,
     required this.co2_threshold,
     required this.time_period,
+    required this.badge_url,
     this.created_at,
   });
 
@@ -25,6 +27,7 @@ class BadgesModel {
     String? description,
     double? co2_threshold,
     int? time_period,
+    String? badge_url,
     Timestamp? created_at,
   }) {
     return BadgesModel(
@@ -33,6 +36,7 @@ class BadgesModel {
       description: description ?? this.description,
       co2_threshold: co2_threshold ?? this.co2_threshold,
       time_period: time_period ?? this.time_period,
+      badge_url: badge_url ?? this.badge_url,
       created_at: created_at ?? this.created_at,
     );
   }
@@ -44,19 +48,20 @@ class BadgesModel {
       'description': description,
       'co2_threshold': co2_threshold,
       'time_period': time_period,
+      'badge_url': badge_url,
       'created_at': created_at,
     };
   }
 
   factory BadgesModel.fromMap(Map<String, dynamic> map) {
     return BadgesModel(
-      badge_id: map['badge_id'] as String? ?? '',
-      name: map['name'] as String? ?? '',
-      description: map['description'] as String? ?? '',
-      co2_threshold: (map['co2_threshold'] as num?)?.toDouble() ?? 0.0,
-      time_period: map['time_period'] as int? ?? 0,
-      created_at: map['created_at'] as Timestamp?,
-    );
+        badge_id: map['badge_id'] as String? ?? '',
+        name: map['name'] as String? ?? '',
+        description: map['description'] as String? ?? '',
+        co2_threshold: (map['co2_threshold'] as num?)?.toDouble() ?? 0.0,
+        time_period: map['time_period'] as int? ?? 0,
+        badge_url: map['badge_url'] as String? ?? '',
+        created_at: map['created_at'] as Timestamp?);
   }
 
   String toJson() => json.encode(toMap());
@@ -66,7 +71,7 @@ class BadgesModel {
 
   @override
   String toString() {
-    return 'BadgesModel(badge_id: $badge_id, name: $name, description: $description, co2_threshold: $co2_threshold, time_period: $time_period, created_at: $created_at)';
+    return 'BadgesModel(badge_id: $badge_id, name: $name, description: $description, co2_threshold: $co2_threshold, time_period: $time_period, badge_url: $badge_url, created_at: $created_at)';
   }
 
   @override
@@ -78,6 +83,7 @@ class BadgesModel {
         other.description == description &&
         other.co2_threshold == co2_threshold &&
         other.time_period == time_period &&
+        other.badge_url == badge_url &&
         other.created_at == created_at;
   }
 
@@ -88,6 +94,7 @@ class BadgesModel {
         description.hashCode ^
         co2_threshold.hashCode ^
         time_period.hashCode ^
+        badge_url.hashCode ^
         created_at.hashCode;
   }
 }

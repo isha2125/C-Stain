@@ -311,6 +311,7 @@ class FirestoreService {
 
   Future<void> checkAndAwardBadges(String userId, int currentStreak) async {
     try {
+      print('are we here ?');
       final badges = await fetchBadges();
       final eligibleBadges =
           badges.where((badge) => currentStreak >= badge.time_period).toList();
