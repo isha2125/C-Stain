@@ -395,4 +395,32 @@ class FirestoreService {
       return null;
     }
   }
+
+  Stream<List<Map<String, dynamic>>> getUserAchievementsWithDetailsStream(
+      String userId) {
+    return _firestore
+        .collection('user_achievements')
+        .where('user_id', isEqualTo: userId)
+        .orderBy('earned_at', descending: true)
+        .snapshots()
+        .asyncMap((snapshot) async {
+      List<Map<String, dynamic>> achievementsWithDetails = [];
+      for (var doc in snapshot.docs) {
+        final userAchievement = UserAchievementsModel.fromMap(doc.data());
+        final achievementDoc = await _firestore
+            .collection('achievements')
+            .doc(userAchievement.achievement_id)
+            .get();
+        if (achievementDoc.exists) {
+          final achievement = AchievementsModel.fromMap(achievementDoc.data()!);
+          achievementsWithDetails.add({
+            ...userAchievement.toMap(),
+            'name': achievement.name,
+            'description': achievement.description,
+          });
+        }
+      }
+      return achievementsWithDetails;
+    });
+  }
 }

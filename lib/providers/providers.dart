@@ -55,3 +55,11 @@ final latestUserAchievementProvider =
   final firestoreService = ref.watch(firestoreServiceProvider);
   return firestoreService.fetchLatestUserAchievement(userId);
 });
+final userAchievementsWithDetailsProvider =
+    StreamProvider.autoDispose<List<Map<String, dynamic>>>((ref) {
+  final user = ref.watch(authStateProvider).value;
+  if (user == null) throw Exception('User not authenticated');
+  return ref
+      .watch(firestoreServiceProvider)
+      .getUserAchievementsWithDetailsStream(user.uid);
+});

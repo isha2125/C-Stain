@@ -9,6 +9,9 @@ class MYProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userStream = ref.watch(userStreamProvider);
     final userBadges = ref.watch(userBadgesProvider);
+    final userAchievementsStream =
+        ref.watch(userAchievementsWithDetailsProvider);
+
     int itemCount = 0;
     return Scaffold(
       appBar: AppBar(
@@ -232,8 +235,8 @@ class MYProfileScreen extends ConsumerWidget {
                               BorderRadius.circular(8), // Rounded edges
                         ),
                         height: double.infinity, // Make it fill the height
-                        margin: EdgeInsets.symmetric(
-                            horizontal: 20), // Adds space around the divider
+                        //margin: EdgeInsets.symmetric(
+                        //horizontal: 2), // Adds space around the divider
                       ),
                       // VerticalDivider(
                       //   color: Color.fromARGB(255, 146, 146, 146), // Changed to grey
@@ -241,41 +244,32 @@ class MYProfileScreen extends ConsumerWidget {
                       //   width: 20, // Space between columns
                       // ),
 
-                      latestAchievement.when(
-                        data: (achievement) => Column(
-                          children: [
-                            Text(
-                              'Latest Achievement',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                            if (achievement != null)
-                              FutureBuilder<AchievementsModel?>(
-                                future: ref
-                                    .read(firestoreServiceProvider)
-                                    .fetchAchievementById(
-                                        achievement.achievement_id),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return CircularProgressIndicator();
-                                  }
-                                  if (snapshot.hasData) {
-                                    return Text(
-                                      snapshot.data!.name,
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold),
-                                    );
-                                  }
-                                  return Text('No achievements yet');
-                                },
-                              )
-                            else
-                              Text('No achievements yet'),
-                          ],
-                        ),
+                      userAchievementsStream.when(
+                        data: (achievements) {
+                          final lastAchievement = achievements.isNotEmpty
+                              ? achievements.first
+                              : null;
+                          return Column(
+                            children: [
+                              Text(
+                                'Last Achievement',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                              Text(
+                                lastAchievement != null
+                                    ? lastAchievement[
+                                        'name'] // Now displaying the achievement name
+                                    : 'No achievements yet',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                         loading: () => CircularProgressIndicator(),
-                        error: (_, __) => Text('Error loading achievement'),
+                        error: (error, stack) => Text('Error: $error'),
                       ),
                     ],
                   ),
