@@ -79,9 +79,6 @@ class MYProfileScreen extends ConsumerWidget {
       ),
       body: userStream.when(
         data: (myUser) {
-          final latestAchievement =
-              ref.watch(latestUserAchievementProvider(myUser.uid));
-
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -250,10 +247,12 @@ class MYProfileScreen extends ConsumerWidget {
                               ? achievements.first
                               : null;
                           return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 'Last Achievement',
-                                style: TextStyle(color: Colors.grey),
+                                style:
+                                    TextStyle(color: Colors.grey, fontSize: 12),
                               ),
                               Text(
                                 lastAchievement != null
@@ -261,9 +260,12 @@ class MYProfileScreen extends ConsumerWidget {
                                         'name'] // Now displaying the achievement name
                                     : 'No achievements yet',
                                 style: TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 22,
                                   fontWeight: FontWeight.bold,
                                 ),
+                                softWrap: true, // Allows wrapping
+                                maxLines: 4, // Allows unlimited lines
+                                overflow: TextOverflow.visible,
                               ),
                             ],
                           );
