@@ -1,3 +1,5 @@
+import 'package:cstain/models/achievements.dart';
+import 'package:cstain/models/user_badges.dart';
 import 'package:cstain/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,72 +8,78 @@ class MYProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userStream = ref.watch(userStreamProvider);
+    final userBadges = ref.watch(userBadgesProvider);
+    int itemCount = 0;
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('User Profile'),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context),
-          ),
-          actions: [
-            PopupMenuButton<int>(
-              icon: Icon(Icons.more_vert), // Trailing menu icon
-              onSelected: (value) {
-                switch (value) {
-                  case 0:
-                    // Navigate to Settings
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => SettingsScreen()),
-                    );
-                    break;
-                  case 1:
-                    // Call Sign Out function
-                    _signOut(context);
-                    break;
-                  case 2:
-                    // Call Delete Account function
-                    _deleteAccount(context);
-                    break;
-                }
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 0,
-                  child: Row(
-                    children: [
-                      Icon(Icons.settings, color: Colors.black),
-                      SizedBox(width: 10),
-                      Text("Settings"),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 1,
-                  child: Row(
-                    children: [
-                      Icon(Icons.exit_to_app, color: Colors.black),
-                      SizedBox(width: 10),
-                      Text("Sign Out"),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 2,
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete_forever, color: Colors.red),
-                      SizedBox(width: 10),
-                      Text("Delete Account"),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
+      appBar: AppBar(
+        title: const Text('User Profile'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
         ),
-        body: userStream.when(
-          data: (myUser) => Padding(
+        actions: [
+          PopupMenuButton<int>(
+            icon: Icon(Icons.more_vert), // Trailing menu icon
+            onSelected: (value) {
+              switch (value) {
+                case 0:
+                  // Navigate to Settings
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SettingsScreen()),
+                  );
+                  break;
+                case 1:
+                  // Call Sign Out function
+                  _signOut(context);
+                  break;
+                case 2:
+                  // Call Delete Account function
+                  _deleteAccount(context);
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 0,
+                child: Row(
+                  children: [
+                    Icon(Icons.settings, color: Colors.black),
+                    SizedBox(width: 10),
+                    Text("Settings"),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 1,
+                child: Row(
+                  children: [
+                    Icon(Icons.exit_to_app, color: Colors.black),
+                    SizedBox(width: 10),
+                    Text("Sign Out"),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 2,
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_forever, color: Colors.red),
+                    SizedBox(width: 10),
+                    Text("Delete Account"),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      body: userStream.when(
+        data: (myUser) {
+          final latestAchievement =
+              ref.watch(latestUserAchievementProvider(myUser.uid));
+
+          return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
@@ -118,8 +126,8 @@ class MYProfileScreen extends ConsumerWidget {
                                       style: TextStyle(
                                         fontWeight: FontWeight
                                             .bold, // Bold style for the number
-                                        color:
-                                            Colors.green, // Your desired color
+                                        color: Color(
+                                            0xFF237155), // Your desired color
                                         fontSize:
                                             16, // Optional size adjustment
                                       ),
@@ -127,8 +135,8 @@ class MYProfileScreen extends ConsumerWidget {
                                     TextSpan(
                                       text: ' Followers', // The remaining text
                                       style: TextStyle(
-                                        color:
-                                            Colors.green, // Your desired color
+                                        color: Color(
+                                            0xFF237155), // Your desired color
                                         fontSize:
                                             16, // Optional size adjustment
                                       ),
@@ -145,8 +153,8 @@ class MYProfileScreen extends ConsumerWidget {
                                       style: TextStyle(
                                         fontWeight: FontWeight
                                             .bold, // Bold style for the number
-                                        color:
-                                            Colors.green, // Your desired color
+                                        color: Color(
+                                            0xFF237155), // Your desired color
                                         fontSize:
                                             16, // Optional size adjustment
                                       ),
@@ -154,8 +162,8 @@ class MYProfileScreen extends ConsumerWidget {
                                     TextSpan(
                                       text: ' Following', // The remaining text
                                       style: TextStyle(
-                                        color:
-                                            Colors.green, // Your desired color
+                                        color: Color(
+                                            0xFF237155), // Your desired color
                                         fontSize:
                                             16, // Optional size adjustment
                                       ),
@@ -181,13 +189,16 @@ class MYProfileScreen extends ConsumerWidget {
                   child: ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green, // Button color
+                      backgroundColor: Color(0xFF237155), // Button color
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
                       minimumSize: Size(double.infinity, 40),
                     ),
-                    child: const Text('Follow'),
+                    child: const Text(
+                      'Edit Profile',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ),
 
@@ -207,7 +218,9 @@ class MYProfileScreen extends ConsumerWidget {
                           Text(
                             '${myUser.total_CO2_saved.toStringAsFixed(2)} kg',
                             style: const TextStyle(
-                                fontSize: 22, fontWeight: FontWeight.bold),
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromARGB(255, 0, 0, 0)),
                           ),
                         ],
                       ),
@@ -227,18 +240,42 @@ class MYProfileScreen extends ConsumerWidget {
                       //   thickness: 2.0, // Adjust thickness as needed
                       //   width: 20, // Space between columns
                       // ),
-                      const Column(
-                        children: [
-                          Text(
-                            'Achievement',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                          Text(
-                            'Green Guardian',
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                        ],
+
+                      latestAchievement.when(
+                        data: (achievement) => Column(
+                          children: [
+                            Text(
+                              'Latest Achievement',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                            if (achievement != null)
+                              FutureBuilder<AchievementsModel?>(
+                                future: ref
+                                    .read(firestoreServiceProvider)
+                                    .fetchAchievementById(
+                                        achievement.achievement_id),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return CircularProgressIndicator();
+                                  }
+                                  if (snapshot.hasData) {
+                                    return Text(
+                                      snapshot.data!.name,
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold),
+                                    );
+                                  }
+                                  return Text('No achievements yet');
+                                },
+                              )
+                            else
+                              Text('No achievements yet'),
+                          ],
+                        ),
+                        loading: () => CircularProgressIndicator(),
+                        error: (_, __) => Text('Error loading achievement'),
                       ),
                     ],
                   ),
@@ -252,7 +289,7 @@ class MYProfileScreen extends ConsumerWidget {
                     child: Column(
                       children: [
                         TabBar(
-                          indicatorColor: Colors.green,
+                          indicatorColor: Color(0xFF237155),
                           labelColor: Colors.black,
                           tabs: [
                             Tab(text: 'Posts'),
@@ -263,21 +300,50 @@ class MYProfileScreen extends ConsumerWidget {
                           child: TabBarView(
                             children: [
                               // Posts Tab Content
-                              GridView.builder(
-                                gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 3,
-                                ),
-                                itemCount: 15, // For demo purposes
-                                itemBuilder: (context, index) {
-                                  return Container(
-                                    margin: EdgeInsets.all(4),
-                                    color: Colors.grey[200],
-                                  );
-                                },
-                              ),
+
+                              itemCount == 0
+                                  ? Center(
+                                      child: Text(
+                                        "No posts yet",
+                                        style: TextStyle(
+                                            fontSize: 18, color: Colors.grey),
+                                      ),
+                                    )
+                                  : GridView.builder(
+                                      gridDelegate:
+                                          SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 3,
+                                      ),
+                                      itemCount:
+                                          itemCount, // Placeholder item count or actual count
+                                      itemBuilder: (context, index) {
+                                        return Container(
+                                          margin: EdgeInsets.all(4),
+                                          color: Colors.grey[200],
+                                        );
+                                      },
+                                    ),
+
+                              // GridView.builder(
+                              //   gridDelegate:
+                              //       SliverGridDelegateWithFixedCrossAxisCount(
+                              //     crossAxisCount: 3,
+                              //   ),
+                              //   itemCount: 15, // For demo purposes
+                              //   itemBuilder: (context, index) {
+                              //     return Container(
+                              //       margin: EdgeInsets.all(4),
+                              //       color: Colors.grey[200],
+                              //     );
+                              //   },
+                              // ),
                               // Badges Tab Content
-                              Center(child: Text('Badges')),
+                              userBadges.when(
+                                data: (badges) => _buildBadgesList(badges, ref),
+                                loading: () => CircularProgressIndicator(),
+                                error: (error, stack) =>
+                                    Text('Error loading badges: $error'),
+                              ),
                             ],
                           ),
                         ),
@@ -287,14 +353,16 @@ class MYProfileScreen extends ConsumerWidget {
                 ),
               ],
             ),
-          ),
-          loading: () => Center(
-            child: CircularProgressIndicator(),
-          ),
-          error: (error, stack) => Center(
-            child: Text('Error: $error'),
-          ),
-        ));
+          );
+        },
+        loading: () => Center(
+          child: CircularProgressIndicator(),
+        ),
+        error: (error, stack) => Center(
+          child: Text('Error: $error'),
+        ),
+      ),
+    );
   }
 
   // Function to handle Sign Out
@@ -371,4 +439,71 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _buildBadgesList(List<UserBadgesModel> userBadges, WidgetRef ref) {
+  final allBadges = ref.watch(badgesProvider);
+  return Padding(
+    padding: const EdgeInsets.all(16.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (userBadges.isEmpty)
+          Center(
+            child: Text(
+              'Try to be consistent to earn a badge!',
+              style: TextStyle(
+                fontSize: 16,
+                fontStyle: FontStyle.italic,
+                color: Colors.grey[600],
+              ),
+            ),
+          )
+        else
+          allBadges.when(
+            data: (badges) {
+              final badgeMap = {
+                for (var badge in badges) badge.badge_id: badge
+              };
+              return Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: userBadges.map((userBadge) {
+                  final badge = badgeMap[userBadge.badge_id];
+                  return Tooltip(
+                    message: badge?.description ?? 'Unknown badge',
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              image: NetworkImage(
+                                badge?.badge_url ??
+                                    'https://placeholder.com/60x60',
+                              ),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          badge?.name ?? 'Unknown',
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              );
+            },
+            loading: () => CircularProgressIndicator(),
+            error: (error, stack) => Text('Error loading badges: $error'),
+          ),
+      ],
+    ),
+  );
 }

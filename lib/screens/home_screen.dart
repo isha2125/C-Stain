@@ -99,10 +99,12 @@ class HomeScreen extends ConsumerWidget {
                   // CO2 Saved Widget
                   Container(
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
+                      gradient: const LinearGradient(
                         colors: [
-                          Colors.greenAccent.shade400,
-                          Colors.green.shade800
+                          //Colors.green.shade800,
+                          Color.fromARGB(255, 60, 188, 141),
+                          Color(0xFF237155),
+                          //Colors.greenAccent.shade400,
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -153,7 +155,7 @@ class HomeScreen extends ConsumerWidget {
                   // Achievement Progress
                   _buildAchievementProgress(myUser, achievementsList, ref),
 
-                  SizedBox(height: 20),
+                  SizedBox(height: 10),
 
                   // Tip of the Day
                   Card(
@@ -276,10 +278,10 @@ class HomeScreen extends ConsumerWidget {
               center: Icon(
                 Icons.star,
                 size: 50.0,
-                color: Colors.red,
+                color: Color(0xFFE04034),
               ),
               circularStrokeCap: CircularStrokeCap.round,
-              progressColor: Colors.green,
+              progressColor: Color(0xFF237155),
               backgroundColor: Colors.grey[300] ?? Colors.grey,
               footer: Padding(
                 padding: const EdgeInsets.only(top: 10.0),
@@ -301,7 +303,7 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
             Text(
-              nextAchievement.description,
+              previousAchievement.description,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14.0,

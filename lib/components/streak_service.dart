@@ -174,7 +174,7 @@ class StreakWidget extends ConsumerWidget {
             Text(formattedDate), // Display the formatted date
             Icon(
               hasStreak ? Icons.check_circle : Icons.cancel,
-              color: hasStreak ? Colors.green : Colors.red,
+              color: hasStreak ? Color(0xFF237155) : const Color(0xFFE04034),
             ),
           ],
         );

@@ -361,4 +361,38 @@ class FirestoreService {
             .map((doc) => UserBadgesModel.fromMap(doc.data()))
             .toList());
   }
+
+  Future<UserAchievementsModel?> fetchLatestUserAchievement(
+      String userId) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('user_achievements')
+          .where('user_id', isEqualTo: userId)
+          .orderBy('earned_at', descending: true)
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        return UserAchievementsModel.fromMap(querySnapshot.docs.first.data());
+      }
+      return null;
+    } catch (e) {
+      print('Error fetching latest user achievement: $e');
+      return null;
+    }
+  }
+
+  Future<AchievementsModel?> fetchAchievementById(String achievementId) async {
+    try {
+      final doc =
+          await _firestore.collection('achievements').doc(achievementId).get();
+      if (doc.exists) {
+        return AchievementsModel.fromMap(doc.data()!);
+      }
+      return null;
+    } catch (e) {
+      print('Error fetching achievement by ID: $e');
+      return null;
+    }
+  }
 }

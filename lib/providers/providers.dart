@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/models/badges.dart';
 import 'package:cstain/models/categories_and_action.dart';
 import 'package:cstain/models/user.dart';
+import 'package:cstain/models/user_achievement.dart';
 import 'package:cstain/models/user_badges.dart';
 import 'package:cstain/models/user_contribution.dart';
 import 'package:cstain/providers/auth_service.dart';
@@ -45,4 +47,11 @@ final userBadgesProvider =
   final user = ref.watch(authStateProvider).value;
   if (user == null) throw Exception('User not authenticated');
   return ref.watch(firestoreServiceProvider).getUserBadgesStream(user.uid);
+});
+// In /lib/providers/providers.dart
+
+final latestUserAchievementProvider =
+    FutureProvider.family<UserAchievementsModel?, String>((ref, userId) async {
+  final firestoreService = ref.watch(firestoreServiceProvider);
+  return firestoreService.fetchLatestUserAchievement(userId);
 });
