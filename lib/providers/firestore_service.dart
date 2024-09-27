@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:cstain/models/achievements.dart';
 import 'package:cstain/models/badges.dart';
@@ -313,13 +315,18 @@ class FirestoreService {
     try {
       print('are we here ?');
       final badges = await fetchBadges();
+      print('Fetched badges: $badges');
       final eligibleBadges =
           badges.where((badge) => currentStreak >= badge.time_period).toList();
-
+      print('Eligible badges: $eligibleBadges');
       for (var badge in eligibleBadges) {
         final checkUserHasBadge = await hasUserBadge(userId, badge.badge_id);
+        print('User $userId has badge ${badge.badge_id}: $checkUserHasBadge');
+
         if (!checkUserHasBadge) {
           await storeUserBadge(userId, badge.badge_id);
+          print('Stored badge ${badge.badge_id} for user $userId');
+
           print(
               'Awarded badge ${badge.name} to user $userId for $currentStreak day streak');
         }
@@ -331,6 +338,7 @@ class FirestoreService {
 
   Future<void> storeUserBadge(String userId, String badgeId) async {
     try {
+      print('stroing user badges');
       final userBadge = UserBadgesModel(
         badge_id: badgeId,
         earned_at: Timestamp.now(),

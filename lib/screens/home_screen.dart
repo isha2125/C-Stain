@@ -6,10 +6,11 @@ import 'package:cstain/models/user.dart';
 import 'package:cstain/models/user_badges.dart';
 import 'package:cstain/providers/auth_service.dart';
 import 'package:cstain/providers/providers.dart';
+import 'package:cstain/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
-
+import 'profile_screen.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 final achievementsProvider =
@@ -59,27 +60,28 @@ class HomeScreen extends ConsumerWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute<ProfileScreen>(
-                    builder: (context) => ProfileScreen(
-                      appBar: AppBar(
-                        title: const Text('User Profile'),
-                      ),
-                      actions: [
-                        SignedOutAction((context) {
-                          Navigator.of(context).pop();
-                        })
-                      ],
-                      children: [
-                        const Divider(),
-                        Padding(
-                          padding: const EdgeInsets.all(2),
-                          child: AspectRatio(
-                            aspectRatio: 1,
-                            child: Image.asset('assets/Earth black 1.png'),
-                          ),
-                        ),
-                      ],
-                    ),
+                  MaterialPageRoute(
+                    builder: (context) => MYProfileScreen(),
+                    // builder: (context) => ProfileScreen(
+                    //   appBar: AppBar(
+                    //     title: const Text('User Profile'),
+                    //   ),
+                    //   actions: [
+                    //     SignedOutAction((context) {
+                    //       Navigator.of(context).pop();
+                    //     })
+                    //   ],
+                    //   children: [
+                    //     const Divider(),
+                    //     Padding(
+                    //       padding: const EdgeInsets.all(2),
+                    //       child: AspectRatio(
+                    //         aspectRatio: 1,
+                    //         child: Image.asset('assets/Earth black 1.png'),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
                   ),
                 );
               },

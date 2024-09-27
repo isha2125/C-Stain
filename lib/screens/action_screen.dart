@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/providers/providers.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +19,24 @@ class _ActionScreenState extends ConsumerState<ActionScreen> {
   void initState() {
     super.initState();
     _fetchTodayActions();
+    //countUserContributions();
   }
+
+  // Future<void> countUserContributions() async {
+  //   try {
+  //     // Run the count query
+  //     var res = await FirebaseFirestore.instance
+  //         .collection("user_contributions")
+  //         .count()
+  //         .get();
+
+  //     // Print the count
+  //     print('Document count HERE I AM : ${res.count}');
+  //   } catch (e) {
+  //     // Handle any errors
+  //     print('Error completing: $e');
+  //   }
+  // }
 
   Future<void> _fetchTodayActions() async {
     final myUser = ref.read(userProvider);
