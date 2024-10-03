@@ -13,29 +13,14 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'profile_screen.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
-final achievementsProvider =
-    FutureProvider<List<AchievementsModel>>((ref) async {
-  final firestoreService = ref.watch(firestoreServiceProvider);
-  final achievements = await firestoreService.fetchAchievements();
-  print("Fetched ${achievements.length} achievements");
-  return achievements;
-});
-final userStreamProvider = StreamProvider.autoDispose<UserModel>((ref) {
-  final user = ref.watch(authStateProvider).value;
-  if (user == null) throw Exception('User not authenticated');
-  return ref.watch(firestoreServiceProvider).getUserStream(user.uid);
-});
+// final userStreamProvider = StreamProvider.autoDispose<UserModel>((ref) {
+//   final user = ref.watch(authStateProvider).value;
+//   if (user == null) throw Exception('User not authenticated');
+//   return ref.watch(firestoreServiceProvider).getUserStream(user.uid);
+// });
 
-//final userProvider = StateProvider<User?>((ref) => User(full_name: "Aditya"));
-//final co2SavedProvider = StateProvider<double>((ref) => 100.0);
-final achievementProgressProvider = StateProvider<double>((ref) => 0.75);
 final tipOfTheDayProvider =
     StateProvider<String>((ref) => 'Save water, save life!');
-
-// class User {
-//   final String full_name;
-//   User({required this.full_name});
-// }
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -46,9 +31,6 @@ class HomeScreen extends ConsumerWidget {
     final achievements = ref.watch(achievementsProvider);
     print("Achievements state: ${achievements.toString()}");
     final userBadges = ref.watch(userBadgesProvider);
-    //final myUser = ref.watch(userProvider);
-    //final co2Saved = ref.watch(co2SavedProvider);
-    //final achievementProgress = ref.watch(achievementProgressProvider);
     final tipOfTheDay = ref.watch(tipOfTheDayProvider);
 
     return Scaffold(

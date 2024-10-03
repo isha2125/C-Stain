@@ -361,6 +361,268 @@ class MYProfileScreen extends ConsumerWidget {
     );
   }
 
+// import 'package:cstain/models/achievements.dart';
+// import 'package:cstain/models/user_badges.dart';
+// import 'package:cstain/providers/providers.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// class MYProfileScreen extends ConsumerWidget {
+//   final String profileUserId; // ID of the profile being viewed
+
+//   MYProfileScreen({Key? key, required this.profileUserId}) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context, WidgetRef ref) {
+//     final currentUser = ref.watch(currentUserProvider);
+//     final profileUserStream = ref.watch(userStreamProvider(profileUserId)); // Fetch the profile's data
+//     final userBadges = ref.watch(userBadgesProvider);
+//     final userAchievementsStream = ref.watch(userAchievementsWithDetailsProvider);
+
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text('User Profile'),
+//         leading: IconButton(
+//           icon: Icon(Icons.arrow_back),
+//           onPressed: () => Navigator.pop(context),
+//         ),
+//         actions: [
+//           if (profileUserId == currentUser?.uid) // Only show menu for the current user
+//             PopupMenuButton<int>(
+//               icon: Icon(Icons.more_vert),
+//               onSelected: (value) {
+//                 switch (value) {
+//                   case 0:
+//                     // Navigate to Settings
+//                     Navigator.push(
+//                       context,
+//                       MaterialPageRoute(builder: (context) => SettingsScreen()),
+//                     );
+//                     break;
+//                   case 1:
+//                     // Sign out
+//                     _signOut(context);
+//                     break;
+//                   case 2:
+//                     // Delete Account
+//                     _deleteAccount(context);
+//                     break;
+//                 }
+//               },
+//               itemBuilder: (context) => [
+//                 PopupMenuItem(
+//                   value: 0,
+//                   child: Row(
+//                     children: [
+//                       Icon(Icons.settings, color: Colors.black),
+//                       SizedBox(width: 10),
+//                       Text("Settings"),
+//                     ],
+//                   ),
+//                 ),
+//                 PopupMenuItem(
+//                   value: 1,
+//                   child: Row(
+//                     children: [
+//                       Icon(Icons.exit_to_app, color: Colors.black),
+//                       SizedBox(width: 10),
+//                       Text("Sign Out"),
+//                     ],
+//                   ),
+//                 ),
+//                 PopupMenuItem(
+//                   value: 2,
+//                   child: Row(
+//                     children: [
+//                       Icon(Icons.delete_forever, color: Colors.red),
+//                       SizedBox(width: 10),
+//                       Text("Delete Account"),
+//                     ],
+//                   ),
+//                 ),
+//               ],
+//             ),
+//         ],
+//       ),
+//       body: profileUserStream.when(
+//         data: (profileUser) {
+//           final isCurrentUser = profileUserId == currentUser?.uid;
+
+//           return Padding(
+//             padding: const EdgeInsets.all(16.0),
+//             child: Column(
+//               children: [
+//                 // Profile Header Section
+//                 Row(
+//                   children: [
+//                     CircleAvatar(
+//                       radius: 50,
+//                       backgroundImage: NetworkImage(profileUser.profile_picture_url),
+//                     ),
+//                     const SizedBox(width: 20),
+//                     Flexible(
+//                       child: Column(
+//                         crossAxisAlignment: CrossAxisAlignment.start,
+//                         children: [
+//                           Text(
+//                             profileUser.username,
+//                             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+//                           ),
+//                           const SizedBox(height: 10),
+//                           if (profileUser.bio.isNotEmpty)
+//                             Text(
+//                               profileUser.bio,
+//                               style: const TextStyle(fontSize: 14, color: Colors.grey),
+//                             ),
+//                           const SizedBox(height: 10),
+//                           Row(
+//                             children: [
+//                               Text(
+//                                 '200 Followers',
+//                                 style: TextStyle(color: Color(0xFF237155)),
+//                               ),
+//                               const SizedBox(width: 10),
+//                               Text(
+//                                 '200 Following',
+//                                 style: TextStyle(color: Color(0xFF237155)),
+//                               ),
+//                             ],
+//                           ),
+//                         ],
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//                 SizedBox(height: 20),
+
+//                 // Button (Edit Profile or Follow)
+//                 SizedBox(
+//                   width: MediaQuery.of(context).size.width,
+//                   child: ElevatedButton(
+//                     onPressed: () {
+//                       if (isCurrentUser) {
+//                         Navigator.push(
+//                           context,
+//                           MaterialPageRoute(
+//                             builder: (context) => EditProfileScreen(),
+//                           ),
+//                         );
+//                       } else {
+//                         _followUser(profileUserId); // Implement follow logic here
+//                       }
+//                     },
+//                     style: ElevatedButton.styleFrom(
+//                       backgroundColor: Color(0xFF237155),
+//                       shape: RoundedRectangleBorder(
+//                         borderRadius: BorderRadius.circular(30),
+//                       ),
+//                     ),
+//                     child: Text(
+//                       isCurrentUser ? 'Edit Profile' : 'Follow',
+//                       style: TextStyle(color: Colors.white),
+//                     ),
+//                   ),
+//                 ),
+
+//                 // CO2 Savings and Achievements Section
+//                 SizedBox(height: 20),
+//                 IntrinsicHeight(
+//                   child: Row(
+//                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//                     children: [
+//                       Column(
+//                         children: [
+//                           const Text(
+//                             'Total CO2 Saving',
+//                             style: TextStyle(color: Colors.grey),
+//                           ),
+//                           Text(
+//                             '${profileUser.total_CO2_saved.toStringAsFixed(2)} kg',
+//                             style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+//                           ),
+//                         ],
+//                       ),
+//                       Container(
+//                         width: 2,
+//                         color: Colors.grey,
+//                         height: double.infinity,
+//                       ),
+//                       userAchievementsStream.when(
+//                         data: (achievements) {
+//                           final lastAchievement = achievements.isNotEmpty ? achievements.first : null;
+//                           return Column(
+//                             crossAxisAlignment: CrossAxisAlignment.start,
+//                             children: [
+//                               Text('Last Achievement', style: TextStyle(color: Colors.grey)),
+//                               Text(
+//                                 lastAchievement?.name ?? 'No achievements yet',
+//                                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+//                               ),
+//                             ],
+//                           );
+//                         },
+//                         loading: () => CircularProgressIndicator(),
+//                         error: (error, stack) => Text('Error: $error'),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//                 SizedBox(height: 20),
+
+//                 // Tab Section for Posts and Badges
+//                 Expanded(
+//                   child: DefaultTabController(
+//                     length: 2,
+//                     child: Column(
+//                       children: [
+//                         TabBar(
+//                           indicatorColor: Color(0xFF237155),
+//                           labelColor: Colors.black,
+//                           tabs: [
+//                             Tab(text: 'Posts'),
+//                             Tab(text: 'Badges'),
+//                           ],
+//                         ),
+//                         Expanded(
+//                           child: TabBarView(
+//                             children: [
+//                               // Posts Tab Content
+//                               GridView.builder(
+//                                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+//                                   crossAxisCount: 3,
+//                                 ),
+//                                 itemCount: 9, // Replace with actual post count
+//                                 itemBuilder: (context, index) {
+//                                   return Container(
+//                                     margin: EdgeInsets.all(4),
+//                                     color: Colors.grey[200],
+//                                   );
+//                                 },
+//                               ),
+//                               // Badges Tab Content
+//                               userBadges.when(
+//                                 data: (badges) => _buildBadgesList(badges),
+//                                 loading: () => CircularProgressIndicator(),
+//                                 error: (error, stack) => Text('Error: $error'),
+//                               ),
+//                             ],
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           );
+//         },
+//         loading: () => Center(child: CircularProgressIndicator()),
+//         error: (error, stack) => Center(child: Text('Error: $error')),
+//       ),
+//     );
+//   }
+
+//******************************************************************************* */
   // Function to handle Sign Out
   void _signOut(BuildContext context) {
     showDialog(

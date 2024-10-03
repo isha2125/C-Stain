@@ -102,13 +102,15 @@ final streakProvider = StreamProvider<int>((ref) async* {
 });
 
 class StreakWidget extends ConsumerWidget {
+  const StreakWidget({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncStreak = ref.watch(streakProvider);
     final weeklyStreakAsync = ref.watch(weeklyStreakProvider);
 
-    DateTime today = DateTime.now();
-    List<DateTime> weekDates = getCurrentWeekDates(today);
+    //DateTime today = DateTime.now();
+    //List<DateTime> weekDates = getCurrentWeekDates(today);
 
     return Column(
       children: [
@@ -183,6 +185,55 @@ class StreakWidget extends ConsumerWidget {
   }
 }
 
+// Future<void> logUserAction() async {
+//   final user = FirebaseAuth.instance.currentUser;
+
+//   if (user == null) return;
+
+//   final userId = user.uid;
+//   final userDoc = FirebaseFirestore.instance.collection('user').doc(userId);
+
+//   final snapshot = await userDoc.get();
+
+//   if (snapshot.exists) {
+//     final data = snapshot.data();
+//     final currentStreak = data?['currentStreak'] ?? 0;
+//     final lastActionDateTimestamp = data?['lastActivityDate'] as Timestamp?;
+//     final lastActionDate = lastActionDateTimestamp?.toDate();
+
+//     DateTime today = DateTime.now();
+
+//     if (lastActionDate != null) {
+//       final differenceInDays = today.difference(lastActionDate).inDays;
+
+//       if (differenceInDays == 1) {
+//         // Continue the streak if the action was logged on the next day
+//         await userDoc.update({
+//           'currentStreak': currentStreak + 1,
+//           'lastActivityDate': today,
+//         });
+//       } else if (differenceInDays > 1) {
+//         // Reset the streak if more than 1 day has passed
+//         await userDoc.update({
+//           'currentStreak': 1, // Reset to 1 because the user is logging today
+//           'lastActivityDate': today,
+//         });
+//       }
+//     } else {
+//       // If no previous action exists, initialize the streak
+//       await userDoc.set({
+//         'currentStreak': 1,
+//         'lastActivityDate': today,
+//       });
+//     }
+//   } else {
+//     // Create the document for the user if it doesn't exist
+//     await userDoc.set({
+//       'currentStreak': 1,
+//       'lastActivityDate': DateTime.now(),
+//     });
+//   }
+// }
 Future<void> logUserAction() async {
   final user = FirebaseAuth.instance.currentUser;
 
@@ -192,14 +243,27 @@ Future<void> logUserAction() async {
   final userDoc = FirebaseFirestore.instance.collection('user').doc(userId);
 
   final snapshot = await userDoc.get();
-
+  DateTime today = DateTime.now();
   if (snapshot.exists) {
     final data = snapshot.data();
     final currentStreak = data?['currentStreak'] ?? 0;
     final lastActionDateTimestamp = data?['lastActivityDate'] as Timestamp?;
     final lastActionDate = lastActionDateTimestamp?.toDate();
 
-    DateTime today = DateTime.now();
+    // Define `today` as a `DateTime` object
+
+    // Check if today is Sunday and reset streak
+    if (today.weekday == DateTime.sunday) {
+      await userDoc.update({
+        'streak_sunday': false,
+        'streak_monday': false,
+        'streak_tuesday': false,
+        'streak_wednesday': false,
+        'streak_thursday': false,
+        'streak_friday': false,
+        'streak_saturday': false,
+      });
+    }
 
     if (lastActionDate != null) {
       final differenceInDays = today.difference(lastActionDate).inDays;
@@ -209,12 +273,14 @@ Future<void> logUserAction() async {
         await userDoc.update({
           'currentStreak': currentStreak + 1,
           'lastActivityDate': today,
+          'streak_${_getDayName(today.weekday)}': true, // Update today's streak
         });
       } else if (differenceInDays > 1) {
         // Reset the streak if more than 1 day has passed
         await userDoc.update({
           'currentStreak': 1, // Reset to 1 because the user is logging today
           'lastActivityDate': today,
+          'streak_${_getDayName(today.weekday)}': true,
         });
       }
     } else {
@@ -222,13 +288,37 @@ Future<void> logUserAction() async {
       await userDoc.set({
         'currentStreak': 1,
         'lastActivityDate': today,
+        'streak_${_getDayName(today.weekday)}': true,
       });
     }
   } else {
     // Create the document for the user if it doesn't exist
     await userDoc.set({
       'currentStreak': 1,
-      'lastActivityDate': DateTime.now(),
+      'lastActivityDate': today,
+      'streak_sunday': false,
+      'streak_monday': false,
+      'streak_tuesday': false,
+      'streak_wednesday': false,
+      'streak_thursday': false,
+      'streak_friday': false,
+      'streak_saturday': false,
+      'streak_${_getDayName(today.weekday)}': true,
     });
   }
+}
+
+// Helper method to map weekday number to string
+String _getDayName(int weekday) {
+  const days = [
+    'sunday',
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday'
+  ];
+  return days[
+      weekday - 1]; // `weekday` is 1 for Monday, so adjust index for Sunday
 }

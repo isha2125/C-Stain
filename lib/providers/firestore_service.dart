@@ -423,4 +423,15 @@ class FirestoreService {
       return achievementsWithDetails;
     });
   }
+
+  Stream<List<UserContributionModel>> getUserContributionsStream(
+      String userId) {
+    return FirebaseFirestore.instance
+        .collection('user_contributions')
+        .where('user_id', isEqualTo: userId)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => UserContributionModel.fromMap(doc.data()))
+            .toList());
+  }
 }

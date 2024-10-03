@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cstain/models/achievements.dart';
 import 'package:cstain/models/badges.dart';
 import 'package:cstain/models/categories_and_action.dart';
 import 'package:cstain/models/user.dart';
@@ -38,6 +39,7 @@ final userStreamProvider = StreamProvider.autoDispose<UserModel>((ref) {
   if (user == null) throw Exception('User not authenticated');
   return firestoreService.getUserStream(user.uid);
 });
+
 final badgesProvider = FutureProvider<List<BadgesModel>>((ref) async {
   final firestoreService = ref.watch(firestoreServiceProvider);
   return firestoreService.fetchBadges();
@@ -62,4 +64,21 @@ final userAchievementsWithDetailsProvider =
   return ref
       .watch(firestoreServiceProvider)
       .getUserAchievementsWithDetailsStream(user.uid);
+});
+
+final achievementsProvider =
+    FutureProvider<List<AchievementsModel>>((ref) async {
+  final firestoreService = ref.watch(firestoreServiceProvider);
+  final achievements = await firestoreService.fetchAchievements();
+  print("Fetched ${achievements.length} achievements");
+  return achievements;
+});
+final userContributionsStreamProvider =
+    StreamProvider<List<UserContributionModel>>((ref) {
+  final user = ref.watch(authStateProvider).value;
+  if (user == null) {
+    throw Exception('User not authenticated');
+  }
+  final firestoreService = ref.watch(firestoreServiceProvider);
+  return firestoreService.getUserContributionsStream(user.uid);
 });
