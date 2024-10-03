@@ -12,7 +12,7 @@ class MYProfileScreen extends ConsumerWidget {
     final userAchievementsStream =
         ref.watch(userAchievementsWithDetailsProvider);
 
-    int itemCount = 0;
+    int itemCount = 4;
     return Scaffold(
       appBar: AppBar(
         title: const Text('User Profile'),
