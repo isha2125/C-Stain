@@ -43,5 +43,5 @@ app.*.map.json
 /android/app/release
 
 
-lib/backend/dashboard/cstain firebase-adminsdk.json
+lib/backend/dashboard/cstain-firebase-adminsdk.json
 lib/backend/dashboard/myenv
