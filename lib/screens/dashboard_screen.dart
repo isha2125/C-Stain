@@ -1,266 +1,289 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cstain/providers/providers.dart';
-import 'package:cstain/models/user.dart';
-import 'package:cstain/models/user_contribution.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../providers/providers.dart';
+import '../models/user_contribution.dart';
+import '../components/loader.dart';
 import 'package:intl/intl.dart';
-import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 
-class DashboardScreen extends ConsumerWidget {
-  const DashboardScreen({Key? key}) : super(key: key);
+class DashboardScreen extends ConsumerStatefulWidget {
+  @override
+  _DashboardScreenState createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  DateTimeRange _dateRange = DateTimeRange(
+    start: DateTime.now().subtract(Duration(days: 30)),
+    end: DateTime.now(),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Dashboard'),
+        leading: Icon(Icons.dashboard), // Replaced Image with Icon
+        actions: [
+          IconButton(
+            icon: Icon(Icons.person),
+            onPressed: () {
+              Navigator.pushNamed(context, '/profile');
+            },
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Your Impact',
+                  style: Theme.of(context).textTheme.headlineSmall),
+              SizedBox(height: 20),
+              _buildDateRangePicker(),
+              SizedBox(height: 20),
+              SizedBox(
+                  height: 200,
+                  child: CO2SavedOverTimeChart(dateRange: _dateRange)),
+              SizedBox(height: 20),
+              SizedBox(
+                  height: 200,
+                  child: WeeklyProgressChart(dateRange: _dateRange)),
+              SizedBox(height: 20),
+              SizedBox(
+                  height: 200,
+                  child: MonthlyComparisonChart(dateRange: _dateRange)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateRangePicker() {
+    return Row(
+      children: [
+        Text('Date Range: '),
+        TextButton(
+          onPressed: () async {
+            final picked = await showDateRangePicker(
+              context: context,
+              firstDate: DateTime(2020),
+              lastDate: DateTime.now(),
+              initialDateRange: _dateRange,
+            );
+            if (picked != null) {
+              setState(() {
+                _dateRange = picked;
+              });
+            }
+          },
+          child: Text(
+              '${_dateRange.start.toString().substring(0, 10)} - ${_dateRange.end.toString().substring(0, 10)}'),
+        ),
+      ],
+    );
+  }
+}
+
+class CO2SavedOverTimeChart extends ConsumerWidget {
+  final DateTimeRange dateRange;
+
+  CO2SavedOverTimeChart({required this.dateRange});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userStream = ref.watch(userStreamProvider);
+    final contributionsAsyncValue =
+        ref.watch(filteredUserContributionsProvider(dateRange));
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: Image.asset('assets/Earth black 1.png'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute<ProfileScreen>(
-                  builder: (context) => ProfileScreen(
-                    appBar: AppBar(
-                      title: const Text('User Profile'),
-                    ),
-                    actions: [
-                      SignedOutAction((context) {
-                        Navigator.of(context).pop();
-                      })
-                    ],
-                    children: [
-                      const Divider(),
-                      Padding(
-                        padding: const EdgeInsets.all(2),
-                        child: AspectRatio(
-                          aspectRatio: 1,
-                          child: Image.asset('assets/Earth black 1.png'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          )
-        ],
-        automaticallyImplyLeading: false,
-      ),
-      body: userStream.when(
-        data: (user) => _buildDashboard(context, ref, user),
-        loading: () => Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Error: $error')),
-      ),
-    );
-  }
+    return contributionsAsyncValue.when(
+      loading: () => Loader(),
+      error: (error, stack) => Text('Error: $error'),
+      data: (contributions) {
+        if (contributions.isEmpty) {
+          return Center(
+              child: Text('No data available for the selected date range.'));
+        }
 
-  Widget _buildDashboard(BuildContext context, WidgetRef ref, UserModel user) {
-    final userContributions = ref.watch(userContributionsProvider(user.uid));
+        contributions
+            .sort((a, b) => a.createdAtDateTime.compareTo(b.createdAtDateTime));
 
-    return userContributions.when(
-      data: (contributions) => SingleChildScrollView(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildUserSummary(user),
-            SizedBox(height: 20),
-            _buildCO2SavedChart(contributions),
-            SizedBox(height: 20),
-            _buildRecentContributions(contributions),
-            SizedBox(height: 20),
-            _buildStreakInfo(user),
-          ],
-        ),
-      ),
-      loading: () => Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(child: Text('Error: $error')),
-    );
-  }
+        final cumulativeCO2Saved = <FlSpot>[];
+        double totalCO2Saved = 0;
 
-  Widget _buildUserSummary(UserModel user) {
-    return Card(
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Welcome, ${user.full_name}!',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            SizedBox(height: 8),
-            Text(
-                'Total CO2 Saved: ${user.total_CO2_saved.toStringAsFixed(2)} kg',
-                style: TextStyle(fontSize: 18)),
-            Text('Current Streak: ${user.currentStreak} days',
-                style: TextStyle(fontSize: 18)),
-          ],
-        ),
-      ),
-    );
-  }
+        for (var i = 0; i < contributions.length; i++) {
+          totalCO2Saved += contributions[i].co2_saved;
+          cumulativeCO2Saved.add(FlSpot(i.toDouble(), totalCO2Saved));
+        }
 
-  Widget _buildCO2SavedChart(List<UserContributionModel> contributions) {
-    // Group contributions by date and sum CO2 saved
-    final groupedData = groupContributionsByDate(contributions);
-    final sortedDates = groupedData.keys.toList()..sort();
+        final interval = contributions.length > 1
+            ? (contributions.length / 5).ceil().toDouble()
+            : 1.0;
 
-    return Card(
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('CO2 Saved Over Time',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            SizedBox(height: 16),
-            Container(
-              height: 200,
-              child: LineChart(
-                LineChartData(
-                  gridData: FlGridData(show: false),
-                  titlesData: FlTitlesData(
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 40,
-                        getTitlesWidget: (value, meta) {
-                          return Text('${value.toInt()} kg');
-                        },
-                      ),
-                    ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 22,
-                        getTitlesWidget: (value, meta) {
-                          final index = value.toInt();
-                          if (index >= 0 && index < sortedDates.length) {
-                            return Text(
-                                DateFormat('dd/MM').format(sortedDates[index]));
-                          }
-                          return Text('');
-                        },
-                      ),
-                    ),
-                  ),
-                  borderData: FlBorderData(show: true),
-                  minX: 0,
-                  maxX: sortedDates.length.toDouble() - 1,
-                  minY: 0,
-                  maxY: groupedData.values.reduce((a, b) => a > b ? a : b),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: sortedDates.asMap().entries.map((entry) {
-                        return FlSpot(
-                            entry.key.toDouble(), groupedData[entry.value]!);
-                      }).toList(),
-                      isCurved: true,
-                      color: Colors.green,
-                      barWidth: 3,
-                      isStrokeCapRound: true,
-                      dotData: FlDotData(show: false),
-                      belowBarData: BarAreaData(
-                          show: true, color: Colors.green.withOpacity(0.2)),
-                    ),
-                  ],
+        return LineChart(
+          LineChartData(
+            gridData: FlGridData(show: false),
+            titlesData: FlTitlesData(
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  getTitlesWidget: (value, meta) {
+                    final index = value.toInt();
+                    if (index >= 0 && index < contributions.length) {
+                      return Text(contributions[index]
+                          .createdAtDateTime
+                          .day
+                          .toString());
+                    }
+                    return Text('');
+                  },
+                  interval: interval,
                 ),
               ),
+              leftTitles: AxisTitles(
+                sideTitles: SideTitles(showTitles: true, reservedSize: 40),
+              ),
             ),
-          ],
-        ),
-      ),
+            borderData: FlBorderData(show: true),
+            minX: 0,
+            maxX: cumulativeCO2Saved.length.toDouble() - 1,
+            minY: 0,
+            maxY: cumulativeCO2Saved.last.y,
+            lineBarsData: [
+              LineChartBarData(
+                spots: cumulativeCO2Saved,
+                isCurved: true,
+                color: Theme.of(context).primaryColor,
+                barWidth: 3,
+                dotData: FlDotData(show: false),
+                belowBarData: BarAreaData(
+                    show: true,
+                    color: Theme.of(context).primaryColor.withOpacity(0.3)),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
+}
 
-  Map<DateTime, double> groupContributionsByDate(
-      List<UserContributionModel> contributions) {
-    final groupedData = <DateTime, double>{};
-    for (var contribution in contributions) {
-      final date = DateTime(
-        contribution.createdAtDateTime.year,
-        contribution.createdAtDateTime.month,
-        contribution.createdAtDateTime.day,
-      );
-      groupedData[date] = (groupedData[date] ?? 0) + contribution.co2_saved;
-    }
-    return groupedData;
-  }
+class WeeklyProgressChart extends ConsumerWidget {
+  final DateTimeRange dateRange;
 
-  Widget _buildRecentContributions(List<UserContributionModel> contributions) {
-    final recentContributions = contributions.take(5).toList();
+  WeeklyProgressChart({required this.dateRange});
 
-    return Card(
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Recent Contributions',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            SizedBox(height: 8),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: recentContributions.length,
-              itemBuilder: (context, index) {
-                final contribution = recentContributions[index];
-                return ListTile(
-                  title: Text(contribution.action),
-                  subtitle: Text(
-                      '${contribution.co2_saved.toStringAsFixed(2)} kg CO2 saved'),
-                  trailing: Text(DateFormat('dd/MM/yyyy')
-                      .format(contribution.createdAtDateTime)),
-                );
-              },
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final weeklyDataAsyncValue = ref.watch(weeklyDataProvider(dateRange));
+
+    return weeklyDataAsyncValue.when(
+      loading: () => Loader(),
+      error: (error, stack) => Text('Error: $error'),
+      data: (weeklyData) {
+        if (weeklyData.isEmpty) {
+          return Center(
+              child: Text(
+                  'No weekly data available for the selected date range.'));
+        }
+
+        return BarChart(
+          BarChartData(
+            alignment: BarChartAlignment.spaceAround,
+            maxY: weeklyData.values.reduce((a, b) => a > b ? a : b),
+            barTouchData: BarTouchData(enabled: false),
+            titlesData: FlTitlesData(
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  getTitlesWidget: (value, meta) =>
+                      Text('Week ${value.toInt() + 1}'),
+                ),
+              ),
+              leftTitles: AxisTitles(
+                sideTitles: SideTitles(showTitles: true, reservedSize: 40),
+              ),
             ),
-          ],
-        ),
-      ),
+            borderData: FlBorderData(show: false),
+            barGroups: weeklyData.entries.map((entry) {
+              return BarChartGroupData(
+                x: entry.key,
+                barRods: [
+                  BarChartRodData(
+                    toY: entry.value,
+                    color: Theme.of(context).primaryColor,
+                    width: 16,
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+        );
+      },
     );
   }
+}
 
-  Widget _buildStreakInfo(UserModel user) {
-    return Card(
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Weekly Streak',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildStreakDay('Sun', user.streak_sunday),
-                _buildStreakDay('Mon', user.streak_monday),
-                _buildStreakDay('Tue', user.streak_tuesday),
-                _buildStreakDay('Wed', user.streak_wednesday),
-                _buildStreakDay('Thu', user.streak_thursday),
-                _buildStreakDay('Fri', user.streak_friday),
-                _buildStreakDay('Sat', user.streak_saturday),
-              ],
+class MonthlyComparisonChart extends ConsumerWidget {
+  final DateTimeRange dateRange;
+
+  MonthlyComparisonChart({required this.dateRange});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final monthlyDataAsyncValue = ref.watch(monthlyDataProvider(dateRange));
+
+    return monthlyDataAsyncValue.when(
+      loading: () => Loader(),
+      error: (error, stack) => Text('Error: $error'),
+      data: (monthlyData) {
+        if (monthlyData.isEmpty) {
+          return Center(
+              child: Text(
+                  'No monthly data available for the selected date range.'));
+        }
+
+        return LineChart(
+          LineChartData(
+            gridData: FlGridData(show: false),
+            titlesData: FlTitlesData(
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  getTitlesWidget: (value, meta) {
+                    final month = DateTime(dateRange.start.year,
+                        dateRange.start.month + value.toInt(), 1);
+                    return Text(DateFormat.MMM().format(month));
+                  },
+                ),
+              ),
+              leftTitles: AxisTitles(
+                sideTitles: SideTitles(showTitles: true, reservedSize: 40),
+              ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStreakDay(String day, bool isActive) {
-    return Column(
-      children: [
-        Text(day),
-        Icon(
-          isActive ? Icons.check_circle : Icons.circle_outlined,
-          color: isActive ? Colors.green : Colors.grey,
-        ),
-      ],
+            borderData: FlBorderData(show: true),
+            minX: 0,
+            maxX: monthlyData.length.toDouble() - 1,
+            minY: 0,
+            maxY: monthlyData.values.reduce((a, b) => a > b ? a : b),
+            lineBarsData: [
+              LineChartBarData(
+                spots: monthlyData.entries
+                    .map((entry) => FlSpot(entry.key.toDouble(), entry.value))
+                    .toList(),
+                isCurved: true,
+                color: Theme.of(context).primaryColor,
+                barWidth: 3,
+                dotData: FlDotData(show: true),
+                belowBarData: BarAreaData(
+                    show: true,
+                    color: Theme.of(context).primaryColor.withOpacity(0.3)),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

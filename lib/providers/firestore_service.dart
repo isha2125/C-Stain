@@ -434,4 +434,15 @@ class FirestoreService {
             .map((doc) => UserContributionModel.fromMap(doc.data()))
             .toList());
   }
+
+  Future<List<UserContributionModel>> getUserContributions(String uid) async {
+    final querySnapshot = await _firestore
+        .collection('user_contributions')
+        .where('user_id', isEqualTo: uid)
+        .get();
+
+    return querySnapshot.docs
+        .map((doc) => UserContributionModel.fromMap(doc.data()))
+        .toList();
+  }
 }

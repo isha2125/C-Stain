@@ -40,32 +40,22 @@ class HomeScreen extends ConsumerWidget {
             IconButton(
               icon: const Icon(Icons.person),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MYProfileScreen(),
-                    // builder: (context) => ProfileScreen(
-                    //   appBar: AppBar(
-                    //     title: const Text('User Profile'),
-                    //   ),
-                    //   actions: [
-                    //     SignedOutAction((context) {
-                    //       Navigator.of(context).pop();
-                    //     })
-                    //   ],
-                    //   children: [
-                    //     const Divider(),
-                    //     Padding(
-                    //       padding: const EdgeInsets.all(2),
-                    //       child: AspectRatio(
-                    //         aspectRatio: 1,
-                    //         child: Image.asset('assets/Earth black 1.png'),
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
-                  ),
-                );
+                final authState = ref.read(authStateProvider);
+                final userId = authState.value?.uid;
+                if (userId != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          MYProfileScreen(profileUserId: userId),
+                    ),
+                  );
+                } else {
+                  // Handle the case where there's no authenticated user
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('No user logged in')),
+                  );
+                }
               },
             )
           ],
