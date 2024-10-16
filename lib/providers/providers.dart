@@ -137,6 +137,75 @@ final monthlyDataProvider =
   return monthlyData;
 });
 
+final monthlyContributionsProvider =
+    FutureProvider.family<List<Map<String, dynamic>>, DateTimeRange>(
+        (ref, dateRange) async {
+  final user = ref.watch(authStateProvider).value;
+  if (user == null) throw Exception('User not authenticated');
+
+  final firestoreService = ref.watch(firestoreServiceProvider);
+
+  // Fetch user contributions for the given date range
+  final contributions = await firestoreService.getUserContributions(user.uid);
+
+  // Aggregate contributions by category
+  final monthlyDataMap =
+      <String, double>{}; // Key: Category, Value: Total CO2 Saved
+
+  for (var contribution in contributions) {
+    if (contribution.createdAtDateTime.isAfter(dateRange.start) &&
+        contribution.createdAtDateTime
+            .isBefore(dateRange.end.add(Duration(days: 1)))) {
+      monthlyDataMap[contribution.category] =
+          (monthlyDataMap[contribution.category] ?? 0) + contribution.co2_saved;
+    }
+  }
+
+  // Convert the map to a list of maps for easier consumption
+  return monthlyDataMap.entries.map((entry) {
+    return {
+      'categoryName': entry.key,
+      'totalCO2Saved': entry.value,
+    };
+  }).toList();
+});
+
+final top5ActionsProvider =
+    FutureProvider.family<List<Map<String, dynamic>>, DateTimeRange>(
+        (ref, dateRange) async {
+  final user = ref.watch(authStateProvider).value;
+  if (user == null) throw Exception('User not authenticated');
+
+  final firestoreService = ref.watch(firestoreServiceProvider);
+
+  // Fetch user contributions for the given date range
+  final contributions = await firestoreService.getUserContributions(user.uid);
+
+  // Aggregate contributions by action
+  final actionMap = <String, double>{}; // Key: Action, Value: Total CO2 Saved
+
+  for (var contribution in contributions) {
+    if (contribution.createdAtDateTime.isAfter(dateRange.start) &&
+        contribution.createdAtDateTime
+            .isBefore(dateRange.end.add(Duration(days: 1)))) {
+      actionMap[contribution.action] =
+          (actionMap[contribution.action] ?? 0) + contribution.co2_saved;
+    }
+  }
+
+  // Sort and get the top 5 actions
+  final topActions = actionMap.entries.toList()
+    ..sort((a, b) => b.value.compareTo(a.value)); // Sort by total CO2 saved
+
+  return topActions.take(5).map((entry) {
+    return {
+      'action': entry.key,
+      'totalCO2Saved': entry.value,
+    };
+  }).toList();
+});
+
+
 // In /lib/providers/providers.dart
 
 // final co2SavedOverTimeProvider =

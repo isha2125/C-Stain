@@ -362,9 +362,214 @@
 //   }
 // }
 
+// import 'package:flutter/material.dart';
+// import 'package:image_picker/image_picker.dart';
+// import 'package:permission_handler/permission_handler.dart';
+
+// class CommunityScreen extends StatefulWidget {
+//   @override
+//   _CommunityScreenState createState() => _CommunityScreenState();
+// }
+
+// class _CommunityScreenState extends State<CommunityScreen> {
+//   bool showTextField = false; // To toggle the TextField visibility
+//   final TextEditingController _controller = TextEditingController();
+
+//   // Image Picker instance
+//   final ImagePicker _picker = ImagePicker();
+
+//   // Function to pick an image
+//   Future<void> pickImage() async {
+//     // Request permission to access gallery
+//     if (await Permission.photos.request().isGranted) {
+//       // Pick image
+//       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+//       if (image != null) {
+//         print('Image selected: ${image.path}');
+//       }
+//     } else {
+//       print('Permission denied to access gallery');
+//     }
+//   }
+
+//   // Function to pick a video
+//   Future<void> pickVideo() async {
+//     // Request permission to access gallery
+//     if (await Permission.videos.request().isGranted) {
+//       // Pick video
+//       final XFile? video = await _picker.pickVideo(source: ImageSource.gallery);
+//       if (video != null) {
+//         print('Video selected: ${video.path}');
+//       }
+//     } else {
+//       print('Permission denied to access gallery');
+//     }
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: Colors.green[100],
+//       appBar: AppBar(
+//         title: Text('Carbon-Saving Wins'),
+//       ),
+//       body: Padding(
+//         padding: const EdgeInsets.all(16.0),
+//         child: Column(
+//           children: <Widget>[
+//             // Show/hide TextField when 'Text' is clicked
+//             if (showTextField)
+//               TextField(
+//                 controller: _controller,
+//                 decoration: InputDecoration(
+//                   labelText: "What's your carbon-saving win today?",
+//                   border: OutlineInputBorder(),
+//                 ),
+//               ),
+//             SizedBox(height: 20),
+//             Row(
+//               mainAxisAlignment: MainAxisAlignment.spaceAround,
+//               children: [
+//                 // Text Button
+//                 ElevatedButton(
+//                   onPressed: () {
+//                     setState(() {
+//                       showTextField =!showTextField;
+// //Toggle TextField visibility
+//                     });
+//                   },
+//                   child: Text('Text'),
+//                 ),
+//                 // Photos Button
+//                 ElevatedButton(
+//                   onPressed: () {
+//                     pickImage(); // Pick image from gallery
+//                   },
+//                   child: Text('Photos'),
+//                 ),
+//                 // Videos Button
+//                 ElevatedButton(
+//                   onPressed: () {
+//                     pickVideo(); // Pick video from gallery
+//                   },
+//                   child: Text('Videos'),
+//                 ),
+//               ],
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+//*************************************************************** */
+// import 'package:flutter/material.dart';
+// import 'package:image_picker/image_picker.dart';
+// import 'package:permission_handler/permission_handler.dart';
+
+// class CommunityScreen extends StatefulWidget {
+//   @override
+//   _CommunityScreenState createState() => _CommunityScreenState();
+// }
+
+// class _CommunityScreenState extends State<CommunityScreen> {
+//   // FocusNode to control focus on the TextField
+//   final FocusNode _focusNode = FocusNode();
+//   final TextEditingController _controller = TextEditingController();
+
+//   // Image Picker instance
+//   final ImagePicker _picker = ImagePicker();
+
+//   // Function to pick an image
+//   Future<void> pickImage() async {
+//     // Request permission to access gallery
+//     if (await Permission.photos.request().isGranted) {
+//       // Pick image
+//       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+//       if (image != null) {
+//         print('Image selected: ${image.path}');
+//       }
+//     } else {
+//       print('Permission denied to access gallery');
+//     }
+//   }
+
+//   // Function to pick a video
+//   Future<void> pickVideo() async {
+//     // Request permission to access gallery
+//     if (await Permission.videos.request().isGranted) {
+//       // Pick video
+//       final XFile? video = await _picker.pickVideo(source: ImageSource.gallery);
+//       if (video != null) {
+//         print('Video selected: ${video.path}');
+//       }
+//     } else {
+//       print('Permission denied to access gallery');
+//     }
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: Colors.green[100],
+//       appBar: AppBar(
+//         title: Text('Carbon-Saving Wins'),
+//       ),
+//       body: Padding(
+//         padding: const EdgeInsets.all(16.0),
+//         child: Column(
+//           children: <Widget>[
+//             // TextField is always visible
+//             TextField(
+//               controller: _controller,
+//               focusNode: _focusNode,
+//               decoration: InputDecoration(
+//                 labelText: "What's your carbon-saving win today?",
+//                 border: OutlineInputBorder(),
+//               ),
+//             ),
+//             SizedBox(height: 20),
+//             Row(
+//               mainAxisAlignment: MainAxisAlignment.spaceAround,
+//               children: [
+//                 // Text Button
+//                 ElevatedButton(
+//                   onPressed: () {
+//                     _focusNode
+//                         .requestFocus(); // Focus the TextField when the button is pressed
+//                   },
+//                   child: Text('Text'),
+//                 ),
+//                 // Photos Button
+//                 ElevatedButton(
+//                   onPressed: () {
+//                     pickImage(); // Pick image from gallery
+//                   },
+//                   child: Text('Photos'),
+//                 ),
+//                 // Videos Button
+//                 ElevatedButton(
+//                   onPressed: () {
+//                     pickVideo(); // Pick video from gallery
+//                   },
+//                   child: Text('Videos'),
+//                 ),
+//               ],
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+//*************************************************************** */
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:io';
 
 class CommunityScreen extends StatefulWidget {
   @override
@@ -372,20 +577,22 @@ class CommunityScreen extends StatefulWidget {
 }
 
 class _CommunityScreenState extends State<CommunityScreen> {
-  bool showTextField = false; // To toggle the TextField visibility
   final TextEditingController _controller = TextEditingController();
-
-  // Image Picker instance
+  final TextEditingController _titleController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
+  File? _selectedMedia;
+  String? _mediaType; // Either 'image' or 'video'
+  bool _isUploading = false;
 
   // Function to pick an image
   Future<void> pickImage() async {
-    // Request permission to access gallery
     if (await Permission.photos.request().isGranted) {
-      // Pick image
       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
       if (image != null) {
-        print('Image selected: ${image.path}');
+        setState(() {
+          _selectedMedia = File(image.path);
+          _mediaType = 'image';
+        });
       }
     } else {
       print('Permission denied to access gallery');
@@ -394,15 +601,119 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
   // Function to pick a video
   Future<void> pickVideo() async {
-    // Request permission to access gallery
     if (await Permission.videos.request().isGranted) {
-      // Pick video
       final XFile? video = await _picker.pickVideo(source: ImageSource.gallery);
       if (video != null) {
-        print('Video selected: ${video.path}');
+        setState(() {
+          _selectedMedia = File(video.path);
+          _mediaType = 'video';
+        });
       }
     } else {
       print('Permission denied to access gallery');
+    }
+  }
+
+  // Function to upload media to Firebase Storage
+  Future<String?> uploadMediaToStorage(File file, String mediaType) async {
+    setState(() {
+      _isUploading = true;
+    });
+    try {
+      String fileName = '${DateTime.now().millisecondsSinceEpoch}.$mediaType';
+      Reference storageReference =
+          FirebaseStorage.instance.ref().child('community/$fileName');
+      UploadTask uploadTask = storageReference.putFile(file);
+      await uploadTask.whenComplete(() {});
+      String downloadUrl = await storageReference.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      print('Error uploading media: $e');
+      return null;
+    } finally {
+      setState(() {
+        _isUploading = false;
+      });
+    }
+  }
+
+  // Function to save post data to Firestore
+  Future<void> savePost(String mediaUrl) async {
+    await FirebaseFirestore.instance.collection('posts').add({
+      'body': _controller.text,
+      'title': _titleController.text,
+      'created_at': Timestamp.now(),
+      'posted_user_id': 'saviour123', // Replace with the actual user ID
+      'status': 'posted',
+      'media_url': mediaUrl,
+      'media_type': _mediaType,
+      'visibility': 'public',
+    });
+    // Clear fields after posting
+    setState(() {
+      _selectedMedia = null;
+      _controller.clear();
+      _titleController.clear();
+    });
+  }
+
+  // Show a preview of the media and input title before posting
+  void showPreview() async {
+    if (_selectedMedia != null) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Preview Your Post'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Show media preview
+              _mediaType == 'image'
+                  ? Image.file(_selectedMedia!)
+                  : Container(
+                      height: 200,
+                      child: Center(
+                        child: Text('Video selected: ${_selectedMedia!.path}'),
+                      ),
+                    ),
+              SizedBox(height: 10),
+              // Input field for title
+              TextField(
+                controller: _titleController,
+                decoration: InputDecoration(
+                  labelText: 'Your Post Title',
+                ),
+              ),
+              SizedBox(height: 10),
+              // Loading indicator during upload
+              if (_isUploading) CircularProgressIndicator(),
+            ],
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () async {
+                // Upload media and save post
+                if (_selectedMedia != null &&
+                    _titleController.text.isNotEmpty) {
+                  String? mediaUrl =
+                      await uploadMediaToStorage(_selectedMedia!, _mediaType!);
+                  if (mediaUrl != null) {
+                    await savePost(mediaUrl);
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Post uploaded successfully!')));
+                  }
+                }
+              },
+              child: Text('Post'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel'),
+            ),
+          ],
+        ),
+      );
     }
   }
 
@@ -417,45 +728,33 @@ class _CommunityScreenState extends State<CommunityScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: <Widget>[
-            // Show/hide TextField when 'Text' is clicked
-            if (showTextField)
-              TextField(
-                controller: _controller,
-                decoration: InputDecoration(
-                  labelText: "What's your carbon-saving win today?",
-                  border: OutlineInputBorder(),
-                ),
+            TextField(
+              controller: _controller,
+              decoration: InputDecoration(
+                labelText: "What's your carbon-saving win today?",
+                border: OutlineInputBorder(),
               ),
+            ),
             SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                // Text Button
                 ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      showTextField =
-                          !showTextField; // Toggle TextField visibility
-                    });
-                  },
-                  child: Text('Text'),
-                ),
-                // Photos Button
-                ElevatedButton(
-                  onPressed: () {
-                    pickImage(); // Pick image from gallery
-                  },
+                  onPressed: pickImage,
                   child: Text('Photos'),
                 ),
-                // Videos Button
                 ElevatedButton(
-                  onPressed: () {
-                    pickVideo(); // Pick video from gallery
-                  },
+                  onPressed: pickVideo,
                   child: Text('Videos'),
                 ),
               ],
             ),
+            SizedBox(height: 20),
+            if (_selectedMedia != null)
+              TextButton(
+                onPressed: showPreview,
+                child: Text('Preview Post'),
+              ),
           ],
         ),
       ),

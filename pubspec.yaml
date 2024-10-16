@@ -50,6 +50,8 @@ dependencies:
   fl_chart: ^0.69.0
   image_picker: ^1.1.2
   permission_handler: ^11.3.1
+  firebase_storage: ^12.3.3
+  tuple: ^2.0.2
 
 dev_dependencies:
   flutter_test:
