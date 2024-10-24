@@ -52,6 +52,10 @@ dependencies:
   permission_handler: ^11.3.1
   firebase_storage: ^12.3.3
   tuple: ^2.0.2
+  video_player: ^2.9.2
+  share_plus: ^10.1.0
+  firebase_dynamic_links: ^6.0.8
+  timeago: ^3.7.0
 
 dev_dependencies:
   flutter_test:
