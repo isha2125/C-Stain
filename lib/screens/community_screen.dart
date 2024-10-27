@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/models/comments.dart';
 import 'package:cstain/models/post.dart';
 import 'package:cstain/providers/providers.dart';
+import 'package:cstain/screens/profile_screen.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
@@ -12,24 +13,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 import 'package:timeago/timeago.dart' as timeago;
-
-// final postsProvider = StreamProvider<List<PostModel>>((ref) {
-//   print('Fetching posts from Firestore...'); // Print to check the function call
-//   return FirebaseFirestore.instance
-//       .collection('posts')
-//       .where('visibility', isEqualTo: 'public')
-//       .orderBy('created_at', descending: true) // Order by creation time
-//       .snapshots()
-//       .map((snapshot) {
-//     print(
-//         'Documents fetched: ${snapshot.docs.length}'); // Check if documents are fetched
-//     final posts = snapshot.docs
-//         .map((doc) => PostModel.fromMap(doc.data() as Map<String, dynamic>))
-//         .toList();
-//     print('Posts fetched: $posts'); // Add this line for debugging
-//     return posts;
-//   });
-// });
 
 final postsProvider = StreamProvider<List<PostModel>>((ref) {
   print('Fetching posts from Firestore...'); // Print to check the function call
@@ -457,14 +440,25 @@ class PostCard extends ConsumerWidget {
                     children: [
                       Row(
                         children: [
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundImage: profileImageUrl != null
-                                ? NetworkImage(profileImageUrl)
-                                : null,
-                            child: profileImageUrl == null
-                                ? Icon(Icons.person)
-                                : null,
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MYProfileScreen(
+                                      profileUserId: post.posted_user_id),
+                                ),
+                              );
+                            },
+                            child: CircleAvatar(
+                              radius: 20,
+                              backgroundImage: profileImageUrl != null
+                                  ? NetworkImage(profileImageUrl)
+                                  : null,
+                              child: profileImageUrl == null
+                                  ? Icon(Icons.person)
+                                  : null,
+                            ),
                           ),
                           const SizedBox(width: 10),
                           Container(
@@ -844,3 +838,13 @@ class CommentSection extends ConsumerWidget {
     );
   }
 }
+
+// Future<void> _navigateToUserProfile(BuildContext context, String userId) async {
+//   // Navigate to the user's profile page
+//   Navigator.push(
+//     context,
+//     MaterialPageRoute(
+//       builder: (context) => MYProfileScreen(profileUserId: userId),
+//     ),
+//   );
+// }
