@@ -1,47 +1,18 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/screens/action_screen.dart';
 import 'package:cstain/screens/community_screen.dart';
-import 'package:cstain/screens/cormBottomNav.dart';
-import 'package:cstain/screens/dashboard_screen.dart';
-import 'package:cstain/screens/home_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cstain/screens/corp_campaign_screen.dart';
+import 'package:cstain/screens/corp_homescreen.dart';
 import 'package:flutter/material.dart';
 
-class BottomNavigation extends StatefulWidget {
-  const BottomNavigation({super.key});
+class CorpBottomNav extends StatefulWidget {
+  const CorpBottomNav({super.key});
 
   @override
-  State<BottomNavigation> createState() => _BottomNavigationState();
+  State<CorpBottomNav> createState() => _CorpBottomNavstate();
 }
 
-class _BottomNavigationState extends State<BottomNavigation> {
+class _CorpBottomNavstate extends State<CorpBottomNav> {
   int currentPageIndex = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkUserRole();
-  }
-
-  Future<void> _checkUserRole() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('user')
-          .doc(user.uid)
-          .get();
-
-      final role = userDoc.data()?['role'] ?? 'user'; // Default to 'user'
-
-      if (role == 'corp') {
-        // Redirect to CorpDashboard
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => CorpBottomNav()),
-          (Route<dynamic> route) => false,
-        );
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +59,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
             NavigationDestination(
               selectedIcon: Icon(Icons.assessment),
               icon: Icon(Icons.assessment_outlined),
-              label: 'Dashboard',
+              label: 'Campaigns',
             ),
             NavigationDestination(
               selectedIcon: Icon(Icons.groups),
@@ -100,13 +71,13 @@ class _BottomNavigationState extends State<BottomNavigation> {
       ),
       body: <Widget>[
         /// Home page
-        HomeScreen(),
+        CorpHomescreen(),
 
         /// Actions page
         ActionScreen(),
 
         /// Dashboard page
-        DashboardScreen(),
+        CorpCampaignScreen(),
 
         /// Community page
         CommunityScreen(),
