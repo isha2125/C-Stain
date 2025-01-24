@@ -270,7 +270,7 @@ class _CorpAuthPageState extends ConsumerState<CorpAuthPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   CollectionReference get _usersCollection => _firestore.collection('user');
-  Future<void> _handleUserModel(User user) async {
+  Future<void> _ChandleUserModel(User user) async {
     final userDoc = await _usersCollection.doc(user.uid).get();
 
     if (!userDoc.exists) {
@@ -398,7 +398,7 @@ class _CorpAuthPageState extends ConsumerState<CorpAuthPage> {
             email: _emailController.text,
             password: _passwordController.text,
           );
-          await _handleUserModel(userCredential.user!);
+          await _ChandleUserModel(userCredential.user!);
           // Navigate to CorpDashboard after successful signup
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => CorpBottomNav()),
@@ -441,59 +441,161 @@ class _CorpAuthPageState extends ConsumerState<CorpAuthPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isSignUp ? 'Corporate Sign Up' : 'Corporate Sign In'),
-        backgroundColor: const Color(0xFF237155),
-      ),
+      // appBar: AppBar(
+      //   title: Text(
+      //     _isSignUp ? 'Corporate Sign Up' : 'Corporate Sign In',
+      //     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+      //   ),
+      //   centerTitle: true,
+      //   backgroundColor: const Color(0xFF237155),
+      //   elevation: 0,
+      // ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Branding Image Section
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20),
-                child: AspectRatio(
-                  aspectRatio: 2,
-                  child: Image.asset('assets/Earth black 1.png'),
+                child: SizedBox(
+                  height: 150, // Set a smaller height for the image
+                  child: Center(
+                    child: Image.asset(
+                      'assets/Earth black 1.png',
+                      fit: BoxFit
+                          .contain, // Ensures the image scales without cropping
+                    ),
+                  ),
                 ),
               ),
-              TextFormField(
+
+              const SizedBox(height: 16),
+              Text("Welcome To C:Stain, please sign up!"),
+              const SizedBox(height: 20),
+
+              // Email TextField
+              _buildTextField(
                 controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Corporate Email',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) =>
-                    value?.isEmpty ?? true ? 'Required' : null,
-              ),
-              // Other text fields...
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _submitForm,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF237155),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : Text(_isSignUp ? 'Sign Up' : 'Sign In'),
+                label: 'Corporate Email',
+                hint: 'Enter your corporate email',
               ),
               const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: _isLoading ? null : _signInWithGoogle,
-                icon: Image.asset(
-                  'assets/google_logo.png',
-                  height: 24,
-                ),
-                label: const Text('Sign in with Google'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+
+              // Password TextField
+              _buildTextField(
+                controller: _passwordController,
+                label: 'Password',
+                hint: 'Enter your password',
+                obscureText: true,
+              ),
+              const SizedBox(height: 18),
+
+              // // Conditional Fields for Sign-Up Only
+              // if (_isSignUp) ...[
+              //   _buildTextField(
+              //     controller: _companyNameController,
+              //     label: 'Company Name',
+              //     hint: 'Enter your company name',
+              //   ),
+              //   const SizedBox(height: 16),
+              //   _buildTextField(
+              //     controller: _registrationNumberController,
+              //     label: 'Registration Number',
+              //     hint: 'Enter registration number',
+              //   ),
+              //   const SizedBox(height: 16),
+              //   _buildTextField(
+              //     controller: _contactPersonController,
+              //     label: 'Contact Person',
+              //     hint: 'Enter contact person name',
+              //   ),
+              //   const SizedBox(height: 16),
+              //   _buildTextField(
+              //     controller: _industryController,
+              //     label: 'Industry',
+              //     hint: 'Enter your industry type',
+              //   ),
+              //   const SizedBox(height: 16),
+              //   _buildTextField(
+              //     controller: _addressController,
+              //     label: 'Address',
+              //     hint: 'Enter your company address',
+              //   ),
+              //   const SizedBox(height: 16),
+              //   _buildTextField(
+              //     controller: _employeesController,
+              //     label: 'Number of Employees',
+              //     hint: 'Enter the number of employees',
+              //   ),
+              //   const SizedBox(height: 16),
+              // ],
+
+              // Submit Button
+              Center(
+                child: SizedBox(
+                  width: double.infinity, // Makes the button occupy full width
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _submitForm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          Colors.transparent, // Transparent background
+                      foregroundColor: Colors.black, // Black text color
+                      side: const BorderSide(
+                          color: Colors.black, width: 1), // Black border
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10), // Adjust padding
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(50), // Rounded corners
+                      ),
+                      elevation: 0, // Removes shadow
+                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(
+                            color: Colors.black) // Loader in black
+                        : Text(
+                            _isSignUp ? 'Sign Up' : 'Sign In',
+                            style: const TextStyle(
+                                fontSize: 12, color: Color(0xFF237155)),
+                          ),
+                  ),
                 ),
               ),
+
+              const SizedBox(height: 16),
+
+              // Google Sign-In Button
+              Center(
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: _isLoading ? null : _signInWithGoogle,
+                    icon: Image.asset(
+                      'assets/google.png',
+                      height: 24,
+                    ),
+                    label: const Text(
+                      'Sign in with Google',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color.fromARGB(255, 43, 43, 43),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: const BorderSide(color: Colors.grey),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Toggle Between Sign-Up and Sign-In
               TextButton(
                 onPressed: () {
                   setState(() {
@@ -504,7 +606,9 @@ class _CorpAuthPageState extends ConsumerState<CorpAuthPage> {
                   _isSignUp
                       ? 'Already have an account? Sign In'
                       : 'Don\'t have an account? Sign Up',
-                  style: const TextStyle(color: Color(0xFF237155)),
+                  style: const TextStyle(
+                    color: Color.fromARGB(255, 0, 0, 0),
+                  ),
                 ),
               ),
             ],
@@ -513,7 +617,103 @@ class _CorpAuthPageState extends ConsumerState<CorpAuthPage> {
       ),
     );
   }
+
+// Helper Method to Create TextFields
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    bool obscureText = false,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          border:
+              UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey))),
+      obscureText: obscureText,
+      validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
+    );
+  }
 }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text(_isSignUp ? 'Corporate Sign Up' : 'Corporate Sign In'),
+//         backgroundColor: const Color(0xFF237155),
+//       ),
+//       body: SingleChildScrollView(
+//         padding: const EdgeInsets.all(16.0),
+//         child: Form(
+//           key: _formKey,
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.stretch,
+//             children: [
+//               Padding(
+//                 padding: const EdgeInsets.symmetric(vertical: 20),
+//                 child: AspectRatio(
+//                   aspectRatio: 2,
+//                   child: Image.asset('assets/Earth black 1.png'),
+//                 ),
+//               ),
+//               TextFormField(
+//                 controller: _emailController,
+//                 decoration: const InputDecoration(
+//                   labelText: 'Corporate Email',
+//                   border: OutlineInputBorder(),
+//                 ),
+//                 validator: (value) =>
+//                     value?.isEmpty ?? true ? 'Required' : null,
+//               ),
+//               // Other text fields...
+//               const SizedBox(height: 24),
+//               ElevatedButton(
+//                 onPressed: _isLoading ? null : _submitForm,
+//                 style: ElevatedButton.styleFrom(
+//                   backgroundColor: const Color(0xFF237155),
+//                   padding: const EdgeInsets.symmetric(vertical: 16),
+//                 ),
+//                 child: _isLoading
+//                     ? const CircularProgressIndicator(color: Colors.white)
+//                     : Text(_isSignUp ? 'Sign Up' : 'Sign In'),
+//               ),
+//               const SizedBox(height: 16),
+//               ElevatedButton.icon(
+//                 onPressed: _isLoading ? null : _signInWithGoogle,
+//                 icon: Image.asset(
+//                   'assets/google_logo.png',
+//                   height: 24,
+//                 ),
+//                 label: const Text('Sign in with Google'),
+//                 style: ElevatedButton.styleFrom(
+//                   backgroundColor: Colors.white,
+//                   foregroundColor: Colors.black,
+//                   padding: const EdgeInsets.symmetric(vertical: 12),
+//                 ),
+//               ),
+//               TextButton(
+//                 onPressed: () {
+//                   setState(() {
+//                     _isSignUp = !_isSignUp;
+//                   });
+//                 },
+//                 child: Text(
+//                   _isSignUp
+//                       ? 'Already have an account? Sign In'
+//                       : 'Don\'t have an account? Sign Up',
+//                   style: const TextStyle(color: Color(0xFF237155)),
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
 //************************the sign in screen trial */
 // import 'package:cstain/screens/CorpDashboard.dart';
 // import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';

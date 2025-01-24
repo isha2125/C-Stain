@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cstain/models/campaigns.dart';
 import 'package:cstain/models/comments.dart';
 import 'package:cstain/models/post.dart';
 import 'package:cstain/providers/providers.dart';
@@ -13,6 +14,35 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 import 'package:timeago/timeago.dart' as timeago;
+
+final campaignsProvider = StreamProvider<List<Campaign>>((ref) {
+  try {
+    print('Listening to campaigns collection...');
+    return FirebaseFirestore.instance
+        .collection('campaigns')
+        .orderBy('created_at', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      print('Fetched ${snapshot.docs.length} documents');
+      return snapshot.docs
+          .map((doc) {
+            try {
+              print('Processing doc: ${doc.id}');
+              print('Document data: ${doc.data()}');
+              return Campaign.fromMap(doc.data() as Map<String, dynamic>);
+            } catch (e) {
+              print('Error parsing campaign: ${doc.id}, Error: $e');
+              return null;
+            }
+          })
+          .whereType<Campaign>()
+          .toList();
+    });
+  } catch (e) {
+    print('Error in campaignsProvider: $e');
+    rethrow;
+  }
+});
 
 final postsProvider = StreamProvider<List<PostModel>>((ref) {
   print('Fetching posts from Firestore...'); // Print to check the function call
@@ -226,50 +256,53 @@ class CommunityScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userStream = ref.watch(userStreamProvider);
     final postsAsyncValue = ref.watch(postsProvider);
+    final campaignsAsyncValue = ref.watch(campaignsProvider);
+
     return Scaffold(
-        //backgroundColor: Color(0xFFABD5C5),
-        appBar: AppBar(
-          title: Text(
-            'Community',
-            style: TextStyle(fontWeight: FontWeight.w400),
-          ),
-          leading: Image.asset('assets/Earth black 1.png'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.person),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute<ProfileScreen>(
-                    builder: (context) => ProfileScreen(
-                      appBar: AppBar(
-                        title: const Text('User Profile'),
-                      ),
-                      actions: [
-                        SignedOutAction((context) {
-                          Navigator.of(context).pop();
-                        })
-                      ],
-                      children: [
-                        const Divider(),
-                        Padding(
-                          padding: const EdgeInsets.all(2),
-                          child: AspectRatio(
-                            aspectRatio: 1,
-                            child: Image.asset('assets/Earth black 1.png'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            )
-          ],
-          automaticallyImplyLeading: false,
+      //backgroundColor: Color(0xFFABD5C5),
+      appBar: AppBar(
+        title: Text(
+          'Community',
+          style: TextStyle(fontWeight: FontWeight.w400),
         ),
-        body: userStream.when(
-          data: (data) => Padding(
+        leading: Image.asset('assets/Earth black 1.png'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<ProfileScreen>(
+                  builder: (context) => ProfileScreen(
+                    appBar: AppBar(
+                      title: const Text('User Profile'),
+                    ),
+                    actions: [
+                      SignedOutAction((context) {
+                        Navigator.of(context).pop();
+                      })
+                    ],
+                    children: [
+                      const Divider(),
+                      Padding(
+                        padding: const EdgeInsets.all(2),
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: Image.asset('assets/Earth black 1.png'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          )
+        ],
+        automaticallyImplyLeading: false,
+      ),
+      body: userStream.when(
+        data: (data) {
+          return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: <Widget>[
@@ -285,33 +318,29 @@ class CommunityScreen extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     ElevatedButton(
-                        onPressed: () =>
-                            showPreview(context, ref), // Text-only option
-                        child: Text('Text'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.primary,
-                          foregroundColor:
-                              const Color.fromARGB(255, 255, 255, 255),
-                        )),
+                      onPressed: () => showPreview(context, ref),
+                      child: Text('Text'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
                     ElevatedButton(
-                        onPressed: () => pickImage(context, ref),
-                        child: Text('Photos'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.primary,
-                          foregroundColor:
-                              const Color.fromARGB(255, 255, 255, 255),
-                        )),
+                      onPressed: () => pickImage(context, ref),
+                      child: Text('Photos'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
                     ElevatedButton(
-                        onPressed: () => pickVideo(context, ref),
-                        child: Text('Videos'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.primary,
-                          foregroundColor:
-                              const Color.fromARGB(255, 255, 255, 255),
-                        )),
+                      onPressed: () => pickVideo(context, ref),
+                      child: Text('Videos'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
                   ],
                 ),
                 SizedBox(height: 20),
@@ -321,35 +350,244 @@ class CommunityScreen extends ConsumerWidget {
                     child: Text('Preview Post'),
                   ),
                 Expanded(
-                  child: postsAsyncValue.when(
-                    data: (posts) {
-                      print(
-                          'Number of posts: ${posts.length}'); // Check if posts are being fetched
-                      return ListView.builder(
-                        itemCount: posts.length,
-                        itemBuilder: (context, index) {
-                          final post = posts[index];
-                          return PostCard(post: post);
+                  child: campaignsAsyncValue.when(
+                    data: (campaigns) {
+                      print('Campaigns: $campaigns');
+                      return postsAsyncValue.when(
+                        data: (posts) {
+                          // Combine campaigns and posts into one list with explicit typing
+                          final List<dynamic> combinedList = [
+                            ...campaigns,
+                            ...posts
+                          ];
+
+                          // Sort by created_at (descending order)
+                          combinedList.sort((a, b) {
+                            final aCreatedAt = a is Campaign
+                                ? a.created_at
+                                : (a as PostModel).created_at;
+                            final bCreatedAt = b is Campaign
+                                ? b.created_at
+                                : (b as PostModel).created_at;
+                            return bCreatedAt.compareTo(aCreatedAt);
+                          });
+
+                          return ListView.builder(
+                            itemCount: combinedList.length,
+                            itemBuilder: (context, index) {
+                              final item = combinedList[index];
+                              //print('Combined list: $combinedList');
+
+                              // Check if the item is a campaign or a post
+                              if (item is Campaign) {
+                                return ListTile(
+                                  contentPadding: EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 16),
+                                  tileColor: Colors
+                                      .white, // Light background color for the tile
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        12), // Rounded corners
+                                    side: BorderSide(
+                                        color: Colors.grey.shade300, width: 1),
+                                  ),
+                                  title: Text(
+                                    item.title,
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color.fromARGB(255, 0, 0,
+                                          0), // Bright color for the title
+                                    ),
+                                  ),
+                                  subtitle: Padding(
+                                    padding: const EdgeInsets.only(top: 4.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          item.description,
+                                          style: TextStyle(
+                                              color: const Color.fromARGB(
+                                                  255,
+                                                  0,
+                                                  0,
+                                                  0)), // Soft description color
+                                        ),
+                                        SizedBox(
+                                            height:
+                                                4), // Small spacing between text lines
+                                        Text(
+                                          'Target CO2 Savings: ${item.targetCO2Savings} kg',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            color: const Color.fromARGB(
+                                                255,
+                                                0,
+                                                0,
+                                                0), // Green color for target CO2 savings
+                                          ),
+                                        ),
+                                        SizedBox(height: 4),
+                                        Text(
+                                          'Action: ${item.action}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                            color: const Color.fromARGB(
+                                                255,
+                                                0,
+                                                0,
+                                                0), // Action highlighted with orange
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  trailing: Text(
+                                    timeago.format(item.created_at.toDate()),
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      color: Colors
+                                          .grey.shade500, // Soft date color
+                                    ),
+                                  ),
+                                  leading: Icon(
+                                    Icons
+                                        .check_circle_outline, // Icon for action
+                                    color: const Color.fromARGB(255, 0, 0, 0),
+                                  ),
+                                );
+
+                                // return ListTile(
+                                //   title: Text(item.title),
+                                //   subtitle: Column(
+                                //     crossAxisAlignment:
+                                //         CrossAxisAlignment.start,
+                                //     children: [
+                                //       Text(item.description),
+                                //       Text(
+                                //           'Target CO2 Savings: ${item.targetCO2Savings} kg'),
+                                //       Text('Action: ${item.action}'),
+                                //     ],
+                                //   ),
+                                //   trailing: Text(
+                                //       timeago.format(item.created_at.toDate())),
+                                // );
+                              } else if (item is PostModel) {
+                                return PostCard(post: item);
+                              } else {
+                                return SizedBox(); // Fallback if neither type matches
+                              }
+                            },
+                          );
+                        },
+                        loading: () =>
+                            Center(child: CircularProgressIndicator()),
+                        error: (error, stackTrace) {
+                          return Center(
+                              child: Text('Error fetching posts: $error'));
                         },
                       );
                     },
-                    loading: () => Center(
-                        child:
-                            CircularProgressIndicator()), // Make sure you show a loading indicator
+                    loading: () => Center(child: CircularProgressIndicator()),
                     error: (error, stackTrace) {
-                      print('Error: $error'); // Debug errors
                       return Center(
-                          child: Text('Error fetching posts: $error'));
+                          child: Text('Error fetching campaigns: $error'));
                     },
                   ),
                 ),
               ],
             ),
-          ),
-          error: (Object error, StackTrace stackTrace) =>
-              Center(child: Text('Error: $error')),
-          loading: () => Center(child: CircularProgressIndicator()),
-        ));
+          );
+        },
+        error: (Object error, StackTrace stackTrace) =>
+            Center(child: Text('Error: $error')),
+        loading: () => Center(child: CircularProgressIndicator()),
+      ),
+    );
+    // body: userStream.when(
+    //   data: (data) => Padding(
+    //     padding: const EdgeInsets.all(16.0),
+    //     child: Column(
+    //       children: <Widget>[
+    //         TextField(
+    //           controller: ref.read(bodyControllerProvider),
+    //           decoration: InputDecoration(
+    //             labelText: "What's your carbon-saving win today?",
+    //             border: OutlineInputBorder(),
+    //           ),
+    //         ),
+    //         SizedBox(height: 20),
+    //         Row(
+    //           mainAxisAlignment: MainAxisAlignment.spaceAround,
+    //           children: [
+    //             ElevatedButton(
+    //                 onPressed: () =>
+    //                     showPreview(context, ref), // Text-only option
+    //                 child: Text('Text'),
+    //                 style: ElevatedButton.styleFrom(
+    //                   backgroundColor:
+    //                       Theme.of(context).colorScheme.primary,
+    //                   foregroundColor:
+    //                       const Color.fromARGB(255, 255, 255, 255),
+    //                 )),
+    //             ElevatedButton(
+    //                 onPressed: () => pickImage(context, ref),
+    //                 child: Text('Photos'),
+    //                 style: ElevatedButton.styleFrom(
+    //                   backgroundColor:
+    //                       Theme.of(context).colorScheme.primary,
+    //                   foregroundColor:
+    //                       const Color.fromARGB(255, 255, 255, 255),
+    //                 )),
+    //             ElevatedButton(
+    //                 onPressed: () => pickVideo(context, ref),
+    //                 child: Text('Videos'),
+    //                 style: ElevatedButton.styleFrom(
+    //                   backgroundColor:
+    //                       Theme.of(context).colorScheme.primary,
+    //                   foregroundColor:
+    //                       const Color.fromARGB(255, 255, 255, 255),
+    //                 )),
+    //           ],
+    //         ),
+    //         SizedBox(height: 20),
+    //         if (ref.watch(mediaProvider) != null)
+    //           TextButton(
+    //             onPressed: () => showPreview(context, ref),
+    //             child: Text('Preview Post'),
+    //           ),
+    //         Expanded(
+    //           child: postsAsyncValue.when(
+    //             data: (posts) {
+    //               print(
+    //                   'Number of posts: ${posts.length}'); // Check if posts are being fetched
+    //               return ListView.builder(
+    //                 itemCount: posts.length,
+    //                 itemBuilder: (context, index) {
+    //                   final post = posts[index];
+    //                   return PostCard(post: post);
+    //                 },
+    //               );
+    //             },
+    //             loading: () => Center(
+    //                 child:
+    //                     CircularProgressIndicator()), // Make sure you show a loading indicator
+    //             error: (error, stackTrace) {
+    //               print('Error: $error'); // Debug errors
+    //               return Center(
+    //                   child: Text('Error fetching posts: $error'));
+    //             },
+    //           ),
+    //         ),
+    //       ],
+    //     ),
+    //   ),
+    //   error: (Object error, StackTrace stackTrace) =>
+    //       Center(child: Text('Error: $error')),
+    //   loading: () => Center(child: CircularProgressIndicator()),
+    // ));
   }
 }
 
@@ -848,3 +1086,82 @@ class CommentSection extends ConsumerWidget {
 //     ),
 //   );
 // }
+
+class CampaignTile extends StatelessWidget {
+  final Campaign campaign;
+
+  const CampaignTile({Key? key, required this.campaign}) : super(key: key);
+
+  Future<String> _getUserName(String userId) async {
+    try {
+      final userDoc =
+          await FirebaseFirestore.instance.collection('user').doc(userId).get();
+      final userData = userDoc.data() as Map<String, dynamic>?;
+      return userData?['username'] ?? 'Unknown User';
+    } catch (e) {
+      print('Error fetching user name: $e');
+      return 'Unknown User';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String>(
+      future: _getUserName(campaign.corpUserId),
+      builder: (context, snapshot) {
+        final userName = snapshot.data ?? 'Loading...';
+
+        return ListTile(
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          title: Text(
+            campaign.title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 4),
+              Text(
+                'By: $userName',
+                style: const TextStyle(color: Colors.grey),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                campaign.description,
+                style: const TextStyle(fontSize: 14),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Category: ${campaign.category}',
+                style: const TextStyle(color: Colors.grey),
+              ),
+              Text(
+                'Action: ${campaign.action}',
+                style: const TextStyle(color: Colors.grey),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Target CO2 Savings: ${campaign.targetCO2Savings} kg',
+                style: const TextStyle(fontSize: 14),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Start Date: ${campaign.startDate.toDate()}',
+                style: const TextStyle(fontSize: 14),
+              ),
+              Text(
+                'End Date: ${campaign.endDate.toDate()}',
+                style: const TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
+          trailing: Text(
+            timeago.format(campaign.created_at.toDate()),
+            style: const TextStyle(color: Colors.grey, fontSize: 12),
+          ),
+        );
+      },
+    );
+  }
+}
