@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cstain/providers/corp_user_provider.dart';
 import 'package:cstain/screens/Corp%20screens/corp_bottom_nav.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -127,10 +128,11 @@ class _CorpAuthPageState extends ConsumerState<CorpAuthPage> {
         }
 
         // Navigate directly to CorpDashboard
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => CorpBottomNav()),
-          (Route<dynamic> route) => false,
-        );
+        // Navigator.of(context).pushAndRemoveUntil(
+        //   MaterialPageRoute(builder: (context) => CorpBottomNav()),
+        //   (Route<dynamic> route) => false,
+        // );
+        checkCorpUser(context, ref, user.uid);
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -160,9 +162,10 @@ class _CorpAuthPageState extends ConsumerState<CorpAuthPage> {
           );
           await _ChandleUserModel(userCredential.user!);
           // Navigate to CorpDashboard after successful signup
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => CorpBottomNav()),
-          );
+          // Navigator.of(context).pushReplacement(
+          //   MaterialPageRoute(builder: (context) => CorpBottomNav()),
+          // );
+          checkCorpUser(context, ref, userCredential.user!.uid);
         } else {
           // Signing in an existing corporate user
           userCredential =
@@ -178,9 +181,10 @@ class _CorpAuthPageState extends ConsumerState<CorpAuthPage> {
             final userData = userDoc.data() as Map<String, dynamic>;
             if (userData['role'] == 'corp') {
               // Navigate to CorpDashboard
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => CorpBottomNav()),
-              );
+              // Navigator.of(context).pushReplacement(
+              //   MaterialPageRoute(builder: (context) => CorpBottomNav()),
+              // );
+              checkCorpUser(context, ref, userCredential.user!.uid);
             } else {
               throw 'This account is not registered as a corporate user';
             }

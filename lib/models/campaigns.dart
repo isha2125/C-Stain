@@ -14,6 +14,7 @@ class Campaign {
   final Timestamp startDate;
   final Timestamp endDate;
   final Timestamp created_at;
+  final String? imageUrl;
   Campaign({
     required this.campaignId,
     required this.corpUserId,
@@ -25,6 +26,7 @@ class Campaign {
     required this.startDate,
     required this.endDate,
     required this.created_at,
+    this.imageUrl,
   });
 
   Campaign copyWith({
@@ -38,6 +40,7 @@ class Campaign {
     Timestamp? startDate,
     Timestamp? endDate,
     Timestamp? created_at,
+    String? imageUrl,
   }) {
     return Campaign(
       campaignId: campaignId ?? this.campaignId,
@@ -50,6 +53,7 @@ class Campaign {
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       created_at: created_at ?? this.created_at,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 
@@ -65,6 +69,7 @@ class Campaign {
       'startDate': startDate,
       'endDate': endDate,
       'created_at': created_at,
+      'imageUrl': imageUrl,
     };
   }
 
@@ -80,6 +85,7 @@ class Campaign {
       startDate: map['startDate'] as Timestamp,
       endDate: map['endDate'] as Timestamp,
       created_at: map['created_at'] as Timestamp,
+      imageUrl: map['imageUrl'] != null ? map['imageUrl'] as String : null,
     );
   }
 
@@ -90,7 +96,7 @@ class Campaign {
 
   @override
   String toString() {
-    return 'Campaign(campaignId: $campaignId, corpUserId: $corpUserId, title: $title, description: $description, category: $category, action: $action, targetCO2Savings: $targetCO2Savings, startDate: $startDate, endDate: $endDate, created_at: $created_at)';
+    return 'Campaign(campaignId: $campaignId, corpUserId: $corpUserId, title: $title, description: $description, category: $category, action: $action, targetCO2Savings: $targetCO2Savings, startDate: $startDate, endDate: $endDate, created_at: $created_at, imageUrl: $imageUrl)';
   }
 
   @override
@@ -106,7 +112,8 @@ class Campaign {
         other.targetCO2Savings == targetCO2Savings &&
         other.startDate == startDate &&
         other.endDate == endDate &&
-        other.created_at == created_at;
+        other.created_at == created_at &&
+        other.imageUrl == imageUrl;
   }
 
   @override
@@ -120,6 +127,7 @@ class Campaign {
         targetCO2Savings.hashCode ^
         startDate.hashCode ^
         endDate.hashCode ^
-        created_at.hashCode;
+        created_at.hashCode ^
+        imageUrl.hashCode;
   }
 }

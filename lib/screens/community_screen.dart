@@ -14,6 +14,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:intl/intl.dart';
 
 final allCampaignsProvider = StreamProvider<List<Campaign>>((ref) {
   try {
@@ -380,100 +381,85 @@ class CommunityScreen extends ConsumerWidget {
 
                               // Check if the item is a campaign or a post
                               if (item is Campaign) {
-                                return ListTile(
-                                  contentPadding: EdgeInsets.symmetric(
-                                      vertical: 10, horizontal: 16),
-                                  tileColor: Colors
-                                      .white, // Light background color for the tile
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        12), // Rounded corners
-                                    side: BorderSide(
-                                        color: Colors.grey.shade300, width: 1),
-                                  ),
-                                  title: Text(
-                                    item.title,
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color.fromARGB(255, 0, 0,
-                                          0), // Bright color for the title
-                                    ),
-                                  ),
-                                  subtitle: Padding(
-                                    padding: const EdgeInsets.only(top: 4.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          item.description,
-                                          style: TextStyle(
-                                              color: const Color.fromARGB(
-                                                  255,
-                                                  0,
-                                                  0,
-                                                  0)), // Soft description color
-                                        ),
-                                        SizedBox(
-                                            height:
-                                                4), // Small spacing between text lines
-                                        Text(
-                                          'Target CO2 Savings: ${item.targetCO2Savings} kg',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            color: const Color.fromARGB(
-                                                255,
-                                                0,
-                                                0,
-                                                0), // Green color for target CO2 savings
-                                          ),
-                                        ),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          'Action: ${item.action}',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w500,
-                                            color: const Color.fromARGB(
-                                                255,
-                                                0,
-                                                0,
-                                                0), // Action highlighted with orange
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  trailing: Text(
-                                    timeago.format(item.created_at.toDate()),
-                                    style: TextStyle(
-                                      fontStyle: FontStyle.italic,
-                                      color: Colors
-                                          .grey.shade500, // Soft date color
-                                    ),
-                                  ),
-                                  leading: Icon(
-                                    Icons
-                                        .check_circle_outline, // Icon for action
-                                    color: const Color.fromARGB(255, 0, 0, 0),
-                                  ),
-                                );
-
                                 // return ListTile(
-                                //   title: Text(item.title),
-                                //   subtitle: Column(
-                                //     crossAxisAlignment:
-                                //         CrossAxisAlignment.start,
-                                //     children: [
-                                //       Text(item.description),
-                                //       Text(
-                                //           'Target CO2 Savings: ${item.targetCO2Savings} kg'),
-                                //       Text('Action: ${item.action}'),
-                                //     ],
+                                //   contentPadding: EdgeInsets.symmetric(
+                                //       vertical: 10, horizontal: 16),
+                                //   tileColor: Colors
+                                //       .white, // Light background color for the tile
+                                //   shape: RoundedRectangleBorder(
+                                //     borderRadius: BorderRadius.circular(
+                                //         12), // Rounded corners
+                                //     side: BorderSide(
+                                //         color: Colors.grey.shade300, width: 1),
+                                //   ),
+                                //   title: Text(
+                                //     item.title,
+                                //     style: TextStyle(
+                                //       fontSize: 18,
+                                //       fontWeight: FontWeight.bold,
+                                //       color: const Color.fromARGB(255, 0, 0,
+                                //           0), // Bright color for the title
+                                //     ),
+                                //   ),
+                                //   subtitle: Padding(
+                                //     padding: const EdgeInsets.only(top: 4.0),
+                                //     child: Column(
+                                //       crossAxisAlignment:
+                                //           CrossAxisAlignment.start,
+                                //       children: [
+                                //         Text(
+                                //           item.description,
+                                //           style: TextStyle(
+                                //               color: const Color.fromARGB(
+                                //                   255,
+                                //                   0,
+                                //                   0,
+                                //                   0)), // Soft description color
+                                //         ),
+                                //         SizedBox(
+                                //             height:
+                                //                 4), // Small spacing between text lines
+                                //         Text(
+                                //           'Target CO2 Savings: ${item.targetCO2Savings} kg',
+                                //           style: TextStyle(
+                                //             fontWeight: FontWeight.w600,
+                                //             color: const Color.fromARGB(
+                                //                 255,
+                                //                 0,
+                                //                 0,
+                                //                 0), // Green color for target CO2 savings
+                                //           ),
+                                //         ),
+                                //         SizedBox(height: 4),
+                                //         Text(
+                                //           'Action: ${item.action}',
+                                //           style: TextStyle(
+                                //             fontWeight: FontWeight.w500,
+                                //             color: const Color.fromARGB(
+                                //                 255,
+                                //                 0,
+                                //                 0,
+                                //                 0), // Action highlighted with orange
+                                //           ),
+                                //         ),
+                                //       ],
+                                //     ),
                                 //   ),
                                 //   trailing: Text(
-                                //       timeago.format(item.created_at.toDate())),
+                                //     timeago.format(item.created_at.toDate()),
+                                //     style: TextStyle(
+                                //       fontStyle: FontStyle.italic,
+                                //       color: Colors
+                                //           .grey.shade500, // Soft date color
+                                //     ),
+                                //   ),
+                                //   leading: Icon(
+                                //     Icons
+                                //         .check_circle_outline, // Icon for action
+                                //     color: const Color.fromARGB(255, 0, 0, 0),
+                                //   ),
                                 // );
+                                return CampaignTile(campaign: item);
                               } else if (item is PostModel) {
                                 return PostCard(post: item);
                               } else {
@@ -1091,74 +1077,130 @@ class CampaignTile extends StatelessWidget {
   final Campaign campaign;
 
   const CampaignTile({Key? key, required this.campaign}) : super(key: key);
-
-  Future<String> _getUserName(String userId) async {
+  Future<String> _getCompanyName(String userId) async {
     try {
-      final userDoc =
-          await FirebaseFirestore.instance.collection('user').doc(userId).get();
-      final userData = userDoc.data() as Map<String, dynamic>?;
-      return userData?['username'] ?? 'Unknown User';
+      final corpUserDoc = await FirebaseFirestore.instance
+          .collection('corporateUsers')
+          .doc(userId)
+          .get();
+      final corpUserData = corpUserDoc.data() as Map<String, dynamic>?;
+      return corpUserData?['name'] ?? 'Unknown Company';
     } catch (e) {
-      print('Error fetching user name: $e');
-      return 'Unknown User';
+      print('Error fetching company name: $e');
+      return 'Unknown Company';
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
-      future: _getUserName(campaign.corpUserId),
+      future: _getCompanyName(campaign.corpUserId),
       builder: (context, snapshot) {
-        final userName = snapshot.data ?? 'Loading...';
+        final companyName = snapshot.data ?? 'Loading...';
 
-        return ListTile(
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          title: Text(
-            campaign.title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        return Card(
+          elevation: 4,
+          margin: const EdgeInsets.symmetric(vertical: 8.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-          subtitle: Column(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 4),
-              Text(
-                'By: $userName',
-                style: const TextStyle(color: Colors.grey),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                campaign.description,
-                style: const TextStyle(fontSize: 14),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Category: ${campaign.category}',
-                style: const TextStyle(color: Colors.grey),
-              ),
-              Text(
-                'Action: ${campaign.action}',
-                style: const TextStyle(color: Colors.grey),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Target CO2 Savings: ${campaign.targetCO2Savings} kg',
-                style: const TextStyle(fontSize: 14),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Start Date: ${campaign.startDate.toDate()}',
-                style: const TextStyle(fontSize: 14),
-              ),
-              Text(
-                'End Date: ${campaign.endDate.toDate()}',
-                style: const TextStyle(fontSize: 14),
+              if (campaign.imageUrl != null)
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12),
+                  ),
+                  child: Image.network(
+                    campaign.imageUrl!,
+                    height: 150,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              // Replace with actual user profile image URL if available
+                              child: Text(companyName[0].toUpperCase()),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              companyName,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          timeago.format(campaign.created_at.toDate()),
+                          style:
+                              const TextStyle(color: Colors.grey, fontSize: 14),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Center(
+                      child: Text(
+                        campaign.title,
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      campaign.description,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Target CO2 Savings: ${campaign.targetCO2Savings} kg',
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        Text(
+                          'Start: ${DateFormat('dd-MM-yy').format(campaign.startDate.toDate())}',
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Non-functional participate button
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                        ),
+                        child: const Text(
+                          'Participate',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
-          ),
-          trailing: Text(
-            timeago.format(campaign.created_at.toDate()),
-            style: const TextStyle(color: Colors.grey, fontSize: 12),
           ),
         );
       },

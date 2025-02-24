@@ -4,6 +4,7 @@ import 'package:cstain/backend/firebase_options.dart';
 import 'package:cstain/components/loader.dart';
 import 'package:cstain/providers/auth_service.dart';
 import 'package:cstain/screens/Corp%20screens/corp_bottom_nav.dart';
+import 'package:cstain/screens/Corp%20screens/corp_deatilsForm.dart';
 import 'package:cstain/screens/User%20screens/main_navigation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -56,7 +57,42 @@ class MyApp extends ConsumerWidget {
                 final userData = snapshot.data!.data() as Map<String, dynamic>;
                 final String role = userData['role'] ?? 'user';
 
-                return role == 'corp' ? CorpBottomNav() : UserBottomNav();
+                // return role == 'corp' ? CorpBottomNav() : UserBottomNav();
+
+                if (role == 'corp') {
+                  return FutureBuilder<DocumentSnapshot>(
+                    future: FirebaseFirestore.instance
+                        .collection('corporateUsers')
+                        .doc(user.uid)
+                        .get(),
+                    builder: (context, corpSnapshot) {
+                      if (corpSnapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        return Scaffold(
+                          body: Center(child: Loader()),
+                        );
+                      }
+
+                      if (corpSnapshot.hasError) {
+                        print(
+                            "Error fetching corpUser data: ${corpSnapshot.error}");
+                      }
+
+                      if (!corpSnapshot.hasData || !corpSnapshot.data!.exists) {
+                        print("Corp user data not found, showing form.");
+                        return CorpUserFormScreen(userId: user.uid);
+                      }
+
+                      final corpUserData =
+                          corpSnapshot.data!.data() as Map<String, dynamic>;
+                      print("Fetched Corp User Data: $corpUserData");
+
+                      return CorpBottomNav(); // If data exists, go to corporate dashboard
+                    },
+                  );
+                } else {
+                  return UserBottomNav();
+                }
               },
             );
           } else {

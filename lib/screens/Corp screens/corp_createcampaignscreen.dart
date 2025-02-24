@@ -1,12 +1,73 @@
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:cstain/models/campaigns.dart';
+// import 'package:cstain/providers/campaign%20providers/campaign_repository.dart';
+// import 'package:cstain/providers/action%20providers/providers.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:firebase_ui_auth/firebase_ui_auth.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:intl/intl.dart';
+// import 'package:uuid/uuid.dart'; // For generating unique campaignId
+
+// class CreateCampaignForm extends ConsumerStatefulWidget {
+//   @override
+//   ConsumerState<CreateCampaignForm> createState() => _CreateCampaignFormState();
+// }
+
+// class _CreateCampaignFormState extends ConsumerState<CreateCampaignForm> {
+//   String? selectedCategory;
+//   String? selectedAction;
+//   final _formKey = GlobalKey<FormState>();
+//   final Map<String, dynamic> _formData = {};
+
+//   Future<void> _submitForm() async {
+//     if (_formKey.currentState!.validate()) {
+//       _formKey.currentState!.save();
+
+//       final currentUser = FirebaseAuth.instance.currentUser;
+//       if (currentUser == null) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           const SnackBar(content: Text('No user is logged in.')),
+//         );
+//         return;
+//       }
+
+//       final campaign = Campaign(
+//         campaignId: const Uuid().v4(),
+//         corpUserId: currentUser.uid,
+//         title: _formData['title'],
+//         description: _formData['description'],
+//         category: _formData['category'],
+//         action: _formData['action'],
+//         targetCO2Savings: _formData['targetCO2Savings'],
+//         startDate: Timestamp.fromDate(_formData['startDate']),
+//         endDate: Timestamp.fromDate(_formData['endDate']),
+//         created_at: Timestamp.now(),
+//       );
+
+//       try {
+//         await ref.read(campaignProvider.notifier).addCampaign(campaign);
+//         Navigator.pop(context, _formData);
+//       } catch (e) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(content: Text('Failed to create campaign: $e')),
+//         );
+//       }
+//     }
+//   }
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cstain/models/campaigns.dart';
 import 'package:cstain/providers/campaign%20providers/campaign_repository.dart';
 import 'package:cstain/providers/action%20providers/providers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart'; // Import Firebase Storage
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart'; // Import Image Picker
 import 'package:intl/intl.dart';
-import 'package:uuid/uuid.dart'; // For generating unique campaignId
+import 'package:uuid/uuid.dart';
 
 class CreateCampaignForm extends ConsumerStatefulWidget {
   @override
@@ -18,6 +79,32 @@ class _CreateCampaignFormState extends ConsumerState<CreateCampaignForm> {
   String? selectedAction;
   final _formKey = GlobalKey<FormState>();
   final Map<String, dynamic> _formData = {};
+  File? _image; // Added image file variable
+  final ImagePicker _picker = ImagePicker(); // Added ImagePicker instance
+
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+  }
+
+  Future<String?> _uploadImage(String campaignId) async {
+    if (_image == null) return null;
+
+    try {
+      final ref = FirebaseStorage.instance.ref().child(
+          'campaign_banners/$campaignId.jpg'); // Store image with campaign ID
+      await ref.putFile(_image!);
+      return await ref.getDownloadURL();
+    } catch (e) {
+      print('Error uploading image: $e');
+      return null;
+    }
+  }
+
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
@@ -30,13 +117,25 @@ class _CreateCampaignFormState extends ConsumerState<CreateCampaignForm> {
         return;
       }
 
-      _formData['corpUserId'] = currentUser.uid;
-      _formData['created_at'] = Timestamp.now();
-      _formData['campaignId'] =
-          FirebaseFirestore.instance.collection('campaigns').doc().id;
+      final campaignId = const Uuid().v4(); // Generate campaign ID first
+      final imageUrl = await _uploadImage(campaignId); // Upload image
+
+      final campaign = Campaign(
+        campaignId: campaignId,
+        corpUserId: currentUser.uid,
+        title: _formData['title'],
+        description: _formData['description'],
+        category: _formData['category'],
+        action: _formData['action'],
+        targetCO2Savings: _formData['targetCO2Savings'],
+        startDate: Timestamp.fromDate(_formData['startDate']),
+        endDate: Timestamp.fromDate(_formData['endDate']),
+        created_at: Timestamp.now(),
+        imageUrl: imageUrl, // Add image URL to campaign
+      );
 
       try {
-        await ref.read(campaignProvider.notifier).addCampaign(_formData);
+        await ref.read(campaignProvider.notifier).addCampaign(campaign);
         Navigator.pop(context, _formData);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -94,6 +193,18 @@ class _CreateCampaignFormState extends ConsumerState<CreateCampaignForm> {
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
+            //image picker
+            ElevatedButton.icon(
+              onPressed: _pickImage,
+              icon: const Icon(Icons.image_rounded),
+              label: const Text('Pick Campaign Banner'),
+            ),
+            if (_image != null)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Image.file(_image!, height: 100),
+              ),
+            const SizedBox(height: 16),
             // Title field
             TextFormField(
               decoration: const InputDecoration(
@@ -165,29 +276,29 @@ class _CreateCampaignFormState extends ConsumerState<CreateCampaignForm> {
                           : null,
                     ),
                     const SizedBox(height: 16),
-                    if (selectedCategory != null)
-                      DropdownButtonFormField<String>(
-                        decoration: const InputDecoration(
-                          labelText: 'Action',
-                          border: OutlineInputBorder(),
-                        ),
-                        value: selectedAction,
-                        items: actionsForSelectedCategory
-                            .map((actionName) => DropdownMenuItem<String>(
-                                  value: actionName,
-                                  child: Text(actionName),
-                                ))
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            selectedAction = value;
-                            _formData['action'] = value;
-                          });
-                        },
-                        validator: (value) => value == null || value.isEmpty
-                            ? 'Action is required'
-                            : null,
+                    // if (selectedCategory != null)
+                    DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        labelText: 'Action',
+                        border: OutlineInputBorder(),
                       ),
+                      value: selectedAction,
+                      items: actionsForSelectedCategory
+                          .map((actionName) => DropdownMenuItem<String>(
+                                value: actionName,
+                                child: Text(actionName),
+                              ))
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedAction = value;
+                          _formData['action'] = value;
+                        });
+                      },
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'Action is required'
+                          : null,
+                    ),
                   ],
                 );
               },
@@ -211,6 +322,7 @@ class _CreateCampaignFormState extends ConsumerState<CreateCampaignForm> {
             const SizedBox(height: 16),
             // Start Date field
             TextFormField(
+              readOnly: true,
               decoration: const InputDecoration(
                 labelText: 'Start Date (YYYY-MM-DD)',
                 border: OutlineInputBorder(),
@@ -240,6 +352,7 @@ class _CreateCampaignFormState extends ConsumerState<CreateCampaignForm> {
             const SizedBox(height: 16),
             // End Date field
             TextFormField(
+              readOnly: true,
               decoration: const InputDecoration(
                 labelText: 'End Date (YYYY-MM-DD)',
                 border: OutlineInputBorder(),
@@ -247,8 +360,8 @@ class _CreateCampaignFormState extends ConsumerState<CreateCampaignForm> {
               onTap: () async {
                 final pickedDate = await showDatePicker(
                   context: context,
-                  initialDate: _formData['endDate'] ?? DateTime.now(),
-                  firstDate: DateTime.now(),
+                  initialDate: _formData['startDate'] ?? DateTime.now(),
+                  firstDate: _formData['startDate'] ?? DateTime.now(),
                   lastDate: DateTime(2101),
                 );
                 if (pickedDate != null) {
@@ -266,6 +379,7 @@ class _CreateCampaignFormState extends ConsumerState<CreateCampaignForm> {
                   ? 'End Date is required'
                   : null,
             ),
+
             const SizedBox(height: 20),
             // Submit button
             ElevatedButton(
