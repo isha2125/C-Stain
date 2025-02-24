@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/models/campaigns.dart';
 import 'package:cstain/models/comments.dart';
 import 'package:cstain/models/post.dart';
-import 'package:cstain/providers/providers.dart';
+import 'package:cstain/providers/action%20providers/providers.dart';
 import 'package:cstain/screens/profile_screen.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
@@ -15,7 +15,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-final campaignsProvider = StreamProvider<List<Campaign>>((ref) {
+final allCampaignsProvider = StreamProvider<List<Campaign>>((ref) {
   try {
     print('Listening to campaigns collection...');
     return FirebaseFirestore.instance
@@ -256,7 +256,7 @@ class CommunityScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userStream = ref.watch(userStreamProvider);
     final postsAsyncValue = ref.watch(postsProvider);
-    final campaignsAsyncValue = ref.watch(campaignsProvider);
+    final campaignsAsyncValue = ref.watch(allCampaignsProvider);
 
     return Scaffold(
       //backgroundColor: Color(0xFFABD5C5),

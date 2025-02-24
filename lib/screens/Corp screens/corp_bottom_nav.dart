@@ -1,7 +1,7 @@
-import 'package:cstain/screens/action_screen.dart';
+import 'package:cstain/screens/User%20screens/action_screen.dart';
 import 'package:cstain/screens/community_screen.dart';
-import 'package:cstain/screens/corp_campaign_screen.dart';
-import 'package:cstain/screens/corp_homescreen.dart';
+import 'package:cstain/screens/Corp%20screens/corp_campaign_screen.dart';
+import 'package:cstain/screens/Corp%20screens/corp_homescreen.dart';
 import 'package:flutter/material.dart';
 
 class CorpBottomNav extends StatefulWidget {

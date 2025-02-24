@@ -5,19 +5,13 @@ import 'package:cstain/models/badges.dart';
 import 'package:cstain/models/user.dart';
 import 'package:cstain/models/user_badges.dart';
 import 'package:cstain/providers/auth_service.dart';
-import 'package:cstain/providers/providers.dart';
+import 'package:cstain/providers/action%20providers/providers.dart';
 import 'package:cstain/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
-import 'profile_screen.dart';
+import '../profile_screen.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-
-// final userStreamProvider = StreamProvider.autoDispose<UserModel>((ref) {
-//   final user = ref.watch(authStateProvider).value;
-//   if (user == null) throw Exception('User not authenticated');
-//   return ref.watch(firestoreServiceProvider).getUserStream(user.uid);
-// });
 
 final tipOfTheDayProvider =
     StateProvider<String>((ref) => 'Save water, save life!');

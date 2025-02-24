@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:cstain/models/achievements.dart';
 import 'package:cstain/models/badges.dart';
 import 'package:cstain/models/categories_and_action.dart';
@@ -105,16 +104,6 @@ class FirestoreService {
     }
   }
 
-  Future<UserModel> fetchUserData(String userId) async {
-    try {
-      final userDoc = await _firestore.collection('user').doc(userId).get();
-      return UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
-    } catch (e) {
-      print('Error fetching user data: $e');
-      throw e;
-    }
-  }
-
   Future<void> updateUserCO2Saved(String userId, double newTotal) async {
     try {
       await _firestore.collection('user').doc(userId).update({
@@ -125,6 +114,8 @@ class FirestoreService {
       throw e;
     }
   }
+
+//user stream
 
   Stream<UserModel> getUserStream(String userId) {
     return _firestore.collection('user').doc(userId).snapshots().map(

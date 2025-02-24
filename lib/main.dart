@@ -1,9 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/backend/auth_gate.dart';
 import 'package:cstain/backend/firebase_options.dart';
+import 'package:cstain/components/loader.dart';
+import 'package:cstain/providers/auth_service.dart';
+import 'package:cstain/screens/Corp%20screens/corp_bottom_nav.dart';
+import 'package:cstain/screens/User%20screens/main_navigation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+//import 'package:get/get_navigation/src/root/get_material_app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,106 +21,55 @@ void main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
+class MyApp extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authStateProvider);
+
     return MaterialApp(
-      title: '',
+      title: 'C:STAIN',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFABD5C5)),
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      home: const AuthGate(),
+      home: authState.when(
+        data: (user) {
+          if (user != null) {
+            return FutureBuilder<DocumentSnapshot>(
+              future: FirebaseFirestore.instance
+                  .collection('user')
+                  .doc(user.uid)
+                  .get(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Scaffold(
+                    body: Center(child: Loader()),
+                  );
+                }
+                if (snapshot.hasError ||
+                    !snapshot.hasData ||
+                    !snapshot.data!.exists) {
+                  return UserAuthPage(); // If user data is missing, go to login
+                }
+
+                final userData = snapshot.data!.data() as Map<String, dynamic>;
+                final String role = userData['role'] ?? 'user';
+
+                return role == 'corp' ? CorpBottomNav() : UserBottomNav();
+              },
+            );
+          } else {
+            return UserAuthPage(); // If no user is logged in, show login screen
+          }
+        },
+        loading: () => Scaffold(
+          body: Center(child: Loader()),
+        ),
+        error: (err, stack) => Scaffold(
+          body: Center(child: Text('Error: ${err.toString()}')),
+        ),
+      ),
     );
   }
 }
-
-
-// /*******************************************/
-// import 'package:cstain/backend/auth_gate.dart';
-// import 'package:cstain/backend/firebase_options.dart';
-// import 'package:firebase_core/firebase_core.dart';
-// import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-// void main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   await Firebase.initializeApp(
-//     options: DefaultFirebaseOptions.currentPlatform,
-//   );
-
-//   runApp(
-//     ProviderScope(child: MyApp()),
-//   );
-// }
-
-// class MyApp extends StatefulWidget {
-//   const MyApp({super.key});
-
-//   @override
-//   _MyAppState createState() => _MyAppState();
-// }
-
-// class _MyAppState extends State<MyApp> {
-//   @override
-//   void initState() {
-//     super.initState();
-//     _initDynamicLinks();
-//   }
-
-//   // Initialize dynamic links and handle incoming links
-//   Future<void> _initDynamicLinks() async {
-//     FirebaseDynamicLinks.instance.onLink(
-//       onSuccess: (PendingDynamicLinkData? dynamicLinkData) async {
-//         final Uri? deepLink = dynamicLinkData?.link;
-
-//         if (deepLink != null) {
-//           _handleDeepLink(deepLink);
-//         }
-//       },
-//       onError: (OnLinkErrorException e) async {
-//         print('Error handling dynamic link: ${e.message}');
-//       },
-//     );
-
-//     // Handle dynamic links when the app is opened from terminated state
-//     final PendingDynamicLinkData? initialLink = await FirebaseDynamicLinks.instance.getInitialLink();
-//     if (initialLink?.link != null) {
-//       _handleDeepLink(initialLink!.link!);
-//     }
-//   }
-
-//   // Function to handle the deep link and navigate accordingly
-//   void _handleDeepLink(Uri deepLink) {
-//     // Example: Navigate to a specific page if post ID is available in the link
-//     final postId = deepLink.queryParameters['id'];
-//     if (postId != null) {
-//       // Navigate to the specific post page using postId
-//       Navigator.push(
-//         context,
-//         MaterialPageRoute(
-//           builder: (context) => PostDetailPage(postId: postId), // Assume this is the page you want to navigate to
-//         ),
-//       );
-//     }
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'MyApp',
-//       theme: ThemeData(
-//         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFABD5C5)),
-//         useMaterial3: true,
-//       ),
-//       debugShowCheckedModeBanner: false,
-//       home: const AuthGate(),
-//     );
-//   }
-// }
-

@@ -4,7 +4,7 @@ import 'package:cstain/components/loader.dart';
 import 'package:cstain/components/streak_service.dart';
 import 'package:cstain/models/categories_and_action.dart';
 import 'package:cstain/models/user_contribution.dart';
-import 'package:cstain/providers/providers.dart';
+import 'package:cstain/providers/action%20providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';

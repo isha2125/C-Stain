@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cstain/providers/providers.dart';
+import 'package:cstain/providers/auth_service.dart';
+import 'package:cstain/providers/action%20providers/providers.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../backend/auth_gate.dart';
-import '../models/user_contribution.dart';
+import '../../backend/auth_gate.dart';
+import '../../models/user_contribution.dart';
 import 'action_detailScreen.dart';
 
 class ActionScreen extends ConsumerStatefulWidget {
@@ -21,6 +22,8 @@ class _ActionScreenState extends ConsumerState<ActionScreen> {
     _fetchTodayActions();
     //countUserContributions();
   }
+
+  //firestore service
 
   Future<void> _fetchTodayActions() async {
     final myUser = ref.read(userProvider);
@@ -285,3 +288,187 @@ class _ActionScreenState extends ConsumerState<ActionScreen> {
     }
   }
 }
+// //*******************just tried with the action providers************************* */
+// import 'package:cstain/providers/actions_provider.dart';
+// import 'package:cstain/screens/action_detailScreen.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import '../models/user_contribution.dart';
+// import '../providers/auth_service.dart';
+
+// class ActionScreen extends ConsumerStatefulWidget {
+//   const ActionScreen({Key? key}) : super(key: key);
+
+//   @override
+//   ConsumerState<ActionScreen> createState() => _ActionScreenState();
+// }
+
+// class _ActionScreenState extends ConsumerState<ActionScreen> {
+//   @override
+//   Widget build(BuildContext context) {
+//     final myUser = ref.watch(userProvider);
+//     final todayActionsAsync = ref.watch(todayActionsProvider);
+
+//     final totalCarbonSaved = todayActionsAsync.when(
+//       data: (actions) =>
+//           actions.fold(0.0, (sum, action) => sum + action.co2_saved),
+//       loading: () => 0.0,
+//       error: (_, __) => 0.0,
+//     );
+
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Actions', style: TextStyle(fontWeight: FontWeight.w400)),
+//       ),
+//       body: Column(
+//         children: [
+//           _buildTotalCarbonSavedCard(context, totalCarbonSaved),
+//           Expanded(
+//             child: todayActionsAsync.when(
+//               data: (actions) => actions.isEmpty
+//                   ? _buildNoActionsPlaceholder()
+//                   : _buildActionsList(actions),
+//               loading: () => Center(child: CircularProgressIndicator()),
+//               error: (error, stack) =>
+//                   Center(child: Text('Error loading actions')),
+//             ),
+//           ),
+//         ],
+//       ),
+//       floatingActionButton: FloatingActionButton.extended(
+//         onPressed: () {
+//           Navigator.push(
+//             context,
+//             MaterialPageRoute(
+//               builder: (context) => ActionDetailScreen(
+//                 userId: myUser!.uid,
+//                 onNavigateBack: () {
+//                   ref.invalidate(
+//                       todayActionsProvider); // Refresh list after returning
+//                 },
+//                 onAddLog: (String) {},
+//               ),
+//             ),
+//           );
+//         },
+//         icon: Icon(Icons.add),
+//         label: Text("New Action"),
+//         backgroundColor: Colors.green,
+//       ),
+//     );
+//   }
+
+//   Widget _buildTotalCarbonSavedCard(
+//       BuildContext context, double totalCarbonSaved) {
+//     return Padding(
+//       padding: const EdgeInsets.all(16.0),
+//       child: Card(
+//         shape:
+//             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+//         elevation: 3,
+//         child: Padding(
+//           padding: const EdgeInsets.all(16.0),
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               Text("Total Carbon Saved Today",
+//                   style: Theme.of(context)
+//                       .textTheme
+//                       .titleMedium
+//                       ?.copyWith(fontWeight: FontWeight.bold)),
+//               SizedBox(height: 8),
+//               Text(
+//                 '${totalCarbonSaved.toStringAsFixed(2)} kg CO₂',
+//                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+//                     color: Color(0xFF237155), fontWeight: FontWeight.bold),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget _buildActionsList(List<UserContributionModel> actions) {
+//     return ListView.separated(
+//       shrinkWrap: true,
+//       physics: BouncingScrollPhysics(),
+//       padding: const EdgeInsets.symmetric(horizontal: 16.0),
+//       itemCount: actions.length,
+//       separatorBuilder: (context, index) =>
+//           Divider(color: Colors.grey[300], thickness: 1),
+//       itemBuilder: (context, index) {
+//         final action = actions[index];
+//         final categoryData = _getCategoryIcon(action.category);
+//         return ListTile(
+//           leading: CircleAvatar(
+//             backgroundColor: categoryData['color'],
+//             child: Icon(categoryData['icon'], color: Colors.white),
+//           ),
+//           title: Text(
+//             action.action,
+//             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+//                   fontWeight: FontWeight.bold,
+//                   color: Colors.grey[800],
+//                 ),
+//           ),
+//           subtitle: Text(
+//             '${_formatDuration(action.duration.toInt(), action.category)} - ${action.category}',
+//             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+//                   color: Colors.grey[600],
+//                 ),
+//           ),
+//           trailing: Text(
+//             '${action.co2_saved.toStringAsFixed(2)} kg',
+//             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+//                   color: Color(0xFF237155),
+//                   fontWeight: FontWeight.bold,
+//                 ),
+//           ),
+//         );
+//       },
+//     );
+//   }
+
+//   Widget _buildNoActionsPlaceholder() {
+//     return Center(
+//       child: Padding(
+//         padding: const EdgeInsets.all(16.0),
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             Icon(Icons.hourglass_empty, size: 50, color: Colors.grey),
+//             SizedBox(height: 8),
+//             Text(
+//               "No actions recorded today!",
+//               style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+
+//   Map<String, dynamic> _getCategoryIcon(String category) {
+//     switch (category) {
+//       case 'Transport':
+//         return {'icon': Icons.directions_car, 'color': Colors.blue};
+//       case 'Energy':
+//         return {'icon': Icons.flash_on, 'color': Colors.orange};
+//       case 'Food':
+//         return {'icon': Icons.restaurant, 'color': Colors.green};
+//       default:
+//         return {'icon': Icons.category, 'color': Colors.grey};
+//     }
+//   }
+
+//   String _formatDuration(int duration, String category) {
+//     if (category == 'Transport') {
+//       return '$duration min';
+//     } else if (category == 'Energy') {
+//       return '$duration kWh';
+//     } else {
+//       return '$duration items';
+//     }
+//   }
+// }

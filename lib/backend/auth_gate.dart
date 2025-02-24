@@ -1,322 +1,195 @@
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:cstain/backend/corp_auth_page.dart';
-// import 'package:cstain/components/loader.dart';
-// //import 'package:cstain/components/streak_service.dart';
-// import 'package:cstain/models/user.dart';
-// import 'package:cstain/providers/auth_service.dart';
-// import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
-// import 'package:firebase_ui_auth/firebase_ui_auth.dart';
-// import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-// import '../screens/main_navigation.dart';
-
-// final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-// CollectionReference get _usersCollection => _firestore.collection('user');
-// final userProvider = StateProvider<UserModel?>((ref) => null);
-
-// final userDataLoadingProvider = FutureProvider.autoDispose((ref) async {
-//   final authState = await ref.watch(authStateProvider.future);
-//   if (authState != null) {
-//     String role = 'user'; // Initialize role with a default value
-//     await AuthGate._handleUserModel(authState, ref);
-//   }
-// });
-
-// class AuthGate extends ConsumerWidget {
-//   const AuthGate({super.key});
-
-//   static Future<void> _handleUserModel(User user, Ref ref) async {
-//     final userDoc = await _usersCollection.doc(user.uid).get();
-
-//     //streak provider
-
-//     // final streakService = StreakService();
-
-//     UserModel userModel;
-
-//     if (!userDoc.exists) {
-//       userModel = UserModel(
-//         uid: user.uid,
-//         bio: '',
-//         created_at: Timestamp.now(),
-//         email: user.email ?? 'No Email',
-//         full_name: user.displayName ?? 'Climate Action Enthusiast',
-//         profile_picture_url: user.photoURL ?? 'Default Profile Picture URL',
-//         total_CO2_saved: 0.0,
-//         username: user.displayName ?? 'No Username',
-//         currentStreak: 0,
-//         lastActivityDate: Timestamp.now(),
-//         streak_sunday: false,
-//         streak_monday: false,
-//         streak_tuesday: false,
-//         streak_wednesday: false,
-//         streak_thursday: false,
-//         streak_friday: false,
-//         streak_saturday: false,
-//       );
-
-//       await _usersCollection.doc(userModel.uid).set(userModel.toMap());
-//     } else {
-//       userModel = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
-//     }
-//     //await streakService.updateStreakOnNewLog();
-
-//     ref.read(userProvider.notifier).state = userModel;
-//   }
-
-//   @override
-//   Widget build(BuildContext context, WidgetRef ref) {
-//     final authState = ref.watch(authStateProvider);
-
-//     return authState.when(
-//       data: (user) {
-//         if (user == null) {
-//           return SignInScreen(
-//             providers: [
-//               EmailAuthProvider(),
-//               GoogleProvider(
-//                 clientId:
-//                     '341493656655-a49svge8kfg4jdcve8te8pg60odtep9b.apps.googleusercontent.com',
-//               ),
-//             ],
-//             headerBuilder: (context, constraints, shrinkOffset) {
-//               return Padding(
-//                 padding: const EdgeInsets.all(20),
-//                 child: AspectRatio(
-//                   aspectRatio: 1,
-//                   child: Image.asset('assets/Earth black 1.png'),
-//                 ),
-//               );
-//             },
-//             subtitleBuilder: (context, action) {
-//               return Padding(
-//                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-//                 child: action == AuthAction.signIn
-//                     ? const Text('Welcome to C:Stain, please sign in!')
-//                     : const Text('Welcome to C:stain, please sign up!'),
-//               );
-//             },
-//             footerBuilder: (context, action) {
-//               return Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   const Padding(
-//                     padding: EdgeInsets.only(top: 16),
-//                     child: Text(
-//                       'By signing in, you agree to our terms and conditions.',
-//                       style: TextStyle(color: Colors.grey),
-//                       textAlign: TextAlign.left,
-//                     ),
-//                   ),
-//                   Row(
-//                     crossAxisAlignment: CrossAxisAlignment.center,
-//                     mainAxisAlignment: MainAxisAlignment.start,
-//                     children: [
-//                       Text("Are you a corporate user?"),
-//                       TextButton(
-//                         onPressed: () {
-//                           // Navigate to the corporate sign-up page
-//                           Navigator.of(context).push(
-//                             MaterialPageRoute(
-//                                 builder: (context) => const CorpAuthPage()),
-//                           );
-//                         },
-//                         child: Text(
-//                           'Sign up here',
-//                           style: TextStyle(
-//                               color: Color(0xFF237155),
-//                               fontWeight: FontWeight.w600),
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ],
-//               );
-//             },
-//             sideBuilder: (context, shrinkOffset) {
-//               return Padding(
-//                 padding: const EdgeInsets.all(20),
-//                 child: AspectRatio(
-//                   aspectRatio: 1,
-//                   child: Image.asset('assets/Earth black 1.png'),
-//                 ),
-//               );
-//             },
-//           );
-//         }
-
-//         // Watch the userDataLoadingProvider
-//         final userDataLoading = ref.watch(userDataLoadingProvider);
-
-//         return userDataLoading.when(
-//           data: (_) => const BottomNavigation(),
-//           loading: () => const Loader(),
-//           error: (error, stack) =>
-//               Center(child: Text('Error loading user data')),
-//         );
-//       },
-//       loading: () => Loader(),
-//       error: (error, stack) => Center(child: Text('Something went wrong')),
-//     );
-//   }
-// }
-//***************the below codes works grt ****************************************************************************
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/backend/corp_auth_page.dart';
-import 'package:cstain/components/loader.dart';
 import 'package:cstain/models/user.dart';
 import 'package:cstain/providers/auth_service.dart';
-import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
-import 'package:firebase_ui_auth/firebase_ui_auth.dart';
-import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
+import 'package:cstain/screens/User%20screens/main_navigation.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../screens/main_navigation.dart';
+class UserAuthPage extends ConsumerStatefulWidget {
+  @override
+  _UserAuthPageState createState() => _UserAuthPageState();
+}
 
-final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-CollectionReference get _usersCollection => _firestore.collection('user');
-final userProvider = StateProvider<UserModel?>((ref) => null);
+class _UserAuthPageState extends ConsumerState<UserAuthPage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLogin = true;
 
-final userDataLoadingProvider = FutureProvider.autoDispose((ref) async {
-  final authState = await ref.watch(authStateProvider.future);
-  if (authState != null) {
-    await AuthGate._handleUserModel(authState, ref);
-  }
-});
+  Future<void> _signInWithEmail() async {
+    try {
+      UserCredential userCredential;
+      if (_isLogin) {
+        userCredential = await _auth.signInWithEmailAndPassword(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
+      } else {
+        userCredential = await _auth.createUserWithEmailAndPassword(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
 
-class AuthGate extends ConsumerWidget {
-  const AuthGate({super.key});
+        // Create user model and save to Firestore
+        UserModel newUser = UserModel(
+          uid: userCredential.user!.uid,
+          email: _emailController.text,
+          full_name: userCredential.user!.displayName ?? "New User",
+          username: userCredential.user!.email!.split('@')[0],
+          bio: '',
+          profile_picture_url: userCredential.user!.photoURL ?? '',
+          created_at: Timestamp.now(),
+          total_CO2_saved: 0.0,
+          currentStreak: 0,
+          lastActivityDate: Timestamp.now(),
+          streak_sunday: false,
+          streak_monday: false,
+          streak_tuesday: false,
+          streak_wednesday: false,
+          streak_thursday: false,
+          streak_friday: false,
+          streak_saturday: false,
+          role: 'user',
+        );
 
-  static Future<void> _handleUserModel(User user, Ref ref) async {
-    final userDoc = await _usersCollection.doc(user.uid).get();
+        await _firestore
+            .collection('user')
+            .doc(newUser.uid)
+            .set(newUser.toMap());
+        ref.read(userProvider.notifier).setUser(newUser);
+      }
 
-    UserModel userModel;
+      // Fetch user details from Firestore and update provider
+      DocumentSnapshot userDoc = await _firestore
+          .collection('user')
+          .doc(userCredential.user!.uid)
+          .get();
+      UserModel loggedInUser =
+          UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+      ref.read(userProvider.notifier).setUser(loggedInUser);
 
-    if (!userDoc.exists) {
-      userModel = UserModel(
-        uid: user.uid,
-        bio: '',
-        created_at: Timestamp.now(),
-        email: user.email ?? 'No Email',
-        full_name: user.displayName ?? 'Climate Action Enthusiast',
-        profile_picture_url: user.photoURL ?? 'Default Profile Picture URL',
-        total_CO2_saved: 0.0,
-        username: user.displayName ?? 'No Username',
-        currentStreak: 0,
-        lastActivityDate: Timestamp.now(),
-        streak_sunday: false,
-        streak_monday: false,
-        streak_tuesday: false,
-        streak_wednesday: false,
-        streak_thursday: false,
-        streak_friday: false,
-        streak_saturday: false,
-        role: 'user', // Set default role as 'user'
-        // Initialize corporate fields as null since this is a regular user
-      );
-
-      await _usersCollection.doc(userModel.uid).set(userModel.toMap());
-    } else {
-      userModel = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+      _navigateToUserHome();
+    } catch (e) {
+      print('Error: $e');
     }
+  }
 
-    ref.read(userProvider.notifier).state = userModel;
+  Future<void> _signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
+
+      DocumentSnapshot userDoc = await _firestore
+          .collection('user')
+          .doc(userCredential.user!.uid)
+          .get();
+      if (!userDoc.exists) {
+        UserModel newUser = UserModel(
+          uid: userCredential.user!.uid,
+          email: userCredential.user!.email!,
+          full_name: userCredential.user!.displayName ?? "New User",
+          username: userCredential.user!.email!.split('@')[0],
+          bio: '',
+          profile_picture_url: userCredential.user!.photoURL ?? '',
+          created_at: Timestamp.now(),
+          total_CO2_saved: 0.0,
+          currentStreak: 0,
+          lastActivityDate: Timestamp.now(),
+          streak_sunday: false,
+          streak_monday: false,
+          streak_tuesday: false,
+          streak_wednesday: false,
+          streak_thursday: false,
+          streak_friday: false,
+          streak_saturday: false,
+          role: 'user',
+        );
+
+        await _firestore
+            .collection('user')
+            .doc(newUser.uid)
+            .set(newUser.toMap());
+        ref.read(userProvider.notifier).setUser(newUser);
+      } else {
+        UserModel loggedInUser =
+            UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+        ref.read(userProvider.notifier).setUser(loggedInUser);
+      }
+
+      _navigateToUserHome();
+    } catch (e) {
+      print('Google Sign-In Error: $e');
+    }
+  }
+
+  void _navigateToUserHome() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => UserBottomNav()),
+    );
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authStateProvider);
-
-    return authState.when(
-      data: (user) {
-        if (user == null) {
-          return SignInScreen(
-            providers: [
-              EmailAuthProvider(),
-              GoogleProvider(
-                clientId:
-                    '341493656655-a49svge8kfg4jdcve8te8pg60odtep9b.apps.googleusercontent.com',
-              ),
-            ],
-            headerBuilder: (context, constraints, shrinkOffset) {
-              return Padding(
-                padding: const EdgeInsets.all(20),
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: Image.asset('assets/Earth black 1.png'),
-                ),
-              );
-            },
-            subtitleBuilder: (context, action) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: action == AuthAction.signIn
-                    ? const Text('Welcome to C:Stain, please sign in!')
-                    : const Text('Welcome to C:stain, please sign up!'),
-              );
-            },
-            footerBuilder: (context, action) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(top: 16),
-                    child: Text(
-                      'By signing in, you agree to our terms and conditions.',
-                      style: TextStyle(color: Colors.grey),
-                      textAlign: TextAlign.left,
-                    ),
-                  ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text("Are you a corporate user?"),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (context) => CorpAuthPage()),
-                          );
-                        },
-                        child: Text(
-                          'Sign up here',
-                          style: TextStyle(
-                              color: Color(0xFF237155),
-                              fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              );
-            },
-            sideBuilder: (context, shrinkOffset) {
-              return Padding(
-                padding: const EdgeInsets.all(20),
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: Image.asset('assets/Earth black 1.png'),
-                ),
-              );
-            },
-          );
-        }
-
-        final userDataLoading = ref.watch(userDataLoadingProvider);
-
-        return userDataLoading.when(
-          data: (_) => const BottomNavigation(),
-          loading: () => const Loader(),
-          error: (error, stack) =>
-              Center(child: Text('Error loading user data')),
-        );
-      },
-      loading: () => Loader(),
-      error: (error, stack) => Center(child: Text('Something went wrong')),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(_isLogin ? 'User Login' : 'User Sign Up')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextField(
+              controller: _emailController,
+              decoration: InputDecoration(labelText: 'Email'),
+            ),
+            TextField(
+              controller: _passwordController,
+              decoration: InputDecoration(labelText: 'Password'),
+              obscureText: true,
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _signInWithEmail,
+              child: Text(_isLogin ? 'Login' : 'Sign Up'),
+            ),
+            ElevatedButton(
+              onPressed: _signInWithGoogle,
+              child: Text('Sign in with Google'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _isLogin = !_isLogin;
+                });
+              },
+              child: Text(_isLogin
+                  ? "Don't have an account? Sign Up"
+                  : "Already have an account? Login"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => CorpAuthPage()),
+                );
+              },
+              child: Text("Are you a corporate user? Register here!"),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

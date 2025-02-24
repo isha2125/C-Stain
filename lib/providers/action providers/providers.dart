@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/models/achievements.dart';
 import 'package:cstain/models/badges.dart';
 import 'package:cstain/models/categories_and_action.dart';
@@ -36,6 +35,10 @@ final userContributionsProvider =
   return firestoreService.fetchTodayUserContributions(userId);
 });
 
+//user stream provider
+//used on comunnity screen and dashboard screen and home screen
+//to get the user data stream
+//
 final userStreamProvider = StreamProvider.autoDispose<UserModel>((ref) {
   final firestoreService = ref.watch(firestoreServiceProvider);
   final user = FirebaseAuth.instance.currentUser;
@@ -204,53 +207,3 @@ final top5ActionsProvider =
     };
   }).toList();
 });
-
-
-// In /lib/providers/providers.dart
-
-// final co2SavedOverTimeProvider =
-//     FutureProvider<List<UserContributionModel>>((ref) async {
-//   final firestoreService = ref.watch(firestoreServiceProvider);
-//   final user = ref.watch(userStreamProvider.asProvider()).value;
-//   if (user == null) throw Exception('User not authenticated');
-//   return firestoreService.getUserContributions(user.uid);
-// });
-
-// final categoryBreakdownProvider =
-//     FutureProvider<Map<String, double>>((ref) async {
-//   final contributions = await ref.watch(co2SavedOverTimeProvider.future);
-//   final breakdown = <String, double>{};
-//   for (final contribution in contributions) {
-//     breakdown.update(
-//         contribution.category, (value) => value + contribution.co2_saved,
-//         ifAbsent: () => contribution.co2_saved);
-//   }
-//   return breakdown;
-// });
-
-// final dailyContributionsProvider =
-//     FutureProvider<Map<DateTime, double>>((ref) async {
-//   final contributions = await ref.watch(co2SavedOverTimeProvider.future);
-//   final dailyContributions = <DateTime, double>{};
-//   for (final contribution in contributions) {
-//     final date = DateTime(
-//         contribution.createdAtDateTime.year,
-//         contribution.createdAtDateTime.month,
-//         contribution.createdAtDateTime.day);
-//     dailyContributions.update(date, (value) => value + contribution.co2_saved,
-//         ifAbsent: () => contribution.co2_saved);
-//   }
-//   return dailyContributions;
-// });
-
-// final co2SavingsByActionProvider =
-//     FutureProvider<Map<String, double>>((ref) async {
-//   final contributions = await ref.watch(co2SavedOverTimeProvider.future);
-//   final savingsByAction = <String, double>{};
-//   for (final contribution in contributions) {
-//     savingsByAction.update(
-//         contribution.action, (value) => value + contribution.co2_saved,
-//         ifAbsent: () => contribution.co2_saved);
-//   }
-//   return savingsByAction;
-// });

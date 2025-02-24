@@ -1137,7 +1137,7 @@ import 'package:cstain/models/post.dart';
 import 'package:cstain/models/user.dart';
 import 'package:cstain/models/user_badges.dart';
 import 'package:cstain/providers/auth_service.dart';
-import 'package:cstain/providers/providers.dart';
+import 'package:cstain/providers/action%20providers/providers.dart';
 import 'package:cstain/screens/community_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

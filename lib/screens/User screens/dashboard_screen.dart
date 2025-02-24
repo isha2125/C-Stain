@@ -817,9 +817,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:tuple/tuple.dart';
-import '../providers/providers.dart';
-import '../models/user_contribution.dart';
-import '../components/loader.dart';
+import '../../providers/action providers/providers.dart';
+import '../../models/user_contribution.dart';
+import '../../components/loader.dart';
 import 'package:intl/intl.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {

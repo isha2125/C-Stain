@@ -1,20 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cstain/screens/action_screen.dart';
+import 'package:cstain/screens/User%20screens/action_screen.dart';
 import 'package:cstain/screens/community_screen.dart';
-import 'package:cstain/screens/cormBottomNav.dart';
-import 'package:cstain/screens/dashboard_screen.dart';
-import 'package:cstain/screens/home_screen.dart';
+import 'package:cstain/screens/Corp%20screens/corp_bottom_nav.dart';
+import 'package:cstain/screens/User%20screens/dashboard_screen.dart';
+import 'package:cstain/screens/User%20screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class BottomNavigation extends StatefulWidget {
-  const BottomNavigation({super.key});
+class UserBottomNav extends StatefulWidget {
+  const UserBottomNav({super.key});
 
   @override
-  State<BottomNavigation> createState() => _BottomNavigationState();
+  State<UserBottomNav> createState() => _UserBottomNavigationState();
 }
 
-class _BottomNavigationState extends State<BottomNavigation> {
+class _UserBottomNavigationState extends State<UserBottomNav> {
   int currentPageIndex = 0;
 
   @override
