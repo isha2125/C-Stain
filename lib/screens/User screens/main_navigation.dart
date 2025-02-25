@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/screens/User%20screens/action_screen.dart';
+import 'package:cstain/screens/User%20screens/user_campaign_screen.dart';
 import 'package:cstain/screens/community_screen.dart';
 import 'package:cstain/screens/Corp%20screens/corp_bottom_nav.dart';
 import 'package:cstain/screens/User%20screens/dashboard_screen.dart';
@@ -81,14 +82,19 @@ class _UserBottomNavigationState extends State<UserBottomNav> {
               label: 'Home',
             ),
             NavigationDestination(
+              selectedIcon: Icon(Icons.assessment),
+              icon: Icon(Icons.assessment_outlined),
+              label: 'Dashboard',
+            ),
+            NavigationDestination(
               selectedIcon: Icon(Icons.check_circle),
               icon: Icon(Icons.check_circle_outline),
               label: 'Actions',
             ),
             NavigationDestination(
-              selectedIcon: Icon(Icons.assessment),
-              icon: Icon(Icons.assessment_outlined),
-              label: 'Dashboard',
+              selectedIcon: Icon(Icons.campaign),
+              icon: Icon(Icons.campaign_outlined),
+              label: 'Campaign',
             ),
             NavigationDestination(
               selectedIcon: Icon(Icons.groups),
@@ -102,11 +108,14 @@ class _UserBottomNavigationState extends State<UserBottomNav> {
         /// Home page
         HomeScreen(),
 
+        /// Dashboard page
+        DashboardScreen(),
+
         /// Actions page
         ActionScreen(),
 
-        /// Dashboard page
-        DashboardScreen(),
+        /// Campaign Screen
+        UserCampaignScreen(),
 
         /// Community page
         CommunityScreen(),

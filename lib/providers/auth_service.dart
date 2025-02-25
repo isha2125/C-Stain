@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 final authStateProvider = StreamProvider<User?>((ref) {
   return FirebaseAuth.instance.authStateChanges();
 });
-
+// here it is if u need the user id of the logged in user!!
 final userProvider = StateNotifierProvider<UserNotifier, UserModel?>((ref) {
   return UserNotifier();
 });

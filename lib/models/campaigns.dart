@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class Campaign {
   final String campaignId;
@@ -15,6 +16,7 @@ class Campaign {
   final Timestamp endDate;
   final Timestamp created_at;
   final String? imageUrl;
+  final List<String>? participants;
   Campaign({
     required this.campaignId,
     required this.corpUserId,
@@ -27,6 +29,7 @@ class Campaign {
     required this.endDate,
     required this.created_at,
     this.imageUrl,
+    this.participants,
   });
 
   Campaign copyWith({
@@ -41,6 +44,7 @@ class Campaign {
     Timestamp? endDate,
     Timestamp? created_at,
     String? imageUrl,
+    List<String>? participants,
   }) {
     return Campaign(
       campaignId: campaignId ?? this.campaignId,
@@ -54,6 +58,7 @@ class Campaign {
       endDate: endDate ?? this.endDate,
       created_at: created_at ?? this.created_at,
       imageUrl: imageUrl ?? this.imageUrl,
+      participants: participants ?? this.participants,
     );
   }
 
@@ -70,24 +75,56 @@ class Campaign {
       'endDate': endDate,
       'created_at': created_at,
       'imageUrl': imageUrl,
+      'participants': participants,
     };
   }
 
   factory Campaign.fromMap(Map<String, dynamic> map) {
-    return Campaign(
-      campaignId: map['campaignId'] as String,
-      corpUserId: map['corpUserId'] as String,
-      title: map['title'] as String,
-      description: map['description'] as String,
-      category: map['category'] as String,
-      action: map['action'] as String,
-      targetCO2Savings: map['targetCO2Savings'] as double,
-      startDate: map['startDate'] as Timestamp,
-      endDate: map['endDate'] as Timestamp,
-      created_at: map['created_at'] as Timestamp,
-      imageUrl: map['imageUrl'] != null ? map['imageUrl'] as String : null,
-    );
+    try {
+      print('Parsing campaign: ${map['campaignId']}');
+      return Campaign(
+        campaignId: map['campaignId'] as String? ?? '',
+        corpUserId: map['corpUserId'] as String? ?? '',
+        title: map['title'] as String? ?? '',
+        description: map['description'] as String? ?? '',
+        category: map['category'] as String? ?? '',
+        action: map['action'] as String? ?? '',
+        targetCO2Savings: (map['targetCO2Savings'] is int)
+            ? (map['targetCO2Savings'] as int).toDouble()
+            : (map['targetCO2Savings'] as double? ?? 0.0),
+        startDate: map['startDate'] as Timestamp,
+        endDate: (map['endDate'] as Timestamp),
+        created_at: (map['created_at'] as Timestamp),
+        imageUrl: map['imageUrl'] as String?,
+        participants: (map['participants'] as List<dynamic>?)
+                ?.map((e) => e.toString())
+                .toList() ??
+            [],
+      );
+    } catch (e) {
+      print('❌ Error parsing campaign: $e');
+      throw Exception("Error parsing campaign: $e");
+    }
   }
+
+  // factory Campaign.fromMap(Map<String, dynamic> map) {
+  //   return Campaign(
+  //     campaignId: map['campaignId'] as String,
+  //     corpUserId: map['corpUserId'] as String,
+  //     title: map['title'] as String,
+  //     description: map['description'] as String,
+  //     category: map['category'] as String,
+  //     action: map['action'] as String,
+  //     targetCO2Savings: map['targetCO2Savings'] as double,
+  //     startDate: map['startDate'] as Timestamp,
+  //     endDate: map['endDate'] as Timestamp,
+  //     created_at: map['created_at'] as Timestamp,
+  //     imageUrl: map['imageUrl'] != null ? map['imageUrl'] as String : null,
+  //     participants: map['participants'] != null
+  //         ? List<String>.from((map['participants'] as List<String>))
+  //         : null,
+  //   );
+  // }
 
   String toJson() => json.encode(toMap());
 
@@ -96,7 +133,7 @@ class Campaign {
 
   @override
   String toString() {
-    return 'Campaign(campaignId: $campaignId, corpUserId: $corpUserId, title: $title, description: $description, category: $category, action: $action, targetCO2Savings: $targetCO2Savings, startDate: $startDate, endDate: $endDate, created_at: $created_at, imageUrl: $imageUrl)';
+    return 'Campaign(campaignId: $campaignId, corpUserId: $corpUserId, title: $title, description: $description, category: $category, action: $action, targetCO2Savings: $targetCO2Savings, startDate: $startDate, endDate: $endDate, created_at: $created_at, imageUrl: $imageUrl, participants: $participants)';
   }
 
   @override
@@ -113,7 +150,8 @@ class Campaign {
         other.startDate == startDate &&
         other.endDate == endDate &&
         other.created_at == created_at &&
-        other.imageUrl == imageUrl;
+        other.imageUrl == imageUrl &&
+        listEquals(other.participants, participants);
   }
 
   @override
@@ -128,6 +166,7 @@ class Campaign {
         startDate.hashCode ^
         endDate.hashCode ^
         created_at.hashCode ^
-        imageUrl.hashCode;
+        imageUrl.hashCode ^
+        participants.hashCode;
   }
 }

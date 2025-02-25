@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cstain/components/participation_button.dart';
 import 'package:cstain/models/campaigns.dart';
 import 'package:cstain/models/comments.dart';
 import 'package:cstain/models/post.dart';
@@ -31,6 +32,8 @@ final allCampaignsProvider = StreamProvider<List<Campaign>>((ref) {
               print('Processing doc: ${doc.id}');
               print('Document data: ${doc.data()}');
               return Campaign.fromMap(doc.data() as Map<String, dynamic>);
+              print('Processing doc: ${doc.id}');
+              print('Document data: ${doc.data()}');
             } catch (e) {
               print('Error parsing campaign: ${doc.id}, Error: $e');
               return null;
@@ -1161,6 +1164,9 @@ class CampaignTile extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       campaign.description,
+                      // campaign.participants?.length == 1
+                      //     ? '1 participant'
+                      //     : '${campaign.participants?.length ?? 0} participants',
                       style: const TextStyle(fontSize: 14),
                     ),
                     const SizedBox(height: 8),
@@ -1179,23 +1185,24 @@ class CampaignTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Center(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Non-functional participate button
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                        ),
-                        child: const Text(
-                          'Participate',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
+                      child: ParticipateButton(campaignId: campaign.campaignId),
+                      // child: ElevatedButton(
+                      //   onPressed: () {
+                      //     // Non-functional participate button
+                      //   },
+                      //   style: ElevatedButton.styleFrom(
+                      //     backgroundColor: Colors.teal,
+                      //     shape: RoundedRectangleBorder(
+                      //       borderRadius: BorderRadius.circular(8),
+                      //     ),
+                      //     padding: const EdgeInsets.symmetric(
+                      //         horizontal: 16, vertical: 8),
+                      //   ),
+                      //   child: const Text(
+                      //     'Participate',
+                      //     style: TextStyle(color: Colors.white),
+                      //   ),
+                      // ),
                     ),
                   ],
                 ),
