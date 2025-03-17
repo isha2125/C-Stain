@@ -235,9 +235,12 @@ class _ActionDetailScreenState extends ConsumerState<ActionDetailScreen> {
                         );
                         final co2SavingFactor =
                             actionModel?.co2_saving_factor ?? 0;
+                        final double carbonSaved =
+                            numberOfMeals * co2SavingFactor;
+                        final String contributionId = '';
 
                         final contribution = UserContributionModel(
-                          contribution_id: Uuid().v4(),
+                          contribution_id: contributionId,
                           action: action,
                           category: selectedCategory!,
                           co2_saved: numberOfMeals * co2SavingFactor,
@@ -251,14 +254,27 @@ class _ActionDetailScreenState extends ConsumerState<ActionDetailScreen> {
                               ref.read(firestoreServiceProvider);
                           await firestoreService
                               .addUserContribution(contribution);
+                          // await firestoreService.updateCampaigns(
+                          //     contribution.user_id,
+                          //     contribution.action,
+                          //     carbonSaved);
+                          // await firestoreService.updateCampaigns(
+                          //     contribution.user_id,
+                          //     contribution.action,
+                          //     carbonSaved,
+                          //     contributionId);
+
                           print('User contribution added successfully');
+
+                          // _updateCampaigns(widget.userId, action, carbonSaved);
 
                           widget.onAddLog(
                               '$action: $numberOfMeals meals, CO2 saved: ${(numberOfMeals * co2SavingFactor).toStringAsFixed(2)}');
                           Navigator.pop(context);
                           widget.onNavigateBack();
                         } catch (e) {
-                          print('Error adding user contribution: $e');
+                          print(
+                              'Error adding user contribution from show foodinput bottom screen: $e');
                         }
                       },
                       child: Text('Add Log'),
@@ -324,9 +340,13 @@ class _ActionDetailScreenState extends ConsumerState<ActionDetailScreen> {
                           action_name: action, co2_saving_factor: 0),
                     );
                     final co2SavingFactor = actionModel?.co2_saving_factor ?? 0;
+                    // final double carbonSaved =
+                    // selectedDuration.inHours * co2SavingFactor;
+                    print(
+                        'here is the selected duration: ${selectedDuration.inHours}');
 
                     final contribution = UserContributionModel(
-                      contribution_id: Uuid().v4(),
+                      contribution_id: '',
                       action: action,
                       category: selectedCategory!,
                       co2_saved: selectedDuration.inMinutes * co2SavingFactor,
@@ -340,6 +360,7 @@ class _ActionDetailScreenState extends ConsumerState<ActionDetailScreen> {
                           ref.read(firestoreServiceProvider);
                       await firestoreService.addUserContribution(contribution);
                       print('User contribution added successfully');
+                      // _updateCampaigns(widget.userId, action, carbonSaved);
 
                       widget.onAddLog(
                           '$action: ${selectedDuration.inMinutes} minutes, CO2 saved: ${(selectedDuration.inMinutes * co2SavingFactor).toStringAsFixed(2)}');
@@ -347,7 +368,8 @@ class _ActionDetailScreenState extends ConsumerState<ActionDetailScreen> {
                       widget.onNavigateBack();
                       logUserAction();
                     } catch (e) {
-                      print('Error adding user contribution: $e');
+                      print(
+                          'Error adding user contribution from action detail screen: $e');
                     }
                   },
                   child: Text('Add Log'),

@@ -266,17 +266,88 @@ class _ActionScreenState extends ConsumerState<ActionScreen> {
     return todayActions.fold(0.0, (sum, action) => sum + action.co2_saved);
   }
 
+  // Future<void> _deleteAction(UserContributionModel action) async {
+  //   try {
+  //     final firestoreService = ref.read(firestoreServiceProvider);
+  //     await firestoreService.deleteUserContribution(action);
+
+  //     setState(() {
+  //       todayActions.remove(action);
+  //     });
+
+  //     // Update the total carbon saved
+  //     final totalCarbonSaved = _calculateTotalCarbonSaved();
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Action deleted successfully')),
+  //     );
+  //   } catch (e) {
+  //     print('Error deleting action: $e');
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Failed to delete action')),
+  //     );
+  //   }
+  // }
   Future<void> _deleteAction(UserContributionModel action) async {
     try {
       final firestoreService = ref.read(firestoreServiceProvider);
+
+      // 1️⃣ Delete the contribution from Firestore
       await firestoreService.deleteUserContribution(action);
 
+      // 2️⃣ Find participant entry where contribution_id array contains this contribution
+      final participantQuery = await FirebaseFirestore.instance
+          .collection('participations')
+          .where('contributionIds', arrayContains: action.contribution_id)
+          .get();
+
+      String? campaignId;
+
+      for (var doc in participantQuery.docs) {
+        campaignId = doc['campaignId']; // Get campaign ID
+
+        List<dynamic> contributionIds = List.from(doc['contributionIds']);
+        double participantCO2Saved = (doc['carbonSaved'] as num).toDouble();
+
+        // Remove the deleted contribution ID from the array
+        contributionIds.remove(action.contribution_id);
+
+        // Update the participant's CO2 saved value
+        double updatedParticipantCO2Saved =
+            participantCO2Saved - action.co2_saved;
+
+        await doc.reference.update({
+          'contributionIds': contributionIds, // Update contribution list
+          'carbonSaved':
+              updatedParticipantCO2Saved >= 0 ? updatedParticipantCO2Saved : 0,
+        });
+      }
+
+      // 3️⃣ If a campaign was linked, reduce its CO₂ saved
+      if (campaignId != null) {
+        final campaignQuery = await FirebaseFirestore.instance
+            .collection('campaigns')
+            .where('campaignId', isEqualTo: campaignId)
+            .get();
+
+        for (var campaignDoc in campaignQuery.docs) {
+          final campaignData = campaignDoc.data();
+          final double currentCampaignCO2Saved =
+              (campaignData['totalCarbonSaved'] ?? 0) as double;
+          final double updatedCampaignCO2Saved =
+              currentCampaignCO2Saved - action.co2_saved;
+
+          await campaignDoc.reference.update({
+            'totalCarbonSaved':
+                updatedCampaignCO2Saved >= 0 ? updatedCampaignCO2Saved : 0,
+          });
+        }
+      }
+
+      // 4️⃣ Remove from local state
       setState(() {
         todayActions.remove(action);
       });
 
-      // Update the total carbon saved
-      final totalCarbonSaved = _calculateTotalCarbonSaved();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Action deleted successfully')),
       );
@@ -288,6 +359,7 @@ class _ActionScreenState extends ConsumerState<ActionScreen> {
     }
   }
 }
+
 // //*******************just tried with the action providers************************* */
 // import 'package:cstain/providers/actions_provider.dart';
 // import 'package:cstain/screens/action_detailScreen.dart';

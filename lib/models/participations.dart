@@ -2,17 +2,22 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class ParticipationModel {
   final String participationId;
   final String campaignId;
   final String userId;
   final Timestamp joinedAt;
+  final double? carbonSaved;
+  final List<String>? contributionIds;
   ParticipationModel({
     required this.participationId,
     required this.campaignId,
     required this.userId,
     required this.joinedAt,
+    this.carbonSaved,
+    this.contributionIds,
   });
 
   ParticipationModel copyWith({
@@ -20,12 +25,16 @@ class ParticipationModel {
     String? campaignId,
     String? userId,
     Timestamp? joinedAt,
+    double? carbonSaved,
+    List<String>? contributionIds,
   }) {
     return ParticipationModel(
       participationId: participationId ?? this.participationId,
       campaignId: campaignId ?? this.campaignId,
       userId: userId ?? this.userId,
       joinedAt: joinedAt ?? this.joinedAt,
+      carbonSaved: carbonSaved ?? this.carbonSaved,
+      contributionIds: contributionIds ?? this.contributionIds,
     );
   }
 
@@ -35,6 +44,8 @@ class ParticipationModel {
       'campaignId': campaignId,
       'userId': userId,
       'joinedAt': joinedAt,
+      'carbonSaved': carbonSaved,
+      'contributionIds': contributionIds,
     };
   }
 
@@ -44,6 +55,14 @@ class ParticipationModel {
       campaignId: map['campaignId'] as String,
       userId: map['userId'] as String,
       joinedAt: map['joinedAt'] as Timestamp,
+      carbonSaved:
+          map['carbonSaved'] != null ? map['carbonSaved'] as double : null,
+      contributionIds: map['contributionIds'] != null
+          ? List<String>.from(
+              (map['contributionIds'] as List<dynamic>)
+                  .map((e) => e.toString()),
+            )
+          : [],
     );
   }
 
@@ -54,7 +73,7 @@ class ParticipationModel {
 
   @override
   String toString() {
-    return 'ParticipationModel(participationId: $participationId, campaignId: $campaignId, userId: $userId, joinedAt: $joinedAt)';
+    return 'ParticipationModel(participationId: $participationId, campaignId: $campaignId, userId: $userId, joinedAt: $joinedAt, carbonSaved: $carbonSaved, contributionIds: $contributionIds)';
   }
 
   @override
@@ -64,7 +83,9 @@ class ParticipationModel {
     return other.participationId == participationId &&
         other.campaignId == campaignId &&
         other.userId == userId &&
-        other.joinedAt == joinedAt;
+        other.joinedAt == joinedAt &&
+        other.carbonSaved == carbonSaved &&
+        listEquals(other.contributionIds, contributionIds);
   }
 
   @override
@@ -72,6 +93,8 @@ class ParticipationModel {
     return participationId.hashCode ^
         campaignId.hashCode ^
         userId.hashCode ^
-        joinedAt.hashCode;
+        joinedAt.hashCode ^
+        carbonSaved.hashCode ^
+        contributionIds.hashCode;
   }
 }

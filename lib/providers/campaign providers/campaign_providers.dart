@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cstain/models/campaigns.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -86,4 +87,44 @@ final ParticipantUsernameProvider =
     return data['username'] as String? ?? "Unknown User";
   }
   return "Unknown User";
+});
+//fetches campaign details on the user campaign detail screen
+final campaignStreamProvider =
+    StreamProvider.family<Campaign, String>((ref, campaignId) {
+  return FirebaseFirestore.instance
+      .collection('campaigns')
+      .doc(campaignId)
+      .snapshots()
+      .map((doc) {
+    final data = doc.data();
+    if (data == null) {
+      throw Exception("Campaign data not found for id: $campaignId");
+    }
+    return Campaign.fromMap(data);
+  });
+});
+
+// Provider that fetches the corporate user's name by corpUserId.
+// If not found in 'corporateUsers', it falls back to the 'users' collection.
+final corpUserNameProvider =
+    FutureProvider.family<String, String>((ref, corpUserId) async {
+  final corporateDoc = await FirebaseFirestore.instance
+      .collection('corporateUsers')
+      .doc(corpUserId)
+      .get();
+
+  if (corporateDoc.exists) {
+    final data = corporateDoc.data();
+    return data?['name'] ?? 'Unnamed Corporate';
+  } else {
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(corpUserId)
+        .get();
+    if (userDoc.exists) {
+      final data = userDoc.data();
+      return data?['username'] ?? 'Unnamed User';
+    }
+  }
+  return 'Unknown User';
 });

@@ -8,6 +8,7 @@ import 'package:cstain/models/user.dart';
 import 'package:cstain/models/user_achievement.dart';
 import 'package:cstain/models/user_badges.dart';
 import 'package:cstain/models/user_contribution.dart';
+import 'package:cstain/screens/User screens/action_detailScreen.dart';
 
 class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -52,16 +53,40 @@ class FirestoreService {
           final actionData = actionDoc.docs.first.data();
           final co2SavingFactor =
               (actionData['co2_saving_factor'] as num).toDouble();
-          final durationInHours = contribution.duration / 60;
-          contributionData['co2_saved'] =
+          final durationInHours = (contribution.duration / 60).toDouble();
+          double calculatedCO2Saved =
               (durationInHours * co2SavingFactor).toDouble();
+          contributionData['co2_saved'] = calculatedCO2Saved;
+
+          // contributionData['co2_saved'] =
+          //     (durationInHours * co2SavingFactor).toDouble();
           contributionData['duration'] = durationInHours.toDouble();
+          // await updateCampaigns(
+          //     contribution.user_id, contribution.action, calculatedCO2Saved);
         }
       }
 
+      // contributionData['created_at'] = FieldValue.serverTimestamp();
+
+      // await _firestore.collection('user_contributions').add(contributionData);
+
       contributionData['created_at'] = FieldValue.serverTimestamp();
 
-      await _firestore.collection('user_contributions').add(contributionData);
+      // ✅ Add contribution to Firestore and get the document ID
+      // DocumentReference contributionRef = await _firestore
+      //     .collection('user_contributions')
+      //     .add(contributionData);
+      // String contributionId = contributionRef.id;
+      String contributionId =
+          _firestore.collection('user_contributions').doc().id;
+
+      contributionData['contribution_id'] = contributionId;
+
+      await _firestore
+          .collection('user_contributions')
+          .doc(contributionId)
+          .set(contributionData);
+
       final userDoc =
           await _firestore.collection('user').doc(contribution.user_id).get();
       final userData =
@@ -70,11 +95,173 @@ class FirestoreService {
       await updateUserCO2Saved(contribution.user_id, newTotal);
       await updateStreak(userData.uid);
       print('i am trying to fix streak');
+      print('Calling updateCampaigns...');
+
+      await updateCampaigns(contribution.user_id, contribution.action,
+          (contributionData['co2_saved'] as num).toDouble(), contributionId);
+      print('calling particiapations');
 
       print(
           'User contribution added successfully with CO2 saved: ${contributionData['co2_saved']}');
-    } catch (e) {
+    } catch (e, stackTrace) {
       print('Error adding user contribution: $e');
+      print('Stack trace: $stackTrace');
+    }
+  }
+
+// campaigns crabon saving addition
+  // Future<void> updateCampaigns(
+  //     String userId, String action, double carbonAmount) async {
+  //   final participantQuery = await FirebaseFirestore.instance
+  //       .collection('participations')
+  //       .where('userId', isEqualTo: userId)
+  //       .get();
+
+  //   // 🛑 Edge Case 1: If user is not part of any campaign, exit early.
+  //   if (participantQuery.docs.isEmpty) {
+  //     print("❌ User has not joined any campaign.");
+  //     return;
+  //   }
+
+  //   for (var participant in participantQuery.docs) {
+  //     String campaignId = participant['campaignId'];
+
+  //     await FirebaseFirestore.instance.runTransaction((transaction) async {
+  //       var campaignRef =
+  //           FirebaseFirestore.instance.collection('campaigns').doc(campaignId);
+  //       var participantRef = FirebaseFirestore.instance
+  //           .collection('participations')
+  //           .doc(participant.id);
+
+  //       var campaignSnapshot = await transaction.get(campaignRef);
+  //       var participantSnapshot = await transaction.get(participantRef);
+
+  //       // 🛑 Edge Case 2: If campaign doesn't exist, exit.
+  //       if (!campaignSnapshot.exists || !participantSnapshot.exists) {
+  //         print("❌ Campaign or participant not found.");
+  //         return;
+  //       }
+
+  //       // 🛑 Edge Case 2: Check if campaign has started and is still ongoing.
+  //       Timestamp startDate = campaignSnapshot['startDate'];
+  //       Timestamp endDate = campaignSnapshot['endDate'];
+  //       Timestamp currentTimestamp = Timestamp.now();
+
+  //       if (currentTimestamp.compareTo(startDate) < 0) {
+  //         print("❌ Campaign has not started yet.");
+  //         return;
+  //       }
+
+  //       if (currentTimestamp.compareTo(endDate) > 0) {
+  //         print("❌ Campaign has already ended.");
+  //         return;
+  //       }
+
+  //       // ✅ Proceed only if action matches the campaign's action.
+  //       if (campaignSnapshot['action'] == action) {
+  //         double currentTotalCarbon = campaignSnapshot['totalCarbonSaved'];
+  //         double targetCO2Savings = campaignSnapshot['targetCO2Savings'];
+  //         double newCampaignTotal = currentTotalCarbon + carbonAmount;
+
+  //         // 🛑 Edge Case 4: Ensure total CO₂ savings doesn't exceed the campaign's target.
+  //         if (newCampaignTotal > targetCO2Savings) {
+  //           print("❌ Total carbon savings limit reached. Action not recorded.");
+  //           return;
+  //         }
+
+  //         double newUserTotal =
+  //             participantSnapshot['carbonSaved'] + carbonAmount;
+
+  //         // ✅ Update campaign's total CO₂ saved.
+  //         transaction.update(campaignRef, {
+  //           'totalCarbonSaved': newCampaignTotal,
+  //         });
+
+  //         // ✅ Update user's contribution in that campaign.
+  //         transaction.update(participantRef, {
+  //           'carbonSaved': newUserTotal,
+  //         });
+
+  //         print("✅ Action recorded: ${carbonAmount}kg CO₂ saved.");
+  //       }
+  //     });
+  //   }
+  // }
+
+  Future<void> updateCampaigns(String userId, String action,
+      double carbonAmount, String contributionId) async {
+    print('Calling updateCampaigns inside update camps...');
+    final participantQuery = await FirebaseFirestore.instance
+        .collection('participations')
+        .where('userId', isEqualTo: userId)
+        .get();
+
+    if (participantQuery.docs.isEmpty) {
+      print("❌ User has not joined any campaign.");
+      return;
+    }
+
+    for (var participant in participantQuery.docs) {
+      String campaignId = participant['campaignId'];
+
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        var campaignRef =
+            FirebaseFirestore.instance.collection('campaigns').doc(campaignId);
+        var participantRef = FirebaseFirestore.instance
+            .collection('participations')
+            .doc(participant.id);
+
+        var campaignSnapshot = await transaction.get(campaignRef);
+        var participantSnapshot = await transaction.get(participantRef);
+
+        if (!campaignSnapshot.exists || !participantSnapshot.exists) {
+          print("❌ Campaign or participant not found.");
+          return;
+        }
+
+        Timestamp startDate = campaignSnapshot['startDate'];
+        Timestamp endDate = campaignSnapshot['endDate'];
+        Timestamp currentTimestamp = Timestamp.now();
+
+        if (currentTimestamp.compareTo(startDate) < 0) {
+          print("❌ Campaign has not started yet.");
+          return;
+        }
+
+        if (currentTimestamp.compareTo(endDate) > 0) {
+          print("❌ Campaign has already ended.");
+          return;
+        }
+
+        if (campaignSnapshot['action'] == action) {
+          double currentTotalCarbon =
+              (campaignSnapshot['totalCarbonSaved'] as num).toDouble();
+          double targetCO2Savings =
+              (campaignSnapshot['targetCO2Savings'] as num).toDouble();
+          double newCampaignTotal = currentTotalCarbon + carbonAmount;
+
+          if (newCampaignTotal > targetCO2Savings) {
+            print("❌ Total carbon savings limit reached. Action not recorded.");
+            return;
+          }
+
+          double newUserTotal =
+              participantSnapshot['carbonSaved'] + carbonAmount;
+
+          // ✅ Update campaign's total CO₂ saved.
+          transaction.update(campaignRef, {
+            'totalCarbonSaved': newCampaignTotal,
+          });
+
+          // ✅ Update user's participation record: Add contribution ID
+          transaction.update(participantRef, {
+            'carbonSaved': newUserTotal,
+            'contributionIds': FieldValue.arrayUnion([contributionId])
+          });
+
+          print("✅ Contribution recorded: ${carbonAmount}kg CO₂ saved.");
+        }
+      });
     }
   }
 
@@ -158,6 +345,56 @@ class FirestoreService {
       throw e;
     }
   }
+
+//   Future<void> deleteUserContribution(UserContributionModel contribution) async {
+//   try {
+//     // Delete the contribution document from 'user_contributions'
+//     await _firestore
+//         .collection('user_contributions')
+//         .doc(contribution.contribution_id)
+//         .delete();
+
+//     // Update user's total CO2 saved
+//     final userDoc = await _firestore.collection('user').doc(contribution.user_id).get();
+//     final userData = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+//     final newUserTotal = userData.total_CO2_saved - contribution.co2_saved;
+//     await updateUserCO2Saved(contribution.user_id, newUserTotal);
+
+//     // Check if this contribution is part of a campaign
+//     if (contribution.campaign_id != null) {
+//       // Update the campaign's total CO2 saved
+//       final campaignRef = _firestore.collection('campaigns').doc(contribution.campaign_id);
+//       final campaignDoc = await campaignRef.get();
+//       if (campaignDoc.exists) {
+//         final campaignData = campaignDoc.data()!;
+//         final currentCampaignTotal = campaignData['total_CO2_saved'] ?? 0;
+//         final newCampaignTotal = currentCampaignTotal - contribution.co2_saved;
+//         await campaignRef.update({
+//           'total_CO2_saved': newCampaignTotal,
+//         });
+//       }
+
+//       // Update user's participation in the campaign if it exists
+//       final participationDocId = '${contribution.campaign_id}_${contribution.user_id}';
+//       final participationRef =
+//           _firestore.collection('campaign_participations').doc(participationDocId);
+//       final participationDoc = await participationRef.get();
+//       if (participationDoc.exists) {
+//         final participationData = participationDoc.data()!;
+//         final currentParticipationCO2 = participationData['co2_saved'] ?? 0;
+//         final newParticipationCO2 = currentParticipationCO2 - contribution.co2_saved;
+//         await participationRef.update({
+//           'co2_saved': newParticipationCO2,
+//         });
+//       }
+//     }
+
+//     print('User contribution deleted successfully');
+//   } catch (e) {
+//     print('Error deleting user contribution: $e');
+//     throw e;
+//   }
+// }
 
   Future<void> updateStreak(String userId) async {
     // Get the user's document from Firestore

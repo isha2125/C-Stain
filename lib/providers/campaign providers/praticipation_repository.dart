@@ -94,6 +94,8 @@ class ParticipantRepository {
             campaignId: campaignId,
             userId: userId,
             joinedAt: Timestamp.fromDate(DateTime.now()),
+            carbonSaved: 0.0,
+            contributionIds: [],
           );
 
           transaction.set(participationRef, participation.toMap());

@@ -396,7 +396,8 @@ class CampaignList extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => CampaignDetailScreen(campaign: campaign),
+                builder: (context) =>
+                    CampaignDetailScreen(campaignId: campaign['campaignId']),
               ),
             );
           },
