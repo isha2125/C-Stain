@@ -76,18 +76,34 @@ final categorizedCampaignsProvider =
 
 // final campaignStateProvider =
 //     StateProvider<Map<String, dynamic>?>((ref) => null);
-final ParticipantUsernameProvider =
-    FutureProvider.family<String?, String>((ref, userId) async {
+// final ParticipantUsernameProvider =
+//     FutureProvider.family<String?, String>((ref, userId) async {
+//   final doc =
+//       await FirebaseFirestore.instance.collection('user').doc(userId).get();
+
+//   // Ensure the document exists and has data
+//   if (doc.exists && doc.data() != null) {
+//     final data = doc.data() as Map<String, dynamic>;
+//     return data['username'] as String? ?? "Unknown User";
+//   }
+//   return "Unknown User";
+// });
+
+final participantUserDataProvider =
+    FutureProvider.family<Map<String, String?>, String>((ref, userId) async {
   final doc =
       await FirebaseFirestore.instance.collection('user').doc(userId).get();
 
-  // Ensure the document exists and has data
   if (doc.exists && doc.data() != null) {
     final data = doc.data() as Map<String, dynamic>;
-    return data['username'] as String? ?? "Unknown User";
+    return {
+      'username': data['username'] as String? ?? "Unknown User",
+      'profilePicture': data['profile_picture_url'] as String? ?? "",
+    };
   }
-  return "Unknown User";
+  return {'username': "Unknown User", 'profilePicture': ""};
 });
+
 //fetches campaign details on the user campaign detail screen
 final campaignStreamProvider =
     StreamProvider.family<Campaign, String>((ref, campaignId) {

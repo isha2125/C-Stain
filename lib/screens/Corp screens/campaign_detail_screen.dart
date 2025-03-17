@@ -427,8 +427,8 @@ class ParticipantsList extends ConsumerWidget {
 
                 return Consumer(
                   builder: (context, ref, child) {
-                    final usernameAsync =
-                        ref.watch(ParticipantUsernameProvider(userId));
+                    final userDataAsync =
+                        ref.watch(participantUserDataProvider(userId));
 
                     return Card(
                       elevation: 2,
@@ -438,26 +438,38 @@ class ParticipantsList extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: Colors.teal.shade200,
-                          child: usernameAsync.when(
-                            data: (username) => Text(
-                              (username?.isNotEmpty ?? false)
-                                  ? username![0].toUpperCase()
-                                  : "?",
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            loading: () =>
-                                const CircularProgressIndicator(strokeWidth: 2),
-                            error: (_, __) =>
-                                const Icon(Icons.error, color: Colors.red),
-                          ),
+                        leading: userDataAsync.when(
+                          data: (userData) {
+                            String? profilePicture = userData['profilePicture'];
+                            String? username = userData['username'];
+
+                            return CircleAvatar(
+                              backgroundColor: Colors.teal.shade200,
+                              backgroundImage: (profilePicture != null &&
+                                      profilePicture.isNotEmpty)
+                                  ? NetworkImage(profilePicture)
+                                  : null,
+                              child: (profilePicture == null ||
+                                      profilePicture.isEmpty)
+                                  ? Text(
+                                      username!.isNotEmpty
+                                          ? username[0].toUpperCase()
+                                          : "?",
+                                      style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold),
+                                    )
+                                  : null,
+                            );
+                          },
+                          loading: () =>
+                              const CircularProgressIndicator(strokeWidth: 2),
+                          error: (_, __) =>
+                              const Icon(Icons.error, color: Colors.red),
                         ),
-                        title: usernameAsync.when(
-                          data: (username) => Text(
-                            username ?? "Unknown User",
+                        title: userDataAsync.when(
+                          data: (userData) => Text(
+                            userData['username'] ?? "Unknown User",
                             style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.bold),
                           ),

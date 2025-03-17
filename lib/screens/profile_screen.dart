@@ -1132,6 +1132,7 @@
 // */
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cstain/backend/sign_out.dart';
 import 'package:cstain/models/comments.dart';
 import 'package:cstain/models/post.dart';
 import 'package:cstain/models/user.dart';
@@ -1631,7 +1632,7 @@ class MYProfileScreen extends ConsumerWidget {
                     );
                     break;
                   case 1:
-                    _signOut(context);
+                    signOut(context, ref);
                     break;
                   case 2:
                     _deleteAccount(context);
@@ -1848,9 +1849,9 @@ class MYProfileScreen extends ConsumerWidget {
     );
   }
 
-  void _signOut(BuildContext context) {
-    // Implement sign out logic
-  }
+  // void _signOut(BuildContext context) {
+  //   // Implement sign out logic
+  // }
 
   void _deleteAccount(BuildContext context) {
     // Implement delete account logic

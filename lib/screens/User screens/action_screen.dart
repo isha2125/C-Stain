@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/providers/auth_service.dart';
 import 'package:cstain/providers/action%20providers/providers.dart';
+import 'package:cstain/screens/profile_screen.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -87,31 +88,22 @@ class _ActionScreenState extends ConsumerState<ActionScreen> {
           IconButton(
             icon: const Icon(Icons.person),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute<ProfileScreen>(
-                  builder: (context) => ProfileScreen(
-                    appBar: AppBar(
-                      title: const Text('User Profile'),
-                    ),
-                    actions: [
-                      SignedOutAction((context) {
-                        Navigator.of(context).pop();
-                      })
-                    ],
-                    children: [
-                      const Divider(),
-                      Padding(
-                        padding: const EdgeInsets.all(2),
-                        child: AspectRatio(
-                          aspectRatio: 1,
-                          child: Image.asset('assets/Earth black 1.png'),
-                        ),
-                      ),
-                    ],
+              final authState = ref.read(authStateProvider);
+              final userId = authState.value?.uid;
+              if (userId != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        MYProfileScreen(profileUserId: userId),
                   ),
-                ),
-              );
+                );
+              } else {
+                // Handle the case where there's no authenticated user
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('No user logged in')),
+                );
+              }
             },
           )
         ],

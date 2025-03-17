@@ -4,6 +4,7 @@ import 'package:cstain/models/campaigns.dart';
 import 'package:cstain/models/comments.dart';
 import 'package:cstain/models/post.dart';
 import 'package:cstain/providers/action%20providers/providers.dart';
+import 'package:cstain/providers/auth_service.dart';
 import 'package:cstain/screens/profile_screen.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
@@ -100,34 +101,149 @@ class CommunityScreen extends ConsumerWidget {
   final ImagePicker _picker = ImagePicker();
 
   // Function to pick an image
+  // Future<void> pickImage(BuildContext context, WidgetRef ref) async {
+  //   if (await Permission.photos.request().isGranted) {
+  //     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+  //     if (image != null) {
+  //       ref.read(mediaProvider.notifier).state = File(image.path);
+  //       ref.read(mediaTypeProvider.notifier).state = 'image';
+  //     }
+  //   } else {
+  //     print('Permission denied to access gallery');
+  //   }
+  // }
+
   Future<void> pickImage(BuildContext context, WidgetRef ref) async {
-    if (await Permission.photos.request().isGranted) {
-      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-      if (image != null) {
-        ref.read(mediaProvider.notifier).state = File(image.path);
-        ref.read(mediaTypeProvider.notifier).state = 'image';
-      }
-    } else {
-      print('Permission denied to access gallery');
-    }
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext bc) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: Icon(Icons.camera_alt),
+                title: Text('Capture from Camera'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  var status = await Permission.camera.request();
+                  if (status.isGranted) {
+                    final XFile? image =
+                        await _picker.pickImage(source: ImageSource.camera);
+                    if (image != null) {
+                      ref.read(mediaProvider.notifier).state = File(image.path);
+                      ref.read(mediaTypeProvider.notifier).state = 'image';
+                    }
+                  } else {
+                    print('Camera permission denied');
+                  }
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.photo_library),
+                title: Text('Pick from Gallery'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  var status = await Permission.photos.request();
+                  if (status.isGranted) {
+                    final XFile? image =
+                        await _picker.pickImage(source: ImageSource.gallery);
+                    if (image != null) {
+                      ref.read(mediaProvider.notifier).state = File(image.path);
+                      ref.read(mediaTypeProvider.notifier).state = 'image';
+                    }
+                  } else {
+                    print('Gallery permission denied');
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   // Function to pick a video
+  // Future<void> pickVideo(BuildContext context, WidgetRef ref) async {
+  //   if (await Permission.videos.request().isGranted) {
+  //     final XFile? video = await _picker.pickVideo(source: ImageSource.gallery);
+  //     if (video != null) {
+  //       ref.read(mediaProvider.notifier).state = File(video.path);
+  //       ref.read(mediaTypeProvider.notifier).state = 'video';
+  //       // Initialize the video player
+  //       final videoController = VideoPlayerController.file(File(video.path));
+  //       await videoController.initialize();
+  //       ref.read(videoPlayerControllerProvider.notifier).state =
+  //           videoController;
+  //     }
+  //   } else {
+  //     print('Permission denied to access gallery');
+  //   }
+  // }
   Future<void> pickVideo(BuildContext context, WidgetRef ref) async {
-    if (await Permission.videos.request().isGranted) {
-      final XFile? video = await _picker.pickVideo(source: ImageSource.gallery);
-      if (video != null) {
-        ref.read(mediaProvider.notifier).state = File(video.path);
-        ref.read(mediaTypeProvider.notifier).state = 'video';
-        // Initialize the video player
-        final videoController = VideoPlayerController.file(File(video.path));
-        await videoController.initialize();
-        ref.read(videoPlayerControllerProvider.notifier).state =
-            videoController;
-      }
-    } else {
-      print('Permission denied to access gallery');
-    }
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext bc) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: Icon(Icons.videocam),
+                title: Text('Record a Video (Max 40 sec)'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  var status = await Permission.camera.request();
+                  if (status.isGranted) {
+                    final XFile? video = await _picker.pickVideo(
+                      source: ImageSource.camera,
+                      maxDuration: Duration(seconds: 40), // Limit to 40 seconds
+                    );
+                    if (video != null) {
+                      ref.read(mediaProvider.notifier).state = File(video.path);
+                      ref.read(mediaTypeProvider.notifier).state = 'video';
+
+                      // Initialize video player
+                      final videoController =
+                          VideoPlayerController.file(File(video.path));
+                      await videoController.initialize();
+                      ref.read(videoPlayerControllerProvider.notifier).state =
+                          videoController;
+                    }
+                  } else {
+                    print('Camera permission denied');
+                  }
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.video_library),
+                title: Text('Pick from Gallery'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  var status = await Permission.videos.request();
+                  if (status.isGranted) {
+                    final XFile? video =
+                        await _picker.pickVideo(source: ImageSource.gallery);
+                    if (video != null) {
+                      ref.read(mediaProvider.notifier).state = File(video.path);
+                      ref.read(mediaTypeProvider.notifier).state = 'video';
+
+                      // Initialize video player
+                      final videoController =
+                          VideoPlayerController.file(File(video.path));
+                      await videoController.initialize();
+                      ref.read(videoPlayerControllerProvider.notifier).state =
+                          videoController;
+                    }
+                  } else {
+                    print('Gallery permission denied');
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   // Function to upload media to Firebase Storage
@@ -248,7 +364,22 @@ class CommunityScreen extends ConsumerWidget {
             child: Text('Post'),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              // Reset media selection
+              ref.read(mediaProvider.notifier).state = null;
+              ref.read(mediaTypeProvider.notifier).state = null;
+
+              // Reset video player controller (if any)
+              ref.read(videoPlayerControllerProvider.notifier).state?.dispose();
+              ref.read(videoPlayerControllerProvider.notifier).state = null;
+
+              // Reset text inputs
+              ref.read(titleControllerProvider).clear();
+              ref.read(bodyControllerProvider).clear();
+
+              // Close the dialog
+              Navigator.pop(context);
+            },
             child: Text('Cancel'),
           ),
         ],
@@ -274,31 +405,22 @@ class CommunityScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.person),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute<ProfileScreen>(
-                  builder: (context) => ProfileScreen(
-                    appBar: AppBar(
-                      title: const Text('User Profile'),
-                    ),
-                    actions: [
-                      SignedOutAction((context) {
-                        Navigator.of(context).pop();
-                      })
-                    ],
-                    children: [
-                      const Divider(),
-                      Padding(
-                        padding: const EdgeInsets.all(2),
-                        child: AspectRatio(
-                          aspectRatio: 1,
-                          child: Image.asset('assets/Earth black 1.png'),
-                        ),
-                      ),
-                    ],
+              final authState = ref.read(authStateProvider);
+              final userId = authState.value?.uid;
+              if (userId != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        MYProfileScreen(profileUserId: userId),
                   ),
-                ),
-              );
+                );
+              } else {
+                // Handle the case where there's no authenticated user
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('No user logged in')),
+                );
+              }
             },
           )
         ],

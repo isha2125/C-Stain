@@ -291,9 +291,11 @@
 // }
 //******************************************* Modifying the features and ui of corp campaign screen ********************************************** */
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cstain/providers/auth_service.dart';
 import 'package:cstain/providers/campaign%20providers/campaign_providers.dart';
 import 'package:cstain/screens/Corp%20screens/campaign_detail_screen.dart';
 import 'package:cstain/screens/Corp%20screens/corp_createcampaignscreen.dart';
+import 'package:cstain/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -323,6 +325,29 @@ class CorpCampaignScreen extends ConsumerWidget {
         appBar: AppBar(
           title: const Text('Campaigns',
               style: TextStyle(fontWeight: FontWeight.w400)),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.person),
+              onPressed: () {
+                final authState = ref.read(authStateProvider);
+                final userId = authState.value?.uid;
+                if (userId != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          MYProfileScreen(profileUserId: userId),
+                    ),
+                  );
+                } else {
+                  // Handle the case where there's no authenticated user
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('No user logged in')),
+                  );
+                }
+              },
+            )
+          ],
           bottom: const TabBar(
             indicatorColor: Colors.teal,
             labelColor: Colors.teal,
