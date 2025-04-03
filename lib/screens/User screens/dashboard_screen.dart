@@ -812,8 +812,11 @@
 // }
 
 //******************************/
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/components/Global_Chatbot%20_FAB_Component.dart';
+import 'package:cstain/components/custom_appBar.dart';
 import 'package:cstain/providers/auth_service.dart';
+import 'package:cstain/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -839,17 +842,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return Scaffold(
       floatingActionButton: GlobalChatbotFAB(),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-      appBar: AppBar(
-        title: Text('Dashboard', style: TextStyle(fontWeight: FontWeight.w400)),
-        leading: Image.asset('assets/Earth black 1.png'),
-        //backgroundColor: Theme.of(context).primaryColor,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.person),
-            onPressed: () => Navigator.pushNamed(context, '/profile'),
-          ),
-        ],
+      appBar: CustomAppBar(
+        title: "Dashboard",
       ),
       body: RefreshIndicator(
         onRefresh: () async {

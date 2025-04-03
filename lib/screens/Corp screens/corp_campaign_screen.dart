@@ -291,6 +291,7 @@
 // }
 //******************************************* Modifying the features and ui of corp campaign screen ********************************************** */
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cstain/components/custom_appBar.dart';
 import 'package:cstain/providers/auth_service.dart';
 import 'package:cstain/providers/campaign%20providers/campaign_providers.dart';
 import 'package:cstain/screens/Corp%20screens/campaign_detail_screen.dart';
@@ -324,30 +325,65 @@ class CorpCampaignScreen extends ConsumerWidget {
       child: Scaffold(
         appBar: AppBar(
           leading: Image.asset('assets/Earth black 1.png'),
-          title: const Text('Campaigns',
-              style: TextStyle(fontWeight: FontWeight.w400)),
+          title: const Text(
+            'Campaigns',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.person),
-              onPressed: () {
-                final authState = ref.read(authStateProvider);
+            Consumer(
+              builder: (context, ref, child) {
+                final authState = ref.watch(authStateProvider);
                 final userId = authState.value?.uid;
-                if (userId != null) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          MYProfileScreen(profileUserId: userId),
-                    ),
-                  );
-                } else {
-                  // Handle the case where there's no authenticated user
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('No user logged in')),
-                  );
-                }
+                final profileImageAsync = ref.watch(userProfileProvider);
+
+                return Padding(
+                  padding: const EdgeInsets.only(right: 10.0),
+                  child: userId == null
+                      ? IconButton(
+                          icon: const Icon(Icons.person),
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('No user logged in')),
+                            );
+                          },
+                        )
+                      : GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    MYProfileScreen(profileUserId: userId),
+                              ),
+                            );
+                          },
+                          child: CircleAvatar(
+                            radius: 20,
+                            backgroundColor:
+                                Colors.grey.shade300, // Default background
+                            backgroundImage: profileImageAsync.when(
+                              data: (imageUrl) => imageUrl != null
+                                  ? NetworkImage(imageUrl)
+                                  : null,
+                              loading: () => null, // No image during loading
+                              error: (_, __) => null, // No image on error
+                            ),
+                            child: profileImageAsync.when(
+                              data: (imageUrl) => imageUrl == null
+                                  ? const Icon(Icons.person,
+                                      color: Colors.white)
+                                  : null, // Show icon only if image is null
+                              loading: () => const CircularProgressIndicator(
+                                  strokeWidth: 2),
+                              error: (_, __) =>
+                                  const Icon(Icons.person, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                );
               },
-            )
+            ),
           ],
           bottom: const TabBar(
             indicatorColor: Colors.teal,

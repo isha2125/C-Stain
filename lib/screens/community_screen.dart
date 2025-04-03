@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/components/Global_Chatbot%20_FAB_Component.dart';
+import 'package:cstain/components/custom_appBar.dart';
 import 'package:cstain/components/participation_button.dart';
 import 'package:cstain/models/campaigns.dart';
 import 'package:cstain/models/comments.dart';
@@ -398,36 +399,8 @@ class CommunityScreen extends ConsumerWidget {
       // floatingActionButton: GlobalChatbotFAB(),
       // floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       //backgroundColor: Color(0xFFABD5C5),
-      appBar: AppBar(
-        title: Text(
-          'Community',
-          style: TextStyle(fontWeight: FontWeight.w400),
-        ),
-        leading: Image.asset('assets/Earth black 1.png'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              final authState = ref.read(authStateProvider);
-              final userId = authState.value?.uid;
-              if (userId != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        MYProfileScreen(profileUserId: userId),
-                  ),
-                );
-              } else {
-                // Handle the case where there's no authenticated user
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('No user logged in')),
-                );
-              }
-            },
-          )
-        ],
-        automaticallyImplyLeading: false,
+      appBar: CustomAppBar(
+        title: "Community",
       ),
       body: userStream.when(
         data: (data) {
@@ -1201,30 +1174,181 @@ class CommentSection extends ConsumerWidget {
 //   );
 // }
 
+// class CampaignTile extends StatelessWidget {
+//   final Campaign campaign;
+
+//   const CampaignTile({Key? key, required this.campaign}) : super(key: key);
+//   Future<String> _getCompanyName(String userId) async {
+//     try {
+//       final corpUserDoc = await FirebaseFirestore.instance
+//           .collection('corporateUsers')
+//           .doc(userId)
+//           .get();
+//       final corpUserData = corpUserDoc.data() as Map<String, dynamic>?;
+//       return corpUserData?['name'] ?? 'Unknown Company';
+//     } catch (e) {
+//       print('Error fetching company name: $e');
+//       return 'Unknown Company';
+//     }
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return FutureBuilder<String>(
+//       future: _getCompanyName(campaign.corpUserId),
+//       builder: (context, snapshot) {
+//         final companyName = snapshot.data ?? 'Loading...';
+
+//         return Card(
+//           elevation: 4,
+//           margin: const EdgeInsets.symmetric(vertical: 8.0),
+//           shape: RoundedRectangleBorder(
+//             borderRadius: BorderRadius.circular(12),
+//           ),
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               if (campaign.imageUrl != null)
+//                 ClipRRect(
+//                   borderRadius: const BorderRadius.vertical(
+//                     top: Radius.circular(12),
+//                   ),
+//                   child: Image.network(
+//                     campaign.imageUrl!,
+//                     height: 150,
+//                     width: double.infinity,
+//                     fit: BoxFit.cover,
+//                   ),
+//                 ),
+//               Padding(
+//                 padding: const EdgeInsets.all(16.0),
+//                 child: Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     Row(
+//                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                       children: [
+//                         Row(
+//                           children: [
+//                             CircleAvatar(
+//                               radius: 20,
+//                               // Replace with actual user profile image URL if available
+//                               child: Text(companyName[0].toUpperCase()),
+//                             ),
+//                             const SizedBox(width: 8),
+//                             Text(
+//                               companyName,
+//                               style:
+//                                   const TextStyle(fontWeight: FontWeight.bold),
+//                             ),
+//                           ],
+//                         ),
+//                         const SizedBox(width: 8),
+//                         Text(
+//                           timeago.format(campaign.created_at.toDate()),
+//                           style:
+//                               const TextStyle(color: Colors.grey, fontSize: 14),
+//                         ),
+//                       ],
+//                     ),
+//                     const SizedBox(height: 8),
+//                     Center(
+//                       child: Text(
+//                         campaign.title,
+//                         style: const TextStyle(
+//                             fontSize: 18, fontWeight: FontWeight.bold),
+//                       ),
+//                     ),
+//                     const SizedBox(height: 8),
+//                     Text(
+//                       campaign.description,
+//                       // campaign.participants?.length == 1
+//                       //     ? '1 participant'
+//                       //     : '${campaign.participants?.length ?? 0} participants',
+//                       style: const TextStyle(fontSize: 14),
+//                     ),
+//                     const SizedBox(height: 8),
+//                     Row(
+//                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                       children: [
+//                         Text(
+//                           'Target CO2 Savings: ${campaign.targetCO2Savings} kg',
+//                           style: const TextStyle(fontSize: 14),
+//                         ),
+//                         Text(
+//                           'Start: ${DateFormat('dd-MM-yy').format(campaign.startDate.toDate())}',
+//                           style: const TextStyle(fontSize: 14),
+//                         ),
+//                       ],
+//                     ),
+//                     const SizedBox(height: 16),
+//                     Center(
+//                       child: ParticipateButton(campaignId: campaign.campaignId),
+//                       // child: ElevatedButton(
+//                       //   onPressed: () {
+//                       //     // Non-functional participate button
+//                       //   },
+//                       //   style: ElevatedButton.styleFrom(
+//                       //     backgroundColor: Colors.teal,
+//                       //     shape: RoundedRectangleBorder(
+//                       //       borderRadius: BorderRadius.circular(8),
+//                       //     ),
+//                       //     padding: const EdgeInsets.symmetric(
+//                       //         horizontal: 16, vertical: 8),
+//                       //   ),
+//                       //   child: const Text(
+//                       //     'Participate',
+//                       //     style: TextStyle(color: Colors.white),
+//                       //   ),
+//                       // ),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             ],
+//           ),
+//         );
+//       },
+//     );
+//   }
+// }
 class CampaignTile extends StatelessWidget {
   final Campaign campaign;
 
   const CampaignTile({Key? key, required this.campaign}) : super(key: key);
-  Future<String> _getCompanyName(String userId) async {
+
+  Future<Map<String, String>> _getCompanyData(String userId) async {
     try {
+      // Fetch name from corporateUsers collection
       final corpUserDoc = await FirebaseFirestore.instance
           .collection('corporateUsers')
           .doc(userId)
           .get();
       final corpUserData = corpUserDoc.data() as Map<String, dynamic>?;
-      return corpUserData?['name'] ?? 'Unknown Company';
+
+      String companyName = corpUserData?['name'] ?? 'Unknown Company';
+
+      // Fetch image URL from users collection
+      final userDoc =
+          await FirebaseFirestore.instance.collection('user').doc(userId).get();
+      final userData = userDoc.data() as Map<String, dynamic>?;
+
+      String imageUrl = userData?['profile_picture_url'] ?? '';
+
+      return {'name': companyName, 'profile_picture_url': imageUrl};
     } catch (e) {
-      print('Error fetching company name: $e');
-      return 'Unknown Company';
+      print('Error fetching company data: $e');
+      return {'name': 'Unknown Company', 'profile_picture_url': ''};
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String>(
-      future: _getCompanyName(campaign.corpUserId),
+    return FutureBuilder<Map<String, String>>(
+      future: _getCompanyData(campaign.corpUserId),
       builder: (context, snapshot) {
-        final companyName = snapshot.data ?? 'Loading...';
+        final companyName = snapshot.data?['name'] ?? 'Loading...';
+        final companyImageUrl = snapshot.data?['profile_picture_url'] ?? '';
 
         return Card(
           elevation: 4,
@@ -1257,10 +1381,28 @@ class CampaignTile extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            CircleAvatar(
-                              radius: 20,
-                              // Replace with actual user profile image URL if available
-                              child: Text(companyName[0].toUpperCase()),
+                            GestureDetector(
+                              onTap: () {
+                                // Navigate to user profile screen when tapped
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MYProfileScreen(
+                                      profileUserId: campaign.corpUserId,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: CircleAvatar(
+                                radius: 20,
+                                backgroundImage: companyImageUrl.isNotEmpty
+                                    ? NetworkImage(companyImageUrl)
+                                    : null, // Show image if available
+                                child: companyImageUrl.isEmpty
+                                    ? Text(companyName[0]
+                                        .toUpperCase()) // Default initials
+                                    : null,
+                              ),
                             ),
                             const SizedBox(width: 8),
                             Text(
@@ -1289,9 +1431,6 @@ class CampaignTile extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       campaign.description,
-                      // campaign.participants?.length == 1
-                      //     ? '1 participant'
-                      //     : '${campaign.participants?.length ?? 0} participants',
                       style: const TextStyle(fontSize: 14),
                     ),
                     const SizedBox(height: 8),
@@ -1311,23 +1450,6 @@ class CampaignTile extends StatelessWidget {
                     const SizedBox(height: 16),
                     Center(
                       child: ParticipateButton(campaignId: campaign.campaignId),
-                      // child: ElevatedButton(
-                      //   onPressed: () {
-                      //     // Non-functional participate button
-                      //   },
-                      //   style: ElevatedButton.styleFrom(
-                      //     backgroundColor: Colors.teal,
-                      //     shape: RoundedRectangleBorder(
-                      //       borderRadius: BorderRadius.circular(8),
-                      //     ),
-                      //     padding: const EdgeInsets.symmetric(
-                      //         horizontal: 16, vertical: 8),
-                      //   ),
-                      //   child: const Text(
-                      //     'Participate',
-                      //     style: TextStyle(color: Colors.white),
-                      //   ),
-                      // ),
                     ),
                   ],
                 ),

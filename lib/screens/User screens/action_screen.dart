@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cstain/components/custom_appBar.dart';
 import 'package:cstain/providers/auth_service.dart';
 import 'package:cstain/providers/action%20providers/providers.dart';
 import 'package:cstain/screens/chatbot_screen.dart';
@@ -81,36 +82,8 @@ class _ActionScreenState extends ConsumerState<ActionScreen> {
     final myUser = ref.watch(userProvider);
     final totalCarbonSaved = _calculateTotalCarbonSaved();
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Actions',
-          style: TextStyle(fontWeight: FontWeight.w400),
-        ),
-        leading: Image.asset('assets/Earth black 1.png'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              final authState = ref.read(authStateProvider);
-              final userId = authState.value?.uid;
-              if (userId != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        MYProfileScreen(profileUserId: userId),
-                  ),
-                );
-              } else {
-                // Handle the case where there's no authenticated user
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('No user logged in')),
-                );
-              }
-            },
-          )
-        ],
-        automaticallyImplyLeading: false,
+      appBar: CustomAppBar(
+        title: "Actions",
       ),
       body: SingleChildScrollView(
         child: Column(

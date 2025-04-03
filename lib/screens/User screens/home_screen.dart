@@ -1,5 +1,7 @@
 //import 'package:cstain/backend/auth_gate.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/components/Global_Chatbot%20_FAB_Component.dart';
+import 'package:cstain/components/custom_appBar.dart';
 import 'package:cstain/components/streak_service.dart';
 import 'package:cstain/models/achievements.dart';
 import 'package:cstain/models/badges.dart';
@@ -31,33 +33,7 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
         floatingActionButton: GlobalChatbotFAB(),
         floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-        appBar: AppBar(
-          leading: Image.asset('assets/Earth black 1.png'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.person),
-              onPressed: () {
-                final authState = ref.read(authStateProvider);
-                final userId = authState.value?.uid;
-                if (userId != null) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          MYProfileScreen(profileUserId: userId),
-                    ),
-                  );
-                } else {
-                  // Handle the case where there's no authenticated user
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('No user logged in')),
-                  );
-                }
-              },
-            )
-          ],
-          automaticallyImplyLeading: false,
-        ),
+        appBar: CustomAppBar(),
         body: userStream.when(
           data: (myUser) => achievements.when(
             data: (achievementsList) => SingleChildScrollView(

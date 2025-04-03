@@ -298,6 +298,7 @@
 // }
 //***************************** Updated Campaigns with user carbon saved data********************* */
 import 'package:cstain/components/Global_Chatbot%20_FAB_Component.dart';
+import 'package:cstain/components/custom_appBar.dart';
 import 'package:cstain/models/campaigns.dart';
 // Ensure you import your ParticipationModel here.
 import 'package:cstain/models/participations.dart';
@@ -424,32 +425,8 @@ class UserCampaignScreen extends ConsumerWidget {
     return Scaffold(
       floatingActionButton: GlobalChatbotFAB(),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-      appBar: AppBar(
-        title: Text('My Campaigns'),
-        leading: Image.asset('assets/Earth black 1.png'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              final authState = ref.read(authStateProvider);
-              final userId = authState.value?.uid;
-              if (userId != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        MYProfileScreen(profileUserId: userId),
-                  ),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('No user logged in')),
-                );
-              }
-            },
-          )
-        ],
-        automaticallyImplyLeading: false,
+      appBar: CustomAppBar(
+        title: "My Campaigns",
       ),
       body: campaignsAsync.when(
         data: (campaigns) {
