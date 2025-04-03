@@ -136,7 +136,7 @@ class UserDetailCampaignScreen extends ConsumerWidget {
                           participation!.contributionIds!.isNotEmpty)
                         _infoRow("Contributions",
                             participation!.contributionIds!.length.toString()),
-                      _infoRow("Your Precentage Contribution",
+                      _infoRow("Your Percentage Contribution",
                           " ${contributionPercentage.toStringAsFixed(2)}%")
                     ],
                   ],
