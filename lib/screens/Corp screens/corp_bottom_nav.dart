@@ -1,7 +1,11 @@
+import 'package:cstain/providers/action%20providers/providers.dart';
+import 'package:cstain/providers/auth_service.dart';
 import 'package:cstain/screens/User%20screens/action_screen.dart';
+import 'package:cstain/screens/chatbot_screen.dart';
 import 'package:cstain/screens/community_screen.dart';
 import 'package:cstain/screens/Corp%20screens/corp_campaign_screen.dart';
 import 'package:cstain/screens/Corp%20screens/corp_homescreen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class CorpBottomNav extends StatefulWidget {
@@ -52,9 +56,9 @@ class _CorpBottomNavstate extends State<CorpBottomNav> {
               label: 'Home',
             ),
             NavigationDestination(
-              selectedIcon: Icon(Icons.check_circle),
-              icon: Icon(Icons.check_circle_outline),
-              label: 'Actions',
+              selectedIcon: Icon(Icons.chat_bubble),
+              icon: Icon(Icons.chat_bubble_outline),
+              label: 'ChatBot',
             ),
             NavigationDestination(
               selectedIcon: Icon(Icons.assessment),
@@ -73,8 +77,8 @@ class _CorpBottomNavstate extends State<CorpBottomNav> {
         /// Home page
         CorpHomescreen(),
 
-        /// Actions page
-        ActionScreen(),
+        ///chatbot
+        ChatbotScreen(userId: FirebaseAuth.instance.currentUser!.uid),
 
         /// Dashboard page
         CorpCampaignScreen(),

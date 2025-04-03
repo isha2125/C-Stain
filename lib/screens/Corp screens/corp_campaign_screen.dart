@@ -323,6 +323,7 @@ class CorpCampaignScreen extends ConsumerWidget {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
+          leading: Image.asset('assets/Earth black 1.png'),
           title: const Text('Campaigns',
               style: TextStyle(fontWeight: FontWeight.w400)),
           actions: [

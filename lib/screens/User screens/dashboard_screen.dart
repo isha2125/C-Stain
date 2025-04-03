@@ -812,6 +812,7 @@
 // }
 
 //******************************/
+import 'package:cstain/components/Global_Chatbot%20_FAB_Component.dart';
 import 'package:cstain/providers/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -836,6 +837,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: GlobalChatbotFAB(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       appBar: AppBar(
         title: Text('Dashboard', style: TextStyle(fontWeight: FontWeight.w400)),
         leading: Image.asset('assets/Earth black 1.png'),

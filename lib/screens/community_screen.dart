@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cstain/components/Global_Chatbot%20_FAB_Component.dart';
 import 'package:cstain/components/participation_button.dart';
 import 'package:cstain/models/campaigns.dart';
 import 'package:cstain/models/comments.dart';
@@ -394,6 +395,8 @@ class CommunityScreen extends ConsumerWidget {
     final campaignsAsyncValue = ref.watch(allCampaignsProvider);
 
     return Scaffold(
+      // floatingActionButton: GlobalChatbotFAB(),
+      // floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       //backgroundColor: Color(0xFFABD5C5),
       appBar: AppBar(
         title: Text(

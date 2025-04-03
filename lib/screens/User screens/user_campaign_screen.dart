@@ -297,6 +297,7 @@
 //   }
 // }
 //***************************** Updated Campaigns with user carbon saved data********************* */
+import 'package:cstain/components/Global_Chatbot%20_FAB_Component.dart';
 import 'package:cstain/models/campaigns.dart';
 // Ensure you import your ParticipationModel here.
 import 'package:cstain/models/participations.dart';
@@ -421,6 +422,8 @@ class UserCampaignScreen extends ConsumerWidget {
     final participationMapAsync = ref.watch(userParticipationsMapProvider);
 
     return Scaffold(
+      floatingActionButton: GlobalChatbotFAB(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       appBar: AppBar(
         title: Text('My Campaigns'),
         leading: Image.asset('assets/Earth black 1.png'),

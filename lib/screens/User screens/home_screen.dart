@@ -1,4 +1,5 @@
 //import 'package:cstain/backend/auth_gate.dart';
+import 'package:cstain/components/Global_Chatbot%20_FAB_Component.dart';
 import 'package:cstain/components/streak_service.dart';
 import 'package:cstain/models/achievements.dart';
 import 'package:cstain/models/badges.dart';
@@ -28,6 +29,8 @@ class HomeScreen extends ConsumerWidget {
     final tipOfTheDay = ref.watch(tipOfTheDayProvider);
 
     return Scaffold(
+        floatingActionButton: GlobalChatbotFAB(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
         appBar: AppBar(
           leading: Image.asset('assets/Earth black 1.png'),
           actions: [

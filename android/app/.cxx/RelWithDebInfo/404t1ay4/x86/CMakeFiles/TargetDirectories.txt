@@ -1,0 +1,2 @@
+/Users/isha/Documents/my codes/cstain/android/app/.cxx/RelWithDebInfo/404t1ay4/x86/CMakeFiles/edit_cache.dir
+/Users/isha/Documents/my codes/cstain/android/app/.cxx/RelWithDebInfo/404t1ay4/x86/CMakeFiles/rebuild_cache.dir

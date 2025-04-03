@@ -144,3 +144,26 @@ final corpUserNameProvider =
   }
   return 'Unknown User';
 });
+
+//for chat bot this is needed
+
+// Future<List<Campaign>> getUserCampaigns(String userId) async {
+//   QuerySnapshot participationDocs = await FirebaseFirestore.instance
+//       .collection("participations")
+//       .where("userId", isEqualTo: userId)
+//       .get();
+
+//   List<Campaign> campaigns = [];
+//   for (var doc in participationDocs.docs) {
+//     String campaignId = doc["campaignId"];
+//     DocumentSnapshot campaignDoc = await FirebaseFirestore.instance
+//         .collection("campaigns")
+//         .doc(campaignId)
+//         .get();
+//     if (campaignDoc.exists) {
+//       campaigns
+//           .add(Campaign.fromMap(campaignDoc.data() as Map<String, dynamic>));
+//     }
+//   }
+//   return campaigns;
+// }

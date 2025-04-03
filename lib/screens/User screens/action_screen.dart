@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/providers/auth_service.dart';
 import 'package:cstain/providers/action%20providers/providers.dart';
+import 'package:cstain/screens/chatbot_screen.dart';
 import 'package:cstain/screens/profile_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import '../../backend/auth_gate.dart';
 import '../../models/user_contribution.dart';
 import 'action_detailScreen.dart';
@@ -128,28 +131,85 @@ class _ActionScreenState extends ConsumerState<ActionScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ActionDetailScreen(
-                onAddLog: (String log) {
-                  // This function is not used anymore, but kept for compatibility
-                },
-                userId: myUser!.uid,
-                onNavigateBack: () {
-                  _fetchTodayActions(); // Refresh the list when returning from ActionDetailScreen
-                  Navigator.pop(context);
-                },
+      floatingActionButton: LayoutBuilder(
+        builder: (context, constraints) {
+          double screenWidth = MediaQuery.of(context).size.width;
+          // double fabOffset =
+          //     screenWidth * 0.80; // Adjust dynamically based on screen width
+
+          return Stack(
+            alignment: Alignment.bottomLeft, // Keep FABs aligned to the bottom
+            children: [
+              // Left Floating Action Button (Chat)
+              Positioned(
+                right: screenWidth * 0.78,
+                child: FloatingActionButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ChatbotScreen(
+                                userId: FirebaseAuth.instance.currentUser!.uid,
+                              )),
+                    );
+                  },
+                  backgroundColor: Color.fromARGB(255, 205, 246, 230),
+                  child: Icon(Icons.chat, color: Colors.black),
+                ),
               ),
-            ),
+              // Right Floating Action Button (Add Action)
+              Positioned(
+                left: screenWidth * 0.85,
+                child: FloatingActionButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ActionDetailScreen(
+                          onAddLog: (String log) {
+                            // This function is not used anymore, but kept for compatibility
+                          },
+                          userId: myUser!.uid,
+                          onNavigateBack: () {
+                            _fetchTodayActions(); // Refresh the list when returning from ActionDetailScreen
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                  backgroundColor: const Color(0xFF237155),
+                  foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+                  child: Icon(Icons.add),
+                ),
+              ),
+            ],
           );
         },
-        child: Icon(Icons.add),
-        backgroundColor: const Color.fromARGB(255, 205, 246, 230),
-        foregroundColor: const Color.fromARGB(255, 0, 0, 0),
       ),
+
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     Navigator.push(
+      //       context,
+      //       MaterialPageRoute(
+      //         builder: (context) => ActionDetailScreen(
+      //           onAddLog: (String log) {
+      //             // This function is not used anymore, but kept for compatibility
+      //           },
+      //           userId: myUser!.uid,
+      //           onNavigateBack: () {
+      //             _fetchTodayActions(); // Refresh the list when returning from ActionDetailScreen
+      //             Navigator.pop(context);
+      //           },
+      //         ),
+      //       ),
+      //     );
+      //   },
+      //   child: Icon(Icons.add),
+      //   backgroundColor: const Color.fromARGB(255, 205, 246, 230),
+      //   foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+      // ),
     );
   }
 

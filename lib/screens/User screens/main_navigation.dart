@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cstain/screens/User%20screens/action_screen.dart';
 import 'package:cstain/screens/User%20screens/user_campaign_screen.dart';
+import 'package:cstain/screens/chatbot_screen.dart';
 import 'package:cstain/screens/community_screen.dart';
 import 'package:cstain/screens/Corp%20screens/corp_bottom_nav.dart';
 import 'package:cstain/screens/User%20screens/dashboard_screen.dart';
