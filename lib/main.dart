@@ -8,12 +8,15 @@ import 'package:cstain/screens/Corp%20screens/corp_deatilsForm.dart';
 import 'package:cstain/screens/User%20screens/main_navigation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 //import 'package:get/get_navigation/src/root/get_material_app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load();
+  print('✅ .env loaded: ${dotenv.env['GEMINI_API_KEY']}');
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
